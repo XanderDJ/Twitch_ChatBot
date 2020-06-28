@@ -4,7 +4,7 @@ A python module aimed to wrap [twitch.tvs custom IRC implementation](https://git
 
 # Usage
 ```python
-from twitchchat import twitch_chat
+from twitchchat import TwitchChat
 import logging
 
 
