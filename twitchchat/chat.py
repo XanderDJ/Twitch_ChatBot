@@ -220,9 +220,10 @@ class MessageLimiter:
 
 class TwitchChat(object):
 
-    def __init__(self, user, oauth, channels):
+    def __init__(self, user, admin, oauth, channels):
         self.logger = logging.getLogger(name="twitch_chat")
         self.channels = channels
+        self.admin = admin
         self.user = user
         self.oauth = oauth
         self.channel_servers = {'irc.chat.twitch.tv:6667': {'channel_set': channels}}
@@ -363,10 +364,10 @@ class TwitchChat(object):
                 args['channel'] = match.group(2)
                 args['message'] = match.group(3)
                 self.logger.debug(args["message"])
-                if args['username'] == "lonewulfx3":
+                if args['username'] == self.admin:
                     if self.time_out(args):
                         return True
-                if args['username'] != "lonewulfx6":
+                if args['username'] != self.user:
                     self.validate_emotes(args)
                     self.bye(args)
                     self.give_fact(args)
