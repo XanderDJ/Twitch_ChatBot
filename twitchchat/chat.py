@@ -345,7 +345,8 @@ class TwitchChat(object):
         """Respond to ping messages or twitch boots us off"""
         if re.search(r"PING :tmi\.twitch\.tv", irc_message):
             self.logger.info("Responding to a ping from twitch... pong!")
-            client.send_message("PING :pong\r\n")
+            message = Message("PING :pong\r\n", MessageType.FUNCTIONAL)
+            client.send_message(message)
             return True
 
     def check_message(self, irc_message):
