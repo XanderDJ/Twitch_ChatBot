@@ -520,13 +520,13 @@ def toggle(bot: 'TwitchChat', args, msg, username, channel):
             for tipe in MessageType:
                 if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
                     bot.state[tipe.name] = str(True)
-                    message = Message("@" + username + " bot is now toggled off.", MessageType.CHAT)
+                    message = Message("@" + username + " bot is now toggled on.", MessageType.CHAT)
                     bot.send_message(channel, message)
         elif ans == "off":
             for tipe in MessageType:
                 if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
                     bot.state[tipe.name] = str(False)
-                    message = Message("@" + username + " bit is now toggled on.", MessageType.CHAT)
+                    message = Message("@" + username + " bot is now toggled off.", MessageType.CHAT)
                     bot.send_message(channel, message)
         elif ans == "spam":
             bot.state[MessageType.SPAM.name] = str(not convert(bot.state.get(MessageType.SPAM.name, "True")))
