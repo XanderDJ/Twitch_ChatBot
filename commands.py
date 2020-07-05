@@ -515,6 +515,35 @@ def toggle(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     match = re.match(r"!toggle (.*)", msg)
     if match:
-        arg = match.group(1)
-        message = Message("@" + username + " you gave the argument " + arg, MessageType.CHAT)
-        bot.send_message(channel, message)
+        ans = match.group(1)
+        if ans == "on":
+            for tipe in MessageType:
+                if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
+                    bot.state[tipe.name] = str(True)
+                    message = Message("@" + username + " bot is now toggled off.", MessageType.CHAT)
+                    bot.send_message(channel, message)
+        elif ans == "off":
+            for tipe in MessageType:
+                if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
+                    bot.state[tipe.name] = str(False)
+                    message = Message("@" + username + " bit is now toggled on.", MessageType.CHAT)
+                    bot.send_message(channel, message)
+        elif ans == "spam":
+            bot.state[MessageType.SPAM.name] = str(not convert(bot.state.get(MessageType.SPAM.name, "True")))
+        elif ans == "command":
+            bot.state[MessageType.COMMAND.name] = str(
+                not convert(bot.state.get(MessageType.COMMAND.name, "True")))
+        elif ans == "bld":
+            bot.state[MessageType.BLACKLISTED.name] = str(
+                not convert(bot.state.get(MessageType.BLACKLISTED.name, "True")))
+        elif ans == "helpful":
+            bot.state[MessageType.HELPFUL.name] = str(
+                not convert(bot.state.get(MessageType.HELPFUL.name, "True")))
+        elif ans == "special":
+            bot.state[MessageType.SPECIAL.name] = str(
+                not convert(bot.state.get(MessageType.SPECIAL.name, "True")))
+        elif ans == "sub":
+            bot.state[MessageType.SUBSCRIBER.name] = str(
+                not convert(bot.state.get(MessageType.SUBSCRIBER.name, "True")))
+        else:
+            return
