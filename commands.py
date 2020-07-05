@@ -16,6 +16,7 @@ import time
 import datetime
 import pymongo
 from typing import TYPE_CHECKING
+
 if TYPE_CHECKING:
     from twitchchat.chat import TwitchChat
 # DICTS
@@ -512,8 +513,8 @@ def tyke(bot: 'TwitchChat', args, msg, username, channel):
 @unwrap_command_args
 def toggle(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
-    match = re.match(r"!toggle (.*)")
+    match = re.match(r"!toggle (.*)", msg)
     if match:
         arg = match.group(1)
-        message = Message("@" + username + " you gave the argument " + arg , MessageType.CHAT)
+        message = Message("@" + username + " you gave the argument " + arg, MessageType.CHAT)
         bot.send_message(channel, message)
