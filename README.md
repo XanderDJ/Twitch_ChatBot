@@ -15,7 +15,7 @@ Types defined:
 
 Bot uses a state to keep certain data. Whatever you toggled will be remembered if bot closed normally before.
 
-#Tracking
+# Tracking
 Bot now tracks all misspelled emotes and stores them every 10 minutes in a mongodb.
 This functionality is implemented in commands.py and can be removed if there is no desire to track these stats.
 
