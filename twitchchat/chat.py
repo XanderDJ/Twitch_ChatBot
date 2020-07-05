@@ -3,14 +3,12 @@ import asyncore
 import logging
 import socket
 import sys
-import time
-import pymongo
 from utility.functions import *
 from utility.classes import *
-from commands import ADMIN, COMMAND, NOTICE
+from utility.file_loader import *
+import commands
 from datetime import datetime, timedelta
 from threading import Thread
-from utility.file_loader import *
 
 PY3 = sys.version_info[0] == 3
 if PY3:
@@ -29,16 +27,11 @@ class TwitchChat(object):
         self.oauth = oauth
         self.channel_servers = {'irc.chat.twitch.tv:6667': {'channel_set': channels}}
         self.irc_handlers = []
-        self.admins = ADMIN
-        self.commands = COMMAND
-        print(self.commands)
-        self.notice = NOTICE
-        self.blacklisted = txt_to_set("texts/blacklisted.txt")
-        self.emotes = self.load_emotes()
+        self.admins = commands.ADMIN
+        self.commands = commands.COMMAND
+        self.notice = commands.NOTICE
         self.state = self.load_state()
-        self.temp_db = dict()
         self.limiter = MessageLimiter()
-        self.client = pymongo.MongoClient("mongodb://localhost:27017/")
         self.active = True
         self.command_thread = Thread(target=self.handle_commandline_input)
         self.command_thread.daemon = True
@@ -54,44 +47,12 @@ class TwitchChat(object):
     def can_send_type(self, msg_type: MessageType):
         return convert(self.state.get(msg_type.name, "True"))
 
-    def save_db(self):
-
-        for channel, collections in self.temp_db.items():
-            db = self.client[channel]
-            global_coll = db["global"]
-            global_coll.insert_one({"count": collections.get("count"), "timestamp": time.time()})
-            for emote, wrong_emotes in collections.items():
-                col = db[emote]
-                wrong_emotes_to_insert = []
-                if emote != "count":
-                    for misspell, count in wrong_emotes.items():
-                        item = {"count": count, "spelling": misspell, "timestamp": time.time()}
-                        wrong_emotes_to_insert.append(item)
-                    col.insert_many(wrong_emotes_to_insert)
-        self.temp_db = dict()
-
     def save_state(self):
         loadToText(self.state, "texts/global_state.txt")
 
     @staticmethod
     def load_state():
         return loadToDictionary("texts/global_state.txt")
-
-    @staticmethod
-    def load_emotes():
-        fh = open("texts/emotes.txt", "r")
-        emotes = dict()
-        emotes["all_emotes"] = []
-        for emote in fh:
-            emote = emote.rstrip()
-            emotes["all_emotes"] += [emote]
-            emotes[emote.lower()] = emote
-        fh.close()
-        return emotes
-
-    def reload(self):
-        self.emotes = self.load_emotes()
-        self.blacklisted = txt_to_set("texts/blacklisted.txt")
 
     def start(self):
         for handler in self.irc_handlers:
@@ -100,7 +61,6 @@ class TwitchChat(object):
     def join(self):
         for handler in self.irc_handlers:
             handler.asynloop_thread.join()
-        self.backup_thread.join()
 
     def stop_all(self):
         for handler in self.irc_handlers:
@@ -179,16 +139,6 @@ class TwitchChat(object):
                     func(self, args)
                 return True
 
-    def update_db(self, channel: str, wrong_emote: str, correct_emote: str) -> None:
-        temp_db = self.temp_db
-        temp_db[channel] = temp_db.get(channel, dict())
-        channel_dict = temp_db.get(channel)
-        channel_dict[correct_emote] = channel_dict.get(correct_emote, dict())
-        emote_dict = channel_dict.get(correct_emote)
-        count = emote_dict.get(wrong_emote, 0)
-        emote_dict[wrong_emote] = count + 1
-        channel_dict["count"] = channel_dict.get("count", 0) + 1
-
     def handle_connect(self, client):
         self.logger.info('Connected..authenticating as {0}'.format(self.user))
         client.send_message(Message('Pass ' + self.oauth + '\r\n', MessageType.FUNCTIONAL))
@@ -248,7 +198,7 @@ class TwitchChat(object):
         while self.active:
             time.sleep(600)
             self.save_state()
-            self.save_db()
+            commands.save_db()
             self.logger.info("Backup thread go BRRRRRRRR")
 
     def handle_commandline_input(self):
@@ -257,7 +207,7 @@ class TwitchChat(object):
             match = re.match(r'send (.*)', ans)
             if ans == "save":
                 self.save_state()
-                self.save_db()
+                commands.save_db()
             elif ans == "stop":
                 self.active = False
                 self.save_state()
@@ -274,7 +224,7 @@ class TwitchChat(object):
                 else:
                     self.leave_twitch_channel(channel)
             elif ans == "reload":
-                self.reload()
+                commands.reload()
             elif ans == "toggle spam":
                 self.state[MessageType.SPAM.name] = str(not convert(self.state.get(MessageType.SPAM.name, "True")))
             elif ans == "toggle command":
@@ -300,7 +250,7 @@ class TwitchChat(object):
             elif ans == "state":
                 print(self.state)
             elif ans == "db":
-                print(self.temp_db)
+                print(commands.temp_db)
             elif match:
                 msg = Message(match.group(1), MessageType.CHAT)
                 print("channel?")
