@@ -32,11 +32,11 @@ tirc.start()
 tirc.join()
 ```
 
-#Commands
+# Commands
 Adding commands is done in commands.py. With usage of decorators it's now very easy to add a new command. The signature of the command needs to have five arguments (bot, args, msg, username, channel).
 Alongside the decorators.
 
-##Decorators
+## Decorators
 - notice : Used for USERNOTICE messages. (don't use unwrap decorator)
 - admin : used for commands that can only be run by the defined admin in credentials.py
 - command : Used for commands that everybody can use. 
@@ -44,7 +44,7 @@ Alongside the decorators.
 Convenience decorator so you can use msg, username, channel immediately without needing to get it out of the dictionary.
 Needed for both admin and command decorator (put this decorator beneath the two mentioned).
 
-##Example:
+## Example:
 ```python
 @command
 @unwrap_command_args
@@ -52,10 +52,10 @@ def new_command(bot, args, msg, username, channel):
     pass
 ```
 
-#Utility
+# Utility
 The utility package contains some utility functions and classes used by both commands.py and twitchchat.py.
 
-#State and db
+# State and db
 The bot uses a state to determine which type of messages it can send and how many people have been caught misspelling emotes.
 It stores this state in a txt file calle global_state.txt . It loads this text file when it boots up and creates it if it hasn't been made yet.
 Everything is used with default parameters so on first bootup when nothings has been toggled yet all types automatically can get send and the amount of lackers will be defaulted to 0
@@ -74,7 +74,7 @@ The db looks like this:
 }
 ```
 
-#Texts
+# Texts
 The texts directory contains texts files that the bot uses as responses to commands. 
 Commands can use this by loading a RandomLinePicker with the associated text file 
 and then calling get_line() on the linepicker. For convenience all linepickers are stored in line_pickers in commands.py
