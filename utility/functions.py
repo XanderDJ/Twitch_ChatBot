@@ -54,4 +54,4 @@ def is_anagram(w1: str, w2: str):
 
 
 def cleanup(word: str):
-    return word.translate(str.maketrans('', '', string.punctuation))
+    return word.translate(str.maketrans('', '', string.punctuation.replace("'", "")))
