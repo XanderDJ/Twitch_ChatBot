@@ -100,6 +100,7 @@ class TwitchChat(object):
     def join(self):
         for handler in self.irc_handlers:
             handler.asynloop_thread.join()
+        self.backup_thread.join()
 
     def stop_all(self):
         for handler in self.irc_handlers:
