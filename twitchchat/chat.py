@@ -3,9 +3,7 @@ import asyncore
 import logging
 import socket
 import sys
-from utility.functions import *
-from utility.classes import *
-from utility.file_loader import *
+from utility import *
 import commands
 from datetime import datetime, timedelta
 from threading import Thread

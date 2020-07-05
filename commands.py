@@ -7,9 +7,7 @@
 
     LINES = contains all RandomLinePickers used in commands. These are stored in twitchchat.chat.TwitchChat.line_pickers.
 """
-from utility.classes import *
-from utility.functions import *
-from utility.file_loader import *
+from utility import *
 import functools
 import re
 import urllib3
