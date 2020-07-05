@@ -1,221 +1,22 @@
 import asynchat
 import asyncore
-import json
 import logging
-import re
 import socket
 import sys
 import time
-import random
-import enchant
+import pymongo
+from utility.functions import *
+from utility.classes import *
+from commands import ADMIN, COMMAND, NOTICE
 from datetime import datetime, timedelta
 from threading import Thread
-import urllib3
-from enum import Enum
-from text_to_dictionary import *
+from utility.file_loader import *
 
 PY3 = sys.version_info[0] == 3
 if PY3:
-    from urllib.request import urlopen, Request
     from queue import Queue
 
 logger = logging.getLogger(name="tmi")
-
-http = urllib3.PoolManager()
-
-
-def define(word):
-    html = http.request("GET", "http://dictionary.reference.com/browse/" + word + "?s=t").data.decode("UTF-8")
-    items = re.findall('<meta name=\"description\" content=\"(.*) See more.\">', html, re.S)
-    defs = [re.sub('<.*?>', '', x).strip() for x in items]
-    return defs[0]
-
-
-def contains_word(msg, words):
-    for word in words:
-        if word in " " + msg + " ":
-            return True
-    return False
-
-
-def contains_all(msg, words):
-    for word in words:
-        if word not in " " + msg + " ":
-            return False
-    return True
-
-
-def is_word(msg, words):
-    for word in words:
-        if msg == word:
-            return True
-    return False
-
-
-def convert(string: str) -> bool:
-    if string == "True":
-        return True
-    return False
-
-
-def load_emotes():
-    fh = open("emotes.txt", "r")
-    emotes = dict()
-    emotes["all_emotes"] = []
-    for emote in fh:
-        emote = emote.rstrip()
-        emotes["all_emotes"] += [emote]
-        emotes[emote.lower()] = emote
-    fh.close()
-    return emotes
-
-
-def hammington(str1, str2):
-    str1 = str1.lower()
-    str2 = str2.lower()
-    len1 = len(str1)
-    len2 = len(str2)
-    smallest = min(len1, len2)
-    starting_dist = abs(len1 - len2)
-    if str1[0] != str2[0] or str1[0:smallest] == str2[0:smallest]:
-        starting_dist += 3
-    for i in range(smallest):
-        if str1[i] != str2[i]:
-            starting_dist += 1
-    return starting_dist
-
-
-def validate_emote(emote, emotes):
-    for correct_emote in emotes:
-        dist = hammington(emote, correct_emote)
-        if dist == 1:
-            return False
-    return True
-
-
-def subscriber_type(months):
-    if months == "1":
-        return "bronze"
-    elif months == "3":
-        return "silver"
-    elif months == "6":
-        return "gold"
-    elif months == "12":
-        return "pink"
-    elif months == "24":
-        return "jump king"
-    elif months == "32":
-        return "snail"
-    else:
-        return months + " months"
-
-
-def count_os(string):
-    count = 0
-    max_count = 0
-    prev_char = ""
-    for char in string:
-        if prev_char == "y" and char.lower() == "o":
-            count += 1
-        elif char.lower() == "o" and prev_char == "o" and count > 0:
-            count += 1
-        else:
-            if count > max_count:
-                max_count = count
-            count = 0
-        prev_char = char.lower()
-
-    if count > max_count:
-        max_count = count
-    return max_count
-
-
-class MessageType(Enum):
-    FUNCTIONAL = 1
-    COMMAND = 2
-    SPAM = 3
-    HELPFUL = 4
-    SPECIAL = 5
-
-
-class Message:
-    def __init__(self, msg: str, msg_type: MessageType):
-        self.content = msg
-        self.type = msg_type
-
-    def __str__(self):
-        return "(" + self.content.rstrip() + ", " + str(self.type) + ")"
-
-
-class RandomGreeting:
-    def __init__(self):
-        self.greetings_said = set()
-        self.greetings = set()
-        greetings = open("hello.txt")
-        for greeting in greetings:
-            self.greetings.add(greeting.rstrip())
-
-    def get_greeting(self):
-        if len(self.greetings) == 0:
-            self.greetings = self.greetings_said
-            self.greetings_said = set()
-        greeting = self.greetings.pop()
-        self.greetings_said.add(greeting)
-        return greeting
-
-
-class EightBall:
-    def __init__(self):
-        self.prophecies_said = set()
-        self.prophecies = set()
-        prophecies = open("8ball.txt")
-        for prophecy in prophecies:
-            self.prophecies.add(prophecy.rstrip())
-
-    def get_prophecy(self):
-        if len(self.prophecies) == 0:
-            self.prophecies = self.prophecies_said
-            self.prophecies_said = set()
-        prophecy = self.prophecies.pop()
-        self.prophecies_said.add(prophecy)
-        return prophecy
-
-
-class RandomLinePicker:
-    def __init__(self, fp):
-        self.lines_said = set()
-        self.lines = set()
-        lines = open(fp)
-        for line in lines:
-            self.lines.add(line.rstrip())
-
-    def get_line(self):
-        if len(self.lines) == 0:
-            self.lines = self.lines_said
-            self.lines_said = set()
-        line = self.lines.pop()
-        self.lines_said.add(line)
-        return line
-
-
-class MessageLimiter:
-    def __init__(self):
-        self.dct = dict()
-
-    def can_send(self, msg, tp, renew=False):
-        ts = self.dct.get(msg, None)
-        current_ts = time.time()
-        if ts is not None:
-            delta = current_ts - ts
-            if delta > tp:
-                self.dct[msg] = current_ts
-                return True
-            if renew:
-                self.dct[msg] = current_ts
-            return False
-        else:
-            self.dct[msg] = current_ts
-            return True
 
 
 class TwitchChat(object):
@@ -228,22 +29,23 @@ class TwitchChat(object):
         self.oauth = oauth
         self.channel_servers = {'irc.chat.twitch.tv:6667': {'channel_set': channels}}
         self.irc_handlers = []
-        self.greeting_gen = RandomGreeting()
-        self.eightball = EightBall()
-        self.facts = RandomLinePicker("facts.txt")
-        self.friends = RandomLinePicker("friend.txt")
-        self.byes = RandomLinePicker("goodbyes.txt")
-        self.jokes = RandomLinePicker("jokes.txt")
-        self.pickups = RandomLinePicker("pickuplines.txt")
-        self.limiter = MessageLimiter()
-        self.emotes = load_emotes()
+        self.admins = ADMIN
+        self.commands = COMMAND
+        print(self.commands)
+        self.notice = NOTICE
+        self.blacklisted = txt_to_set("texts/blacklisted.txt")
+        self.emotes = self.load_emotes()
         self.state = self.load_state()
-        self.english = enchant.Dict("en_US")
-        self.load_words()
+        self.temp_db = dict()
+        self.limiter = MessageLimiter()
+        self.client = pymongo.MongoClient("mongodb://localhost:27017/")
         self.active = True
         self.command_thread = Thread(target=self.handle_commandline_input)
         self.command_thread.daemon = True
         self.command_thread.start()
+        self.backup_thread = Thread(target=self.backup_thread)
+        self.backup_thread.daemon = True
+        self.backup_thread.start()
         for server in self.channel_servers:
             handler = IrcClient(server, self.handle_message, self.handle_connect, self.can_send_type)
             self.channel_servers[server]['client'] = handler
@@ -252,16 +54,44 @@ class TwitchChat(object):
     def can_send_type(self, msg_type: MessageType):
         return convert(self.state.get(msg_type.name, "True"))
 
+    def save_db(self):
+
+        for channel, collections in self.temp_db.items():
+            db = self.client[channel]
+            global_coll = db["global"]
+            global_coll.insert_one({"count": collections.get("count"), "timestamp": time.time()})
+            for emote, wrong_emotes in collections.items():
+                col = db[emote]
+                wrong_emotes_to_insert = []
+                if emote != "count":
+                    for misspell, count in wrong_emotes.items():
+                        item = {"count": count, "spelling": misspell, "timestamp": time.time()}
+                        wrong_emotes_to_insert.append(item)
+                    col.insert_many(wrong_emotes_to_insert)
+        self.temp_db = dict()
+
     def save_state(self):
-        loadToText(self.state, "global_state.txt")
+        loadToText(self.state, "texts/global_state.txt")
 
     @staticmethod
     def load_state():
-        return loadToDictionary("global_state.txt")
+        return loadToDictionary("texts/global_state.txt")
 
-    def load_words(self):
-        self.english.add("pov")
-        self.english.add("ludwig,")
+    @staticmethod
+    def load_emotes():
+        fh = open("texts/emotes.txt", "r")
+        emotes = dict()
+        emotes["all_emotes"] = []
+        for emote in fh:
+            emote = emote.rstrip()
+            emotes["all_emotes"] += [emote]
+            emotes[emote.lower()] = emote
+        fh.close()
+        return emotes
+
+    def reload(self):
+        self.emotes = self.load_emotes()
+        self.blacklisted = txt_to_set("texts/blacklisted.txt")
 
     def start(self):
         for handler in self.irc_handlers:
@@ -313,38 +143,14 @@ class TwitchChat(object):
             if match:
                 args['channel'] = match.group(1)
                 args['message'] = match.group(2)
-                self.send_pog(args)
+                for func_name, func in self.notice.items():
+                    func(self, args)
                 return True
 
-    def send_pog(self, args):
-        username = args["login"]
-        tipe = args["msg-id"]
-        if is_word(tipe, ["sub", "resub"]):
-            amount_of_months = args["msg-param-cumulative-months"]
-            type_sub = subscriber_type(amount_of_months)
-            message = Message("@" + username + " POGGIES " + type_sub + "!", MessageType.SPECIAL)
-            self.send_message(args["channel"], message)
-        elif tipe == "subgift":
-            amount_of_gifts = args["msg-param-sender-count"]
-            if not amount_of_gifts == "0":
-                message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
-                                  MessageType.SPECIAL)
-                self.send_message(args["channel"], message)
-        elif tipe == "submysterygift":
-            amount_of_gifts = args["msg-param-sender-count"]
-            message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
-                              MessageType.SPECIAL)
-            self.send_message(args["channel"], message)
-        elif tipe == "anonsubgift":
-            message = Message("POGGIES", MessageType.SPECIAL)
-            self.send_message(args["channel"], message)
-        else:
-            return
-
-    def check_ping(self, irc_message, client):
+    @staticmethod
+    def check_ping(irc_message, client):
         """Respond to ping messages or twitch boots us off"""
         if re.search(r"PING :tmi\.twitch\.tv", irc_message):
-            self.logger.info("Responding to a ping from twitch... pong!")
             message = Message("PING :pong\r\n", MessageType.FUNCTIONAL)
             client.send_message(message)
             return True
@@ -365,196 +171,22 @@ class TwitchChat(object):
                 args['channel'] = match.group(2)
                 args['message'] = match.group(3)
                 self.logger.debug(args["message"])
-                if args['username'] == self.admin:
-                    if self.time_out(args):
-                        return True
-                if args['username'] != self.user:
-                    self.validate_emotes(args)
-                    self.bye(args)
-                    self.give_fact(args)
-                    self.eight_ball(args)
-                    self.ping_if_asked(args)
-                    self.reply_if_yo(args)
-                    self.gn(args)
-                    self.schleem(args)
-                    self.spam(args)
-                    self.suicune(args)
-                    self.weird_jokes(args)
-                    self.dict(args)
-                    self.joke(args)
-                    self.pickup(args)
-                    self.aniki(args)
-                    self.lacking(args)
-                    self.respond(args)
-                    self.iamhere(args)
+                if args["username"] == self.admin:
+                    for func_name, func in self.admins.items():
+                        func(self, args)
+                for func_name, func in self.commands.items():
+                    func(self, args)
                 return True
 
-    def iamhere(self, args):
-        msg = args["message"].lower()
-        if contains_all(msg, ["who", "is", "here"]):
-            message = Message("I am here peepoPog", MessageType.SPECIAL)
-            self.send_message(args["channel"], message)
-
-    def respond(self, args):
-        msg = args["message"].lower()
-        if contains_word(msg, ["@lonewulfx6", "lonewulfx6"]):
-            message = Message("@" + args["username"] +
-                              ", the fact that you've pinged me probably means you've been caught lacking. "
-                              "This bot was made to alert you when you've made"
-                              " a mistake in emotes spelling/capitalisation. "
-                              "Try to be better next time FeelsOkayMan ."
-                              , MessageType.SPAM)
-            self.send_message(args["channel"], message)
-
-    def lacking(self, args):
-        msg = args["message"].lower()
-        if msg == "!lacking":
-            amount = self.state.get("lacking", "0")
-            message = Message("@" + args["username"] + ", " + amount + " people have been caught lacking PepeLaugh",
-                              MessageType.SPECIAL)
-            self.send_message(args["channel"], message)
-
-    def aniki(self, args):
-        msg = args["message"].lower()
-        if msg == "!aniki":
-            message = Message("Sleep tight PepeHands", MessageType.COMMAND)
-            self.send_message(args["channel"], message)
-
-    def pickup(self, args):
-        msg = args["message"].lower()
-        if contains_word(msg, ["!pickup", "!pickupline", "!pickups", "!pickuplines"]):
-            message = Message("@" + args["username"] + ", " + self.pickups.get_line(), MessageType.COMMAND)
-            self.send_message(args["channel"], message)
-
-    def joke(self, args):
-        msg = args["message"].lower()
-        if contains_word(msg, ["!joke", "!jokes", "give me a joke"]):
-            message = Message("@" + args["username"] + ", " + self.jokes.get_line(), MessageType.COMMAND)
-            self.send_message(args["channel"], message)
-
-    def dict(self, args):
-        msg = args["message"].lower() + " "
-        match = re.match(r"!dict\b(.*) ", msg)
-        if match:
-            word = match.group(1)
-            if self.english.check(word):
-                try:
-                    definition = define(word)
-                    message = Message("@" + args["username"] + ", " + definition, MessageType.COMMAND)
-                    self.send_message(args["channel"], message)
-                except Exception:
-                    message = Message("@" + args["username"] + " couldn't look up the definition of " + word,
-                                      MessageType.COMMAND)
-                    self.send_message(args["channel"], message)
-            else:
-                message = Message("@" + args["username"] + ", " + word + " is not an english word.",
-                                  MessageType.COMMAND)
-                self.send_message(args["channel"], message)
-
-    def weird_jokes(self, args):
-        msg = args["message"].lower()
-        if contains_all(msg, ["slime", "piss"]) \
-                or contains_all(msg, ["slime", "pee"]) \
-                or contains_all(msg, ["bus", "lud"]) \
-                or contains_all(msg, ["bus", "hit"]):
-            message = Message("@" + args["username"] + ", FeelsWeirdMan", MessageType.SPAM)
-            self.send_message(args["channel"], message)
-
-    def suicune(self, args):
-        msg = args["message"].lower()
-        if "!suicune" == msg:
-            if self.limiter.can_send("suicune", 5, True):
-                message = Message("bitch", MessageType.COMMAND)
-                self.send_message(args["channel"], message)
-
-    def spam(self, args):
-        msg = args["message"].lower()
-        if "!spam" == msg:
-            if self.limiter.can_send("spam", 5, True):
-                message = Message("not cool peepoWTF", MessageType.COMMAND)
-                self.send_message(args["channel"], message)
-
-    def validate_emotes(self, args):
-        msg = args["message"]
-        words = msg.split()
-        emotes = self.emotes["all_emotes"]
-        wrong_emotes = []
-        for word in words:
-            lowered_word = word.lower()
-            if lowered_word in self.emotes:
-                correct_emote = self.emotes.get(lowered_word)
-                if word != correct_emote:
-                    wrong_emotes.append(word)
-            else:
-                if not validate_emote(word, emotes):
-                    if not self.english.check(word):
-                        wrong_emotes.append(word)
-        if len(wrong_emotes) != 0:
-            amount = self.state.get("lacking", "0")
-            self.state["lacking"] = str(int(amount) + 1)
-            txt = " ".join(wrong_emotes)
-            message = Message("@" + args["username"] + ", " + txt + " PepeLaugh", MessageType.SPAM)
-            self.send_message(args["channel"], message)
-
-    def schleem(self, args):
-        msg = args["message"].lower()
-        if "!schleem" == msg:
-            if self.limiter.can_send("schleem", 10):
-                message = Message("Get outta town", MessageType.COMMAND)
-                self.send_message(args["channel"], message)
-
-    def time_out(self, args):
-        msg = args["message"].lower()
-        if "time out" in msg:
-            message = Message("Gift me PepeLaugh", MessageType.SPECIAL)
-            self.send_message(args["channel"], message)
-
-    def bye(self, args):
-        msg = args["message"].lower()
-        if contains_word(msg, ["cya", "goodbye", "bye", "pppoof"]):
-            if self.limiter.can_send("bye", 60, True):
-                message = Message("@" + args["username"]
-                                  + ", " + self.byes.get_line()
-                                  + " " + self.friends.get_line() + " peepoHug"
-                                  , MessageType.HELPFUL)
-                self.send_message(args["channel"], message)
-
-    def gn(self, args):
-        msg = args["message"].lower()
-        if contains_word(msg, [" gn ", "good night", "goodnight", "to sleep", "bedtime", "to bed"]):
-            if self.limiter.can_send("bye", 60, True):
-                message = Message("@" + args["username"] + ", " + "gn ppPoof , sleep tight!", MessageType.HELPFUL)
-                self.send_message(args["channel"], message)
-
-    def ping_if_asked(self, args):
-        msg = args["message"].lower()
-        if contains_word(msg, ["ping me", "give me attention"]):
-            message = Message("@" + args["username"] + " " + self.greeting_gen.get_greeting(), MessageType.SPECIAL)
-            self.send_message(args["channel"], message)
-
-    def give_fact(self, args):
-        msg = args["message"].lower()
-        if contains_word(msg, ["!fact", "!facts", "give me a fact"]):
-            message = Message("@" + args["username"] + ", did you know that " + self.facts.get_line() + "?",
-                              MessageType.COMMAND)
-            self.send_message(args["channel"], message)
-
-    def reply_if_yo(self, args):
-        msg = args["message"].lower()
-        if len(msg) > 2 and "yo" in msg and count_os(msg) > 2:
-            self.logger.info("Message contained yo, sending Ping")
-            message = Message("@" + args["username"] + ", " + self.greeting_gen.get_greeting() + " peepoHappy",
-                              MessageType.SPECIAL)
-            self.send_message(args["channel"], message)
-            return True
-        return False
-
-    def eight_ball(self, args):
-        msg = args["message"].lower()
-        if "!8ball" in msg or "!eightball" in msg:
-            message = Message("@" + args["username"] + " " + self.eightball.get_prophecy(), MessageType.COMMAND)
-            self.send_message(args["channel"], message)
-            return True
+    def update_db(self, channel: str, wrong_emote: str, correct_emote: str) -> None:
+        temp_db = self.temp_db
+        temp_db[channel] = temp_db.get(channel, dict())
+        channel_dict = temp_db.get(channel)
+        channel_dict[correct_emote] = channel_dict.get(correct_emote, dict())
+        emote_dict = channel_dict.get(correct_emote)
+        count = emote_dict.get(wrong_emote, 0)
+        emote_dict[wrong_emote] = count + 1
+        channel_dict["count"] = channel_dict.get("count", 0) + 1
 
     def handle_connect(self, client):
         self.logger.info('Connected..authenticating as {0}'.format(self.user))
@@ -611,11 +243,20 @@ class TwitchChat(object):
                 client.send_message(Message(u'PRIVMSG #{0} :{1}\n'.format(channel, message.content), message.type))
                 break
 
+    def backup_thread(self):
+        while self.active:
+            time.sleep(600)
+            self.save_state()
+            self.save_db()
+            self.logger.info("Backup thread go BRRRRRRRR")
+
     def handle_commandline_input(self):
         while self.active:
-            ans = input().lower()
+            ans = input()
+            match = re.match(r'send (.*)', ans)
             if ans == "save":
                 self.save_state()
+                self.save_db()
             elif ans == "stop":
                 self.active = False
                 self.save_state()
@@ -631,23 +272,42 @@ class TwitchChat(object):
                     print("Not following {0}".format(channel))
                 else:
                     self.leave_twitch_channel(channel)
-            elif ans == "toggle":
-                client = self.channel_servers.get("irc.chat.twitch.tv:6667").get("client")
-                sendable = not client.allowed
-                client.allowed = sendable
+            elif ans == "reload":
+                self.reload()
             elif ans == "toggle spam":
                 self.state[MessageType.SPAM.name] = str(not convert(self.state.get(MessageType.SPAM.name, "True")))
             elif ans == "toggle command":
                 self.state[MessageType.COMMAND.name] = str(
                     not convert(self.state.get(MessageType.COMMAND.name, "True")))
+            elif ans == "toggle bld":
+                self.state[MessageType.BLACKLISTED.name] = str(
+                    not convert(self.state.get(MessageType.BLACKLISTED.name, "True")))
             elif ans == "toggle helpful":
                 self.state[MessageType.HELPFUL.name] = str(
                     not convert(self.state.get(MessageType.HELPFUL.name, "True")))
             elif ans == "toggle special":
                 self.state[MessageType.SPECIAL.name] = str(
                     not convert(self.state.get(MessageType.SPECIAL.name, "True")))
+            elif ans == "toggle sub":
+                self.state[MessageType.SUBSCRIBER.name] = str(
+                    not convert(self.state.get(MessageType.SUBSCRIBER.name, "True")))
+            elif ans == "toggle all":
+                for key in self.state:
+                    val = self.state.get(key)
+                    if val == "False" or val == "True":
+                        self.state[key] = str(not convert(val))
+            elif ans == "state":
+                print(self.state)
+            elif ans == "db":
+                print(self.temp_db)
+            elif match:
+                msg = Message(match.group(1), MessageType.CHAT)
+                print("channel?")
+                ans = input()
+                if ans in self.channels:
+                    self.send_message(ans, msg)
             else:
-                print("save\nstop\ntoggle\ntoggle (type)")
+                print("save\nstop\njoin\nleave\nreload\nstate\ndb\nsend (msg)\ntoggle (type)")
 
 
 MAX_SEND_RATE = 20
@@ -669,7 +329,6 @@ class IrcClient(asynchat.async_chat, object):
         self.set_terminator(b'\n')
         self.asynloop_thread = Thread(target=self.run)
         self.running = False
-        self.allowed = False
         self.message_callback = message_callback
         self.connect_callback = connect_callback
         self.allowed_callback = allowed_callback
@@ -704,7 +363,6 @@ class IrcClient(asynchat.async_chat, object):
         """Connect start message watching thread"""
         if not self.asynloop_thread.is_alive():
             self.running = True
-            self.allowed = True
             self.asynloop_thread = Thread(target=self.run)
             self.asynloop_thread.daemon = True
             self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -736,14 +394,13 @@ class IrcClient(asynchat.async_chat, object):
 
     def send_loop(self):
         while self.running:
-            time.sleep(random.randint(1, 2))
             if len(self.messages_sent) < MAX_SEND_RATE:
                 if not self.message_queue.empty():
                     to_send = self.message_queue.get()
-                    self.logger.info("Sending")
                     self.logger.info(str(to_send))
-                    if self.allowed and self.allowed_callback(to_send.type):
+                    if self.allowed_callback(to_send.type):
                         self.push(to_send.content.encode("UTF-8"))
+                        time.sleep(random.randint(50, 150) / 100)
                     self.messages_sent.append(datetime.now())
             else:
                 time_cutoff = datetime.now() - timedelta(seconds=SEND_RATE_WITHIN_SECONDS)
