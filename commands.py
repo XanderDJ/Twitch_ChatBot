@@ -506,3 +506,14 @@ def tyke(bot: 'TwitchChat', args, msg, username, channel):
                 txt = "blobDance RareChar blobDance RareChar blobDance " if parity == 0 else "RareChar blobDance RareChar blobDance RareChar "
                 message = Message(txt, MessageType.SPAM)
                 bot.send_message(channel, message)
+
+
+@admin
+@unwrap_command_args
+def toggle(bot: 'TwitchChat', args, msg, username, channel):
+    msg = msg.lower()
+    match = re.match(r"!toggle (.*)")
+    if match:
+        arg = match.group(1)
+        message = Message("@" + username + " you gave the argument " + arg , MessageType.CHAT)
+        bot.send_message(channel, message)
