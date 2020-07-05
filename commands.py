@@ -13,6 +13,7 @@ import re
 import urllib3
 import enchant
 import time
+import datetime
 import pymongo
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -100,13 +101,13 @@ def save_db():
     for channel, collections in temp_db.items():
         db = client[channel]
         global_coll = db["global"]
-        global_coll.insert_one({"count": collections.get("count"), "timestamp": time.time()})
+        global_coll.insert_one({"count": collections.get("count"), "timestamp": datetime.datetime.utcnow()})
         for emote, wrong_emotes in collections.items():
             col = db[emote]
             wrong_emotes_to_insert = []
             if emote != "count":
                 for misspell, count in wrong_emotes.items():
-                    item = {"count": count, "spelling": misspell, "timestamp": time.time()}
+                    item = {"count": count, "spelling": misspell, "timestamp": datetime.datetime.utcnow()}
                     wrong_emotes_to_insert.append(item)
                 col.insert_many(wrong_emotes_to_insert)
     temp_db = dict()
