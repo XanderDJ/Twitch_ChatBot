@@ -25,6 +25,7 @@ if TYPE_CHECKING:
 ADMIN = {}
 COMMAND = {}
 NOTICE = {}
+RETURNS = {}
 line_pickers = {
     "greetings": RandomLinePicker("texts/hello.txt"),
     "8ball": RandomLinePicker("texts/8ball.txt"),
@@ -75,6 +76,11 @@ def command(func):
 
 def notice(func):
     NOTICE[func.__name__] = func
+    return func
+
+
+def returns(func):
+    RETURNS[func.__name__] = func
     return func
 
 
@@ -590,3 +596,32 @@ def replay(bot: 'TwitchChat', args, msg, username, channel):
         if bot.limiter.can_send("replay", 60, True):
             message = Message("No longer green PepeHands", MessageType.COMMAND)
             bot.send_message(channel, message)
+
+
+@returns
+@unwrap_command_args
+def correct(bot: 'TwitchChat', args, msg, username, channel):
+    global emote_dict
+    match = re.match(r"!correct (\w+)", msg)
+    if match:
+        emote = match.group(1)
+        correct_emote = emote_dict.get(emote.lower(), None)
+        if correct_emote is None:
+            message = Message(
+                "@" + username + ", that emote wasn't in my emote database. "
+                                 "So I can't tell you the correct way to spell it.", MessageType.COMMAND)
+            bot.send_message(channel, message)
+            return True
+        if emote == correct_emote:
+            message = Message("@" + username + ", you wrote " + emote + " correctly! Good job FeelsWowMan",
+                              MessageType.COMMAND)
+            bot.send_message(channel, message)
+            return True
+        else:
+            message = Message(
+                "@" + username + ", you wrote " + emote + " incorrectly FeelsBadMan . "
+                                                          "The correct way of spelling it is " + correct_emote,
+                MessageType.COMMAND)
+            bot.send_message(channel, message)
+            return True
+    return False

@@ -28,6 +28,7 @@ class TwitchChat(object):
         self.admins = commands.ADMIN
         self.commands = commands.COMMAND
         self.notice = commands.NOTICE
+        self.returns = commands.RETURNS
         self.state = self.load_state()
         self.limiter = MessageLimiter()
         self.active = True
@@ -133,6 +134,9 @@ class TwitchChat(object):
                 if args["username"] == self.admin:
                     for func_name, func in self.admins.items():
                         func(self, args)
+                for func_name, func in self.returns.items():
+                    if func(self, args):
+                        return True
                 for func_name, func in self.commands.items():
                     func(self, args)
                 return True
