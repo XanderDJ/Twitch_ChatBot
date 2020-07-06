@@ -559,7 +559,7 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel):
     global lurkers
     if "!lurker" in msg:
         if len(lurkers) == 0:
-            js = http.request("https://tmi.twitch.tv/group/user/" + channel + "/chatters").data.decode("UTF-8")
+            js = http.request("GET", "https://tmi.twitch.tv/group/user/" + channel + "/chatters").data.decode("UTF-8")
             chatters = json.loads(js)
             lurkers = chatters.get("chatters").get("viewers")
         if bot.limiter.can_send("lurker", 60, True):
