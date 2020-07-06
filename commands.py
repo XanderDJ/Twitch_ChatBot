@@ -606,22 +606,23 @@ def correct(bot: 'TwitchChat', args, msg, username, channel):
     if match:
         emote = match.group(1)
         correct_emote = emote_dict.get(emote.lower(), None)
-        if correct_emote is None:
-            message = Message(
-                "@" + username + ", that emote wasn't in my emote database. "
-                                 "So I can't tell you the correct way to spell it.", MessageType.COMMAND)
-            bot.send_message(channel, message)
-            return True
-        if emote == correct_emote:
-            message = Message("@" + username + ", you wrote " + emote + " correctly! Good job FeelsWowMan",
-                              MessageType.COMMAND)
-            bot.send_message(channel, message)
-            return True
-        else:
-            message = Message(
-                "@" + username + ", you wrote " + emote + " incorrectly FeelsBadMan . "
-                                                          "The correct way of spelling it is " + correct_emote,
-                MessageType.COMMAND)
-            bot.send_message(channel, message)
-            return True
+        if correct_emote != "WeirdChamp":
+            if correct_emote is None:
+                message = Message(
+                    "@" + username + ", that emote wasn't in my emote database. "
+                                     "So I can't tell you the correct way to spell it.", MessageType.COMMAND)
+                bot.send_message(channel, message)
+                return True
+            if emote == correct_emote:
+                message = Message("@" + username + ", you wrote " + emote + " correctly! Good job FeelsWowMan",
+                                  MessageType.COMMAND)
+                bot.send_message(channel, message)
+                return True
+            else:
+                message = Message(
+                    "@" + username + ", you wrote " + emote + " incorrectly FeelsBadMan . "
+                                                              "The correct way of spelling it is " + correct_emote,
+                    MessageType.COMMAND)
+                bot.send_message(channel, message)
+                return True
     return False
