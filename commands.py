@@ -15,6 +15,7 @@ import enchant
 import time
 import datetime
 import pymongo
+import json
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -34,6 +35,8 @@ line_pickers = {
     "pickups": RandomLinePicker("texts/pickuplines.txt"),
     "quotes": RandomLinePicker("texts/quotes.txt")
 }
+
+lurkers = []
 
 
 def load_emotes():
@@ -184,7 +187,7 @@ def send_pog(bot: 'TwitchChat', args):
                               MessageType.SUBSCRIBER)
             bot.send_message(channel, message)
     elif tipe == "submysterygift":
-        amount_of_gifts = args.get("msg-param-sender-count","0")
+        amount_of_gifts = args.get("msg-param-sender-count", "0")
         if amount_of_gifts != "0":
             message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
                               MessageType.SUBSCRIBER)
@@ -548,3 +551,18 @@ def toggle(bot: 'TwitchChat', args, msg, username, channel):
                 not convert(bot.state.get(MessageType.SUBSCRIBER.name, "True")))
         else:
             return
+
+
+@command
+@unwrap_command_args
+def lurk(bot: 'TwitchChat', args, msg, username, channel):
+    global lurkers
+    if "!lurker" in msg:
+        if len(lurkers) == 0:
+            js = http.request("https://tmi.twitch.tv/group/user/" + channel + "/chatters").data.decode("UTF-8")
+            chatters = json.loads(js)
+            lurkers = chatters.get("chatters").get("viewers")
+        if bot.limiter.can_send("lurker", 60, True):
+            lurker = random.choice(lurkers)
+            message = Message(lurker + " is lurking in chat right now monkaW .", MessageType.COMMAND)
+            bot.send_message(channel, message)
