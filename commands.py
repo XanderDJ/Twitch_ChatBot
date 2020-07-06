@@ -184,10 +184,11 @@ def send_pog(bot: 'TwitchChat', args):
                               MessageType.SUBSCRIBER)
             bot.send_message(channel, message)
     elif tipe == "submysterygift":
-        amount_of_gifts = args["msg-param-sender-count"]
-        message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
-                          MessageType.SUBSCRIBER)
-        bot.send_message(channel, message)
+        amount_of_gifts = args.get("msg-param-sender-count","0")
+        if amount_of_gifts != "0":
+            message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
+                              MessageType.SUBSCRIBER)
+            bot.send_message(channel, message)
     elif tipe == "anonsubgift":
         message = Message("POGGIES", MessageType.SUBSCRIBER)
         bot.send_message(channel, message)
