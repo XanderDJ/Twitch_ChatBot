@@ -559,6 +559,7 @@ def toggle(bot: 'TwitchChat', args, msg, username, channel):
 def lurk(bot: 'TwitchChat', args, msg, username, channel):
     global lurkers
     global previous_lurker_get
+    msg = msg.lower()
     if "!lurker" in msg:
         if len(lurkers) == 0 or time.time() - previous_lurker_get > 600:
             js = http.request("GET", "https://tmi.twitch.tv/group/user/" + channel + "/chatters").data.decode("UTF-8")
@@ -568,4 +569,14 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel):
         if bot.limiter.can_send("lurker", 1200, True):
             lurker = random.choice(lurkers)
             message = Message(lurker + " is lurking in chat right now monkaW .", MessageType.COMMAND)
+            bot.send_message(channel, message)
+
+
+@command
+@unwrap_command_args
+def aaron(bot: 'TwitchChat', args, msg, username, channel):
+    msg = msg.lower()
+    if contains_word(msg, ["!ap"]):
+        if bot.limiter.can_send("aaron", 60, False):
+            message = Message("Wizard Toad wishes you a good day =)", MessageType.COMMAND)
             bot.send_message(channel, message)
