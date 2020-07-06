@@ -625,4 +625,8 @@ def correct(bot: 'TwitchChat', args, msg, username, channel):
                     MessageType.COMMAND)
                 bot.send_message(channel, message)
                 return True
+        else:
+            message = Message("@" + username + " can't fool me PepeLaugh", MessageType.COMMAND)
+            bot.send_message(channel, message)
+            return True
     return False
