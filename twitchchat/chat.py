@@ -343,17 +343,20 @@ class IrcClient(asynchat.async_chat, object):
 
     def send_loop(self):
         while self.running:
-            if len(self.messages_sent) < MAX_SEND_RATE:
-                if not self.message_queue.empty():
-                    to_send = self.message_queue.get()
-                    self.logger.info(str(to_send))
-                    if self.allowed_callback(to_send.type):
-                        self.push(to_send.content.encode("UTF-8"))
-                        time.sleep(random.randint(50, 150) / 100)
-                    self.messages_sent.append(datetime.now())
-            else:
-                time_cutoff = datetime.now() - timedelta(seconds=SEND_RATE_WITHIN_SECONDS)
-                self.messages_sent = [dt for dt in self.messages_sent if dt < time_cutoff]
+            try:
+                if len(self.messages_sent) < MAX_SEND_RATE:
+                    if not self.message_queue.empty():
+                        to_send = self.message_queue.get()
+                        self.logger.info(str(to_send))
+                        if self.allowed_callback(to_send.type):
+                            self.push(to_send.content.encode("UTF-8"))
+                            time.sleep(random.randint(50, 150) / 100)
+                        self.messages_sent.append(datetime.now())
+                else:
+                    time_cutoff = datetime.now() - timedelta(seconds=SEND_RATE_WITHIN_SECONDS)
+                    self.messages_sent = [dt for dt in self.messages_sent if dt < time_cutoff]
+            except Exception:
+                pass
 
     def run(self):
         """Loop!"""
