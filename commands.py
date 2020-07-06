@@ -560,6 +560,26 @@ def toggle(bot: 'TwitchChat', args, msg, username, channel):
             return
 
 
+@admin
+@unwrap_command_args
+def join(bot: 'TwitchChat', args, msg, username, channel):
+    msg = msg.lower()
+    match = re.match(r"!join (\w+)", msg)
+    if match:
+        channel_to_join = match.group(1)
+        bot.join_twitch_channel(channel_to_join)
+
+
+@admin
+@unwrap_command_args
+def part(bot: 'TwitchChat', args, msg, username, channel):
+    msg = msg.lower()
+    match = re.match(r"!leave (\w+)", msg)
+    if match:
+        channel_to_leave = match.group(1)
+        bot.leave_twitch_channel(channel_to_leave)
+
+
 @command
 @unwrap_command_args
 def lurk(bot: 'TwitchChat', args, msg, username, channel):
