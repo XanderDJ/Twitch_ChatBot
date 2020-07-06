@@ -580,3 +580,13 @@ def aaron(bot: 'TwitchChat', args, msg, username, channel):
         if bot.limiter.can_send("aaron", 60, False):
             message = Message("Wizard Toad wishes you a good day =)", MessageType.COMMAND)
             bot.send_message(channel, message)
+
+
+@command
+@unwrap_command_args
+def replay(bot: 'TwitchChat', args, msg, username, channel):
+    msg = msg.lower()
+    if contains_word(msg, ["!replay"]):
+        if bot.limiter.can_send("replay", 60, True):
+            message = Message("No longer green PepeHands", MessageType.COMMAND)
+            bot.send_message(channel, message)
