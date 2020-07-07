@@ -524,7 +524,7 @@ def tyke(bot: 'TwitchChat', args, msg, username, channel):
 @unwrap_command_args
 def toggle(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
-    match = re.match(r"!toggle (.*)", msg)
+    match = re.match(r"!toggle (\w+)", msg)
     if match:
         ans = match.group(1)
         if ans == "on":
@@ -577,7 +577,12 @@ def part(bot: 'TwitchChat', args, msg, username, channel):
     match = re.match(r"!leave (\w+)", msg)
     if match:
         channel_to_leave = match.group(1)
-        bot.leave_twitch_channel(channel_to_leave)
+        if channel_to_leave != all:
+            bot.leave_twitch_channel(channel_to_leave)
+        else:
+            for chan in bot.channels:
+                if chan != channel:
+                    bot.leave_twitch_channel(chan)
 
 
 @command
