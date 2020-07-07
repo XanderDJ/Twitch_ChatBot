@@ -577,7 +577,7 @@ def part(bot: 'TwitchChat', args, msg, username, channel):
     match = re.match(r"!leave (\w+)", msg)
     if match:
         channel_to_leave = match.group(1)
-        if channel_to_leave != all:
+        if channel_to_leave != "all":
             bot.leave_twitch_channel(channel_to_leave)
         else:
             for chan in bot.channels:
