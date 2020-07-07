@@ -660,5 +660,3 @@ def correct(bot: 'TwitchChat', args, msg, username, channel):
             bot.send_message(channel, message)
             return True
     return False
-
-
