@@ -51,17 +51,19 @@ class MessageLimiter:
     def __init__(self):
         self.dct = dict()
 
-    def can_send(self, msg, tp, renew=False):
-        ts = self.dct.get(msg, None)
+    def can_send(self, channel: str, msg: str, tp: int, renew=False):
+        if channel not in self.dct:
+            self.dct[channel] = dict()
+        ts = self.dct.get(channel).get(msg, None)
         current_ts = time.time()
         if ts is not None:
             delta = current_ts - ts
             if delta > tp:
-                self.dct[msg] = current_ts
+                self.dct[channel][msg] = current_ts
                 return True
             if renew:
-                self.dct[msg] = current_ts
+                self.dct[channel][msg] = current_ts
             return False
         else:
-            self.dct[msg] = current_ts
+            self.dct[channel][msg] = current_ts
             return True

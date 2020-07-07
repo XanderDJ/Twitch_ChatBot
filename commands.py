@@ -230,7 +230,7 @@ def subscriber_type(months):
 def schleem(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     if "!schleem" == msg:
-        if bot.limiter.can_send("schleem", 10):
+        if bot.limiter.can_send(channel, "schleem", 10):
             message = Message("Get outta town", MessageType.COMMAND)
             message = change_if_blacklisted(username, message)
             bot.send_message(channel, message)
@@ -255,7 +255,7 @@ def time_out(bot: 'TwitchChat', args, msg, username, channel):
 def bye(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     if contains_word(msg, ["cya", "goodbye", "bye", "pppoof"]):
-        if bot.limiter.can_send("bye", 60, True):
+        if bot.limiter.can_send(channel, "bye", 60, True):
             message = Message("@" + username
                               + ", " + line_pickers.get("byes").get_line()
                               + " " + line_pickers.get("friends").get_line() + " peepoHug"
@@ -268,7 +268,7 @@ def bye(bot: 'TwitchChat', args, msg, username, channel):
 def gn(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     if contains_word(msg, [" gn ", "good night", "goodnight", "to sleep", "bedtime", "to bed"]):
-        if bot.limiter.can_send("bye", 60, True):
+        if bot.limiter.can_send(channel, "bye", 60, True):
             message = Message("@" + username + ", " + "gn ppPoof , sleep tight!", MessageType.HELPFUL)
             bot.send_message(channel, message)
 
@@ -342,7 +342,7 @@ def eight_ball(bot: 'TwitchChat', args, msg, username, channel):
 @unwrap_command_args
 def dance(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg
-    if contains_word(msg, [" ludwigGun "]) and bot.limiter.can_send("dance", 25, True):
+    if contains_word(msg, [" ludwigGun "]) and bot.limiter.can_send(channel, "dance", 25, True):
         message = Message("pepeD " * random.randint(1, 9), MessageType.SPAM)
         message = change_if_blacklisted(username, message)
         bot.send_message(channel, message)
@@ -441,7 +441,7 @@ def weird_jokes(bot: 'TwitchChat', args, msg, username, channel):
 def suicune(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     if "!suicune" == msg:
-        if bot.limiter.can_send("suicune", 5, True):
+        if bot.limiter.can_send(channel, "suicune", 5, True):
             message = Message("bitch", MessageType.COMMAND)
             message = change_if_blacklisted(username, message)
             bot.send_message(channel, message)
@@ -452,7 +452,7 @@ def suicune(bot: 'TwitchChat', args, msg, username, channel):
 def spam(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     if "!spam" == msg:
-        if bot.limiter.can_send("spam", 5, True):
+        if bot.limiter.can_send(channel, "spam", 5, True):
             message = Message("not cool peepoWTF", MessageType.COMMAND)
             message = change_if_blacklisted(username, message)
             bot.send_message(channel, message)
@@ -512,7 +512,7 @@ def update_db(channel: str, wrong_emote: str, correct_emote: str) -> None:
 def tyke(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     if msg == "!tyke":
-        if bot.limiter.can_send("tyke", 300, True):
+        if bot.limiter.can_send(channel, "tyke", 300, True):
             for i in range(3):
                 parity = i % 2
                 txt = "blobDance RareChar blobDance RareChar blobDance " if parity == 0 else "RareChar blobDance RareChar blobDance RareChar "
@@ -592,7 +592,7 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel):
             chatters = json.loads(js)
             lurkers[channel] = chatters.get("chatters").get("viewers")
             previous_lurker_get = time.time()
-        if bot.limiter.can_send("lurker", 1200, True):
+        if bot.limiter.can_send(channel, "lurker", 1200, True):
             lurker = random.choice(lurkers.get(channel, [None]))
             txt = lurker + " is lurking in chat right now monkaW ." if lurker is not None else "No lurkers in chat FeelsBadMan "
             message = Message(txt, MessageType.COMMAND)
@@ -604,7 +604,7 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel):
 def aaron(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     if contains_word(msg, ["!ap"]):
-        if bot.limiter.can_send("aaron", 60, False):
+        if bot.limiter.can_send(channel, "aaron", 60, False):
             message = Message("Wizard Toad wishes you a good day =)", MessageType.COMMAND)
             bot.send_message(channel, message)
 
@@ -614,7 +614,7 @@ def aaron(bot: 'TwitchChat', args, msg, username, channel):
 def lone(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     if "!lone" == msg:
-        if bot.limiter.can_send("lone", 60):
+        if bot.limiter.can_send(channel, "lone", 60):
             message = Message("blobDance PrideLion blobDance PrideLion blobDance", MessageType.SPAM)
             bot.send_message(channel, message)
 
@@ -624,7 +624,7 @@ def lone(bot: 'TwitchChat', args, msg, username, channel):
 def replay(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     if contains_word(msg, ["!replay"]):
-        if bot.limiter.can_send("replay", 60, True):
+        if bot.limiter.can_send(channel, "replay", 60, True):
             message = Message("No longer green PepeHands", MessageType.COMMAND)
             bot.send_message(channel, message)
 
