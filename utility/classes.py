@@ -71,4 +71,4 @@ class MessageLimiter:
     def seconds_since_limit(self, channel: str, command: str):
         current_ts = time.time()
         previous_ts = self.dct.get(channel, dict()).get(command, current_ts)
-        return current_ts - previous_ts
+        return round(current_ts - previous_ts)
