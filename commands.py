@@ -590,7 +590,8 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel):
         if len(lurkers.get(channel, [])) == 0 or time.time() - previous_lurker_get > 600:
             js = http.request("GET", "https://tmi.twitch.tv/group/user/" + channel + "/chatters").data.decode("UTF-8")
             chatters = json.loads(js)
-            lurkers[channel] = chatters.get("chatters").get("viewers", [None])
+            lurkers[channel] = chatters.get("chatters").get("viewers")
+            lurkers[channel] = [None] if len(lurkers.get(channel)) == 0 else lurkers.get(channel)
             previous_lurker_get = time.time()
         if bot.limiter.can_send(channel, "lurker", 1200, True):
             lurker = random.choice(lurkers.get(channel, [None]))
