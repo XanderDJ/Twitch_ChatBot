@@ -660,3 +660,11 @@ def correct(bot: 'TwitchChat', args, msg, username, channel):
             bot.send_message(channel, message)
             return True
     return False
+
+
+@command
+@unwrap_command_args
+def test(bot: 'TwitchChat', args, msg, username, channel):
+    if "!test" in msg:
+        message = Message("test", MessageType.COMMAND)
+        bot.send_message(channel, message)
