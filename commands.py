@@ -610,6 +610,16 @@ def aaron(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
+def lone(bot: 'TwitchChat', args, msg, username, channel):
+    msg = msg.lower()
+    if "!lone" == msg:
+        if bot.limiter.can_send("lone", 60):
+            message = Message("blobDance PrideLion blobDance PrideLion blobDance", MessageType.SPAM)
+            bot.send_message(channel, message)
+
+
+@command
+@unwrap_command_args
 def replay(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
     if contains_word(msg, ["!replay"]):
