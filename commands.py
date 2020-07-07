@@ -587,7 +587,7 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel):
     global previous_lurker_get
     msg = msg.lower()
     if "!lurker" in msg:
-        if len(lurkers.get(channel, 0)) == 0 or time.time() - previous_lurker_get > 600:
+        if len(lurkers.get(channel, [])) == 0 or time.time() - previous_lurker_get > 600:
             js = http.request("GET", "https://tmi.twitch.tv/group/user/" + channel + "/chatters").data.decode("UTF-8")
             chatters = json.loads(js)
             lurkers[channel] = chatters.get("chatters").get("viewers")
