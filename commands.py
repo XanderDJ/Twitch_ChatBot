@@ -593,7 +593,7 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel):
             lurkers[channel] = chatters.get("chatters").get("viewers")
             previous_lurker_get = time.time()
         if bot.limiter.can_send("lurker", 1200, True):
-            lurker = random.choice(lurkers.get(channel), [None])
+            lurker = random.choice(lurkers.get(channel, [None]))
             txt = lurker + " is lurking in chat right now monkaW ." if lurker is not None else "No lurkers in chat FeelsBadMan "
             message = Message(txt, MessageType.COMMAND)
             bot.send_message(channel, message)
