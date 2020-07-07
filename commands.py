@@ -37,7 +37,7 @@ line_pickers = {
     "quotes": RandomLinePicker("texts/quotes.txt")
 }
 
-lurkers = []
+lurkers = dict()
 previous_lurker_get = time.time() - 600
 
 
@@ -587,14 +587,15 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel):
     global previous_lurker_get
     msg = msg.lower()
     if "!lurker" in msg:
-        if len(lurkers) == 0 or time.time() - previous_lurker_get > 600:
+        if len(lurkers.get(channel, 0)) == 0 or time.time() - previous_lurker_get > 600:
             js = http.request("GET", "https://tmi.twitch.tv/group/user/" + channel + "/chatters").data.decode("UTF-8")
             chatters = json.loads(js)
-            lurkers = chatters.get("chatters").get("viewers")
+            lurkers[channel] = chatters.get("chatters").get("viewers")
             previous_lurker_get = time.time()
         if bot.limiter.can_send("lurker", 1200, True):
-            lurker = random.choice(lurkers)
-            message = Message(lurker + " is lurking in chat right now monkaW .", MessageType.COMMAND)
+            lurker = random.choice(lurkers.get(channel), [None])
+            txt = lurker + " is lurking in chat right now monkaW ." if lurker is not None else "No lurkers in chat FeelsBadMan "
+            message = Message(txt, MessageType.COMMAND)
             bot.send_message(channel, message)
 
 
