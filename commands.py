@@ -681,3 +681,12 @@ def limit(bot: 'TwitchChat', args, msg, username, channel):
             if s != 0 else "@" + username + ", that command wasn't used yet"
         message = Message(txt, MessageType.COMMAND)
         bot.send_message(channel, message)
+
+
+@command
+@unwrap_command_args
+def no_stream(bot: 'TwitchChat', args, msg, username, channel):
+    msg = msg.lower()
+    if contains_all(msg, ["when", "stream", "start"]) or contains_all(msg, ["when", "lud", "go"]):
+        message = Message("@" + username + " we don't know. There is never a set date", MessageType.SPAM)
+        bot.send_message(channel, message)
