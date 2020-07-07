@@ -5,6 +5,7 @@ import socket
 import sys
 from utility import *
 import commands
+import importlib
 from datetime import datetime, timedelta
 from threading import Thread
 
@@ -226,6 +227,7 @@ class TwitchChat(object):
                 else:
                     self.leave_twitch_channel(channel)
             elif ans == "reload":
+                importlib.reload(commands)
                 commands.reload()
             elif ans == "toggle spam":
                 self.state[MessageType.SPAM.name] = str(not convert(self.state.get(MessageType.SPAM.name, "True")))
