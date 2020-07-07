@@ -662,3 +662,17 @@ def correct(bot: 'TwitchChat', args, msg, username, channel):
             bot.send_message(channel, message)
             return True
     return False
+
+
+@admin
+@unwrap_command_args
+def limit(bot: 'TwitchChat', args, msg, username, channel):
+    msg = msg.lower()
+    match = re.match(r'!limit (/w+)', msg)
+    if match:
+        cmd = match.group(1)
+        s = bot.limiter.seconds_since_limit(channel, cmd)
+        txt = "@" + username + ", " + str(s) + " seconds since command !" + cmd + " was used." \
+            if s != 0 else "@" + username + ", that command wasn't used yet"
+        message = Message(txt, MessageType.COMMAND)
+        bot.send_message(channel, message)
