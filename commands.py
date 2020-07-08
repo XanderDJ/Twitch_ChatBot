@@ -189,13 +189,13 @@ def send_pog(bot: 'TwitchChat', args):
         bot.send_message(channel, message)
     elif tipe == "subgift":
         amount_of_gifts = args.get("msg-param-sender-count")
-        if not amount_of_gifts == "0":
+        if amount_of_gifts != "0" and amount_of_gifts is not None:
             message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
                               MessageType.SUBSCRIBER)
             bot.send_message(channel, message)
     elif tipe == "submysterygift":
         amount_of_gifts = args.get("msg-param-sender-count", "0")
-        if amount_of_gifts != "0":
+        if amount_of_gifts != "0" and amount_of_gifts is not None:
             message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
                               MessageType.SUBSCRIBER)
             bot.send_message(channel, message)
