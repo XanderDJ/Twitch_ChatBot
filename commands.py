@@ -681,3 +681,11 @@ def limit(bot: 'TwitchChat', args, msg, username, channel):
             if s != 0 else "@" + username + ", that command wasn't used yet"
         message = Message(txt, MessageType.COMMAND)
         bot.send_message(channel, message)
+
+
+@admin
+@unwrap_command_args
+def ping(bot: 'TwitchChat', args, msg, username, channel):
+    if msg == "!ping":
+        message = Message("Pong, I'm alive!", MessageType.FUNCTIONAL)
+        bot.send_message(channel, message)
