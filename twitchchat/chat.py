@@ -368,5 +368,8 @@ class IrcClient(asynchat.async_chat, object):
         """Loop!"""
         try:
             asyncore.loop(map=self.map)
+        except IndexError as e:
+            self.logger.info("Stupid deque error")
+            self.run()
         finally:
             self.running = False
