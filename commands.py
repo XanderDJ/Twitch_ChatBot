@@ -182,7 +182,9 @@ def send_pog(bot: 'TwitchChat', args):
     username = args["login"]
     tipe = args["msg-id"]
     channel = args["channel"]
-    if is_word(tipe, ["sub", "resub"]):
+    if username is None:
+        return
+    elif is_word(tipe, ["sub", "resub"]):
         amount_of_months = args.get("msg-param-cumulative-months", None)
         type_sub = subscriber_type(amount_of_months)
         message = Message("@" + username + " POGGIES " + type_sub + "!", MessageType.SUBSCRIBER)
