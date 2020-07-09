@@ -353,6 +353,7 @@ class IrcClient(asynchat.async_chat, object):
                     if self.allowed_callback(to_send.type):
                         try:
                             self.push(to_send.content.encode("UTF-8"))
+                            self.logger.info(to_send)
                         except Exception as e:
                             self.logger.info(f"Exception occurred for {to_send}")
                             self.message_queue.put(to_send)
