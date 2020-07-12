@@ -143,6 +143,7 @@ def save_mentions():
     db = client["twitch"]
     col = db["twitch"]
     col.insert_many(temp_db.get("mentions"))
+    temp_db["mentions"] = []
 
 
 @command
