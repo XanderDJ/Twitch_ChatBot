@@ -538,7 +538,7 @@ def validate_emote(emote, emotes):
 
 def update_emotes(channel: str, wrong_emote: str, correct_emote: str) -> None:
     global temp_db
-    temp_db[channel] = temp_db.get("emotes").get(channel, dict())
+    temp_db["emotes"][channel] = temp_db.get("emotes").get(channel, dict())
     channel_dict = temp_db.get("emotes").get(channel)
     channel_dict[correct_emote] = channel_dict.get(correct_emote, dict())
     emote_dict = channel_dict.get(correct_emote)
