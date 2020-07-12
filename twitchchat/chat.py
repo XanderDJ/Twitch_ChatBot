@@ -28,6 +28,7 @@ class TwitchChat(object):
         self.commands = commands.COMMAND
         self.notice = commands.NOTICE
         self.returns = commands.RETURNS
+        self.saves = commands.SAVE
         self.state = self.load_state()
         self.limiter = MessageLimiter()
         self.active = True
@@ -45,8 +46,11 @@ class TwitchChat(object):
     def can_send_type(self, msg_type: MessageType):
         return convert(self.state.get(msg_type.name, "True"))
 
-    def save_state(self):
+    def save(self):
         loadToText(self.state, "texts/global_state.txt")
+        for name, func in self.saves.items():
+            logger.info(f"Calling {name}")
+            func()
 
     @staticmethod
     def load_state():
@@ -198,20 +202,18 @@ class TwitchChat(object):
     def backup_thread(self):
         while self.active:
             time.sleep(600)
-            self.save_state()
-            commands.save_db()
             self.logger.info("Backup thread go BRRRRRRRR")
+            self.save()
 
     def handle_commandline_input(self):
         while self.active:
             ans = input()
             match = re.match(r'send (.*)', ans)
             if ans == "save":
-                self.save_state()
-                commands.save_db()
+                self.save()
             elif ans == "stop":
                 self.active = False
-                self.save_state()
+                self.save()
                 self.stop_all()
             elif ans == "join":
                 print("Which channel?")

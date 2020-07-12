@@ -16,16 +16,23 @@ import time
 import datetime
 import pymongo
 import json
+
+# THIS IS TO AVOID CYCLICAL IMPORTS BUT STILL ALLOWS TYPE CHECKING
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from twitchchat.chat import TwitchChat
+
+# Imports of stuff I don't want on github directly
+from pings import pings
+
 # DICTS
 
 ADMIN = {}
 COMMAND = {}
 NOTICE = {}
 RETURNS = {}
+SAVE = {}
 line_pickers = {
     "greetings": RandomLinePicker("texts/hello.txt"),
     "8ball": RandomLinePicker("texts/8ball.txt"),
@@ -84,6 +91,11 @@ def returns(func):
     return func
 
 
+def save(func):
+    SAVE[func.__name__] = func
+    return func
+
+
 def unwrap_command_args(func):
     """
         Decorator for commands that automatically unwraps some args by calling them on the dictionary provided
@@ -104,12 +116,13 @@ def unwrap_command_args(func):
 # COMMANDS AND HELPER FUNCTIONS
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
-temp_db = dict()
+temp_db = {"emotes": dict(), "mentions": []}
 
 
-def save_db():
+@save
+def save_emotes():
     global temp_db, client
-    for channel, collections in temp_db.items():
+    for channel, collections in temp_db.get("emotes").items():
         db = client[channel]
         global_coll = db["global"]
         global_coll.insert_one({"count": collections.get("count"), "timestamp": datetime.datetime.utcnow()})
@@ -121,7 +134,30 @@ def save_db():
                     item = {"count": count, "spelling": misspell, "timestamp": datetime.datetime.utcnow()}
                     wrong_emotes_to_insert.append(item)
                 col.insert_many(wrong_emotes_to_insert)
-    temp_db = dict()
+    temp_db["emotes"] = dict()
+
+
+@save
+def save_mentions():
+    global temp_db, client
+    db = client["twitch"]
+    col = db["twitch"]
+    col.insert_many(temp_db.get("mentions"))
+
+
+@command
+@unwrap_command_args
+def update_mentions(bot: 'TwitchChat', args, msg, username, channel):
+    global temp_db
+    if contains_word(msg.lower(), pings):
+        doc = {
+            "user": username,
+            "message": msg,
+            "channel": channel,
+            "timestamp": datetime.datetime.utcnow()
+        }
+        mentions = temp_db["mentions"]
+        mentions.append(doc)
 
 
 http = urllib3.PoolManager()
@@ -375,7 +411,7 @@ def iamhere(bot: 'TwitchChat', args, msg, username, channel):
 @unwrap_command_args
 def respond(bot: 'TwitchChat', args, msg, username, channel):
     msg = msg.lower()
-    if contains_word(msg, ["@lonewulfx6", "lonewulfx6"]):
+    if contains_word(msg, ["@" + bot.user, bot.user]):
         message = Message("@" + username +
                           ", Beep Boop MrDestructoid"
                           , MessageType.SPAM)
@@ -474,13 +510,13 @@ def validate_emotes(bot: 'TwitchChat', args, msg, username, channel):
         if lowered_word in emote_dict:
             correct_emote = emote_dict.get(lowered_word)
             if word != correct_emote and not dictionary.check(word):
-                update_db(channel, word, correct_emote)
+                update_emotes(channel, word, correct_emote)
                 wrong_emotes.append(word)
         else:
             val = validate_emote(word, emotes)
             if not val.boolean:
                 if not dictionary.check(word):
-                    update_db(channel, word, val.correct)
+                    update_emotes(channel, word, val.correct)
                     wrong_emotes.append(word)
     if len(wrong_emotes) != 0:
         amount = bot.state.get(channel + "lacking", "0")
@@ -498,10 +534,10 @@ def validate_emote(emote, emotes):
     return Validation(True, emote)
 
 
-def update_db(channel: str, wrong_emote: str, correct_emote: str) -> None:
+def update_emotes(channel: str, wrong_emote: str, correct_emote: str) -> None:
     global temp_db
-    temp_db[channel] = temp_db.get(channel, dict())
-    channel_dict = temp_db.get(channel)
+    temp_db[channel] = temp_db.get("emotes").get(channel, dict())
+    channel_dict = temp_db.get("emotes").get(channel)
     channel_dict[correct_emote] = channel_dict.get(correct_emote, dict())
     emote_dict = channel_dict.get(correct_emote)
     count = emote_dict.get(wrong_emote, 0)

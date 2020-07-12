@@ -19,6 +19,10 @@ Bot uses a state to keep certain data. Whatever you toggled will be remembered i
 Bot now tracks all misspelled emotes and stores them every 10 minutes in a mongodb.
 This functionality is implemented in commands.py and can be removed if there is no desire to track these stats.
 
+Bot also tracks messages that mention it, The words that it considers as a mention need to be written in "pings.py"
+in "pings.py" there needs to be a pings variable that is a list containing strings with what should ping you.
+If you don't want this functionality remove "save_mentions", "update_mentions" and the mentions key from temp_db.
+
 # Usage
 ```python
 from twitchchat import TwitchChat
