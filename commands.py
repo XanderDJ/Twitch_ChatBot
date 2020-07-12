@@ -142,7 +142,8 @@ def save_mentions():
     global temp_db, client
     db = client["twitch"]
     col = db["twitch"]
-    col.insert_many(temp_db.get("mentions"))
+    if len(temp_db["mentions"]) != 0:
+        col.insert_many(temp_db.get("mentions"))
     temp_db["mentions"] = []
 
 
