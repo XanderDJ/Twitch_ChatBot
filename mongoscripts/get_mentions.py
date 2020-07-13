@@ -7,4 +7,4 @@ for doc in mentions.find({}):
     username = doc["user"]
     message = doc["message"]
     timestamp = doc["timestamp"]
-    print(username + ": " + message + " at " + timestamp)
+    print(username + ": " + message + " at " + timestamp.strftime("%d/%m/%Y"))
