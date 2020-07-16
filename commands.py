@@ -105,11 +105,11 @@ def unwrap_command_args(func):
     """
 
     @functools.wraps(func)
-    def wrapper(bot, args: dict) -> bool:
+    def wrapper(bot, args: dict, send=True) -> bool:
         msg = args.get("message")
         username = args.get("username")
         channel = args.get("channel")
-        return func(bot, args, msg, username, channel)
+        return func(bot, args, msg, username, channel, send)
 
     return wrapper
 
@@ -156,7 +156,7 @@ def save_ignore_list():
 
 @command
 @unwrap_command_args
-def update_mentions(bot: 'TwitchChat', args, msg, username, channel):
+def update_mentions(bot: 'TwitchChat', args, msg, username, channel, send):
     global temp_db
     if contains_word(msg.lower(), pings):
         doc = {
@@ -186,7 +186,7 @@ dictionary = english_dictionary()
 
 @command
 @unwrap_command_args
-def dct(bot: 'TwitchChat', args, msg, username, channel):
+def dct(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower() + " "
     match = re.match(r"!dict\b(.*) ", msg)
     if match:
@@ -274,7 +274,7 @@ def subscriber_type(months):
 
 @command
 @unwrap_command_args
-def schleem(bot: 'TwitchChat', args, msg, username, channel):
+def schleem(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!schleem" == msg:
         if bot.limiter.can_send(channel, "schleem", 10):
@@ -285,7 +285,7 @@ def schleem(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def time_out(bot: 'TwitchChat', args, msg, username, channel):
+def time_out(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     username = username
     if "time out" in msg and username == bot.admin:
@@ -299,7 +299,7 @@ def time_out(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def bye(bot: 'TwitchChat', args, msg, username, channel):
+def bye(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["cya", "goodbye", "bye", "pppoof"]):
         if bot.limiter.can_send(channel, "bye", 60, True):
@@ -312,7 +312,7 @@ def bye(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def gn(bot: 'TwitchChat', args, msg, username, channel):
+def gn(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, [" gn ", "good night", "goodnight", "to sleep", "bedtime", "to bed"]):
         if bot.limiter.can_send(channel, "bye", 60, True):
@@ -322,7 +322,7 @@ def gn(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def ping_if_asked(bot: 'TwitchChat', args, msg, username, channel):
+def ping_if_asked(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, [" ping me ", " give me attention"]):
         message = Message("@" + username + " " + line_pickers.get("greetings").get_line(), MessageType.SPECIAL)
@@ -332,7 +332,7 @@ def ping_if_asked(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def give_fact(bot: 'TwitchChat', args, msg, username, channel):
+def give_fact(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!fact", "!facts", "give me a fact"]):
         message = Message("@" + username + ", did you know that " + line_pickers.get("facts").get_line(),
@@ -343,7 +343,7 @@ def give_fact(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def reply_if_yo(bot: 'TwitchChat', args, msg, username, channel):
+def reply_if_yo(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if len(msg) > 2 and "yo" in msg and count_os(msg) > 2:
         message = Message("@" + username + ", " + line_pickers.get("greetings").get_line() + " peepoHappy",
@@ -376,7 +376,7 @@ def count_os(msg):
 
 @command
 @unwrap_command_args
-def eight_ball(bot: 'TwitchChat', args, msg, username, channel):
+def eight_ball(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!8ball" in msg or "!eightball" in msg:
         message = Message("@" + username + " " + line_pickers.get("8ball").get_line(), MessageType.COMMAND)
@@ -387,7 +387,7 @@ def eight_ball(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def dance(bot: 'TwitchChat', args, msg, username, channel):
+def dance(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg
     if contains_word(msg, [" ludwigGun "]) and bot.limiter.can_send(channel, "dance", 25, True):
         message = Message("pepeD " * random.randint(1, 9), MessageType.SPAM)
@@ -397,7 +397,7 @@ def dance(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def quote(bot: 'TwitchChat', args, msg, username, channel):
+def quote(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg
     username = username
     if is_word(msg, ["!inspire"]):
@@ -408,7 +408,7 @@ def quote(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def iamhere(bot: 'TwitchChat', args, msg, username, channel):
+def iamhere(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_all(msg, ["who", "is", "here"]):
         message = Message("I am here peepoPog", MessageType.SPECIAL)
@@ -418,7 +418,7 @@ def iamhere(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def respond(bot: 'TwitchChat', args, msg, username, channel):
+def respond(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["@" + bot.user, bot.user]):
         message = Message("@" + username +
@@ -430,7 +430,7 @@ def respond(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def lacking(bot: 'TwitchChat', args, msg, username, channel):
+def lacking(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     channel = channel
     if msg == "!lacking":
@@ -443,7 +443,7 @@ def lacking(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def aniki(bot: 'TwitchChat', args, msg, username, channel):
+def aniki(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if msg == "!aniki":
         message = Message("Sleep tight PepeHands", MessageType.COMMAND)
@@ -453,7 +453,7 @@ def aniki(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def pickup(bot: 'TwitchChat', args, msg, username, channel):
+def pickup(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!pickup", "!pickupline", "!pickups", "!pickuplines"]):
         message = Message("@" + username + ", " + line_pickers.get("pickups").get_line(), MessageType.COMMAND)
@@ -463,7 +463,7 @@ def pickup(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def joke(bot: 'TwitchChat', args, msg, username, channel):
+def joke(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!joke", "!jokes", " give me a joke "]):
         message = Message("@" + username + ", " + line_pickers.get("jokes").get_line(), MessageType.COMMAND)
@@ -473,7 +473,7 @@ def joke(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def weird_jokes(bot: 'TwitchChat', args, msg, username, channel):
+def weird_jokes(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_all(msg, ["slime", "piss"]) \
             or contains_all(msg, ["slime", "pee"]) \
@@ -485,7 +485,7 @@ def weird_jokes(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def suicune(bot: 'TwitchChat', args, msg, username, channel):
+def suicune(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!suicune" == msg:
         if bot.limiter.can_send(channel, "suicune", 5, True):
@@ -496,7 +496,7 @@ def suicune(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def spam(bot: 'TwitchChat', args, msg, username, channel):
+def spam(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!spam" == msg:
         if bot.limiter.can_send(channel, "spam", 5, True):
@@ -507,7 +507,7 @@ def spam(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def validate_emotes(bot: 'TwitchChat', args, msg, username, channel, send=True):
+def validate_emotes(bot: 'TwitchChat', args, msg, username, channel, send):
     global emote_dict
     msg = cleanup(msg)
     channel = channel
@@ -557,7 +557,7 @@ def update_emotes(channel: str, wrong_emote: str, correct_emote: str) -> None:
 
 @command
 @unwrap_command_args
-def tyke(bot: 'TwitchChat', args, msg, username, channel):
+def tyke(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if msg == "!tyke":
         if bot.limiter.can_send(channel, "tyke", 300, True):
@@ -570,7 +570,7 @@ def tyke(bot: 'TwitchChat', args, msg, username, channel):
 
 @admin
 @unwrap_command_args
-def toggle(bot: 'TwitchChat', args, msg, username, channel):
+def toggle(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     match = re.match(r"!toggle (\w+)", msg)
     if match:
@@ -610,7 +610,7 @@ def toggle(bot: 'TwitchChat', args, msg, username, channel):
 
 @admin
 @unwrap_command_args
-def join(bot: 'TwitchChat', args, msg, username, channel):
+def join(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     match = re.match(r"!join (\w+)", msg)
     if match:
@@ -620,7 +620,7 @@ def join(bot: 'TwitchChat', args, msg, username, channel):
 
 @admin
 @unwrap_command_args
-def part(bot: 'TwitchChat', args, msg, username, channel):
+def part(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     match = re.match(r"!leave (\w+)", msg)
     if match:
@@ -635,7 +635,7 @@ def part(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def lurk(bot: 'TwitchChat', args, msg, username, channel):
+def lurk(bot: 'TwitchChat', args, msg, username, channel, send):
     global lurkers
     global previous_lurker_get
     msg = msg.lower()
@@ -655,7 +655,7 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def aaron(bot: 'TwitchChat', args, msg, username, channel):
+def aaron(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!ap"]):
         if bot.limiter.can_send(channel, "aaron", 60, False):
@@ -665,7 +665,7 @@ def aaron(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def lone(bot: 'TwitchChat', args, msg, username, channel):
+def lone(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!lone" == msg:
         if bot.limiter.can_send(channel, "lone", 60):
@@ -675,7 +675,7 @@ def lone(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def replay(bot: 'TwitchChat', args, msg, username, channel):
+def replay(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!replay"]):
         if bot.limiter.can_send(channel, "replay", 60, True):
@@ -685,7 +685,7 @@ def replay(bot: 'TwitchChat', args, msg, username, channel):
 
 @returns
 @unwrap_command_args
-def correct(bot: 'TwitchChat', args, msg, username, channel):
+def correct(bot: 'TwitchChat', args, msg, username, channel, send):
     global emote_dict
     match = re.match(r"!correct (\w+)", msg)
     if match:
@@ -719,7 +719,7 @@ def correct(bot: 'TwitchChat', args, msg, username, channel):
 
 @admin
 @unwrap_command_args
-def limit(bot: 'TwitchChat', args, msg, username, channel):
+def limit(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     match = re.match(r'!limit (\w+)', msg)
     if match:
@@ -733,7 +733,7 @@ def limit(bot: 'TwitchChat', args, msg, username, channel):
 
 @admin
 @unwrap_command_args
-def ping(bot: 'TwitchChat', args, msg, username, channel):
+def ping(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg == "!ping":
         message = Message("Pong, I'm alive!", MessageType.FUNCTIONAL)
         bot.send_message(channel, message)
@@ -741,7 +741,7 @@ def ping(bot: 'TwitchChat', args, msg, username, channel):
 
 @returns
 @unwrap_command_args
-def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel):
+def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
     global ignore_list
     msg = msg.lower()
     if msg == "!unignore me":
@@ -754,8 +754,8 @@ def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel):
 
 @returns
 @unwrap_command_args
-def ignore(bot: 'TwitchChat', args, msg, username, channel):
-    validate_emotes(bot, args, msg, username, channel, send=False)
+def ignore(bot: 'TwitchChat', args, msg, username, channel, send):
+    validate_emotes(bot, args, False)
     if username in ignore_list:
         return True
     return False
@@ -763,7 +763,7 @@ def ignore(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel):
+def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
     global ignore_list
     msg = msg.lower()
     if msg == "!ignore me":
