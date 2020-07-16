@@ -507,7 +507,7 @@ def spam(bot: 'TwitchChat', args, msg, username, channel):
 
 @command
 @unwrap_command_args
-def validate_emotes(bot: 'TwitchChat', args, msg, username, channel):
+def validate_emotes(bot: 'TwitchChat', args, msg, username, channel, send=True):
     global emote_dict
     msg = cleanup(msg)
     channel = channel
@@ -530,9 +530,10 @@ def validate_emotes(bot: 'TwitchChat', args, msg, username, channel):
     if len(wrong_emotes) != 0:
         amount = bot.state.get(channel + "lacking", "0")
         bot.state[channel + "lacking"] = str(int(amount) + len(wrong_emotes))
-        txt = " ".join(wrong_emotes)
-        message = Message("@" + username + ", " + txt + " PepeLaugh", MessageType.SPAM)
-        bot.send_message(channel, message)
+        if send:
+            txt = " ".join(wrong_emotes)
+            message = Message("@" + username + ", " + txt + " PepeLaugh", MessageType.SPAM)
+            bot.send_message(channel, message)
 
 
 def validate_emote(emote, emotes):
@@ -754,6 +755,7 @@ def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel):
 @returns
 @unwrap_command_args
 def ignore(bot: 'TwitchChat', args, msg, username, channel):
+    validate_emotes(bot, args, msg, username, channel, send=False)
     if username in ignore_list:
         return True
     return False
