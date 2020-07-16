@@ -46,6 +46,7 @@ line_pickers = {
 
 lurkers = dict()
 previous_lurker_get = time.time() - 600
+ignore_list = txt_to_set("texts/ignore.txt")
 
 
 def load_emotes():
@@ -145,6 +146,12 @@ def save_mentions():
     if len(temp_db["mentions"]) != 0:
         col.insert_many(temp_db.get("mentions"))
     temp_db["mentions"] = []
+
+
+@save
+def save_ignore_list():
+    global ignore_list
+    set_to_txt(ignore_list, "texts/ignore.txt")
 
 
 @command
@@ -728,4 +735,36 @@ def limit(bot: 'TwitchChat', args, msg, username, channel):
 def ping(bot: 'TwitchChat', args, msg, username, channel):
     if msg == "!ping":
         message = Message("Pong, I'm alive!", MessageType.FUNCTIONAL)
+        bot.send_message(channel, message)
+
+
+@returns
+@unwrap_command_args
+def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel):
+    global ignore_list
+    msg = msg.lower()
+    if msg == "!unignore me":
+        ignore_list.remove(username)
+        message = Message("@" + username + ", welcome back PrideLion !", MessageType.COMMAND)
+        bot.send_message(channel, message)
+        return True
+    return False
+
+
+@returns
+@unwrap_command_args
+def ignore(bot: 'TwitchChat', args, msg, username, channel):
+    if username in ignore_list:
+        return True
+    return False
+
+
+@command
+@unwrap_command_args
+def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel):
+    global ignore_list
+    msg = msg.lower()
+    if msg == "!ignore me":
+        ignore_list.add(username)
+        message = Message("@" + username + ", from now on you will be ignored PrideLion", MessageType.COMMAND)
         bot.send_message(channel, message)
