@@ -16,14 +16,20 @@ class MessageType(Enum):
     CHAT = 7
     BLACKLISTED = 8
 
+    def __str__(self):
+        return self.name
+
 
 class Message:
-    def __init__(self, msg: str, msg_type: MessageType):
+    def __init__(self, msg: str, msg_type: MessageType, channel=None):
         self.content = msg
         self.type = msg_type
+        self.channel = channel
 
     def __str__(self):
-        return "(" + self.content.rstrip() + ", " + str(self.type) + ")"
+        if self.channel is None:
+            return "(" + self.content.rstrip() + ", " + str(self.type) + ")"
+        return "(" + self.content.rstrip() + ", " + str(self.type) + "," + self.channel + ")"
 
 
 class Validation:

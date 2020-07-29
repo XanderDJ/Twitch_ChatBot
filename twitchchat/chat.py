@@ -3,6 +3,7 @@ import logging
 import socket
 import sys
 from utility import *
+import re
 import commands
 from datetime import datetime, timedelta
 from threading import Thread
@@ -43,18 +44,20 @@ class TwitchChat(object):
             self.channel_servers[server]['client'] = handler
             self.irc_handlers.append(handler)
 
-    def can_send_type(self, msg_type: MessageType):
-        return convert(self.state.get(msg_type.name, "True"))
+    def can_send_type(self, channel, msg_type: MessageType):
+        if channel is None:
+            return True
+        return convert(self.state.get(channel).get(msg_type.name, "True"))
 
     def save(self):
-        loadToText(self.state, "texts/global_state.txt")
+        f.save(self.state, "texts/global_state.txt")
         for name, func in self.saves.items():
             logger.info(f"Calling {name}")
             func()
 
     @staticmethod
     def load_state():
-        return loadToDictionary("texts/global_state.txt")
+        return f.load("texts/global_state.txt", default=dict())
 
     def start(self):
         for handler in self.irc_handlers:
@@ -155,13 +158,19 @@ class TwitchChat(object):
         for server in self.channel_servers:
             if server == client.serverstring:
                 self.logger.info('Joining channels {0}'.format(self.channel_servers[server]))
-                for chan in self.channel_servers[server]['channel_set']:
-                    client.send_message(Message('JOIN ' + '#' + chan.lower() + '\r\n', MessageType.FUNCTIONAL))
+                for chan in self.channel_servers[server]["channel_set"]:
+                    self.join_twitch_channel(chan)
 
     def join_twitch_channel(self, channel: str):
+        self.state[channel] = self.state.get(channel, dict())
+        # Turn bot off when joining a channel (except for functional and chat messages.
+        for tipe in MessageType:
+            if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
+                self.state[channel][tipe.name] = "False"
         self.logger.info('Joining channel {0}'.format(channel))
         channels = self.channel_servers.get('irc.chat.twitch.tv:6667').get("channel_set")
-        channels.append(channel)
+        if channel not in channels:
+            channels.append(channel)
         self.channel_servers['irc.chat.twitch.tv:6667']['channel_set'] = channels
         self.channels = channels
         client = self.channel_servers["irc.chat.twitch.tv:6667"]["client"]
@@ -192,11 +201,13 @@ class TwitchChat(object):
         elif self.check_error(irc_message):
             return
 
-    def send_message(self, channel: str, message: Message):
+    def send_message(self, message: Message):
         for server in self.channel_servers:
-            if channel in self.channel_servers[server]['channel_set']:
+            if message.channel in self.channel_servers[server]['channel_set']:
                 client = self.channel_servers[server]['client']
-                client.send_message(Message(u'PRIVMSG #{0} :{1}\n'.format(channel, message.content), message.type))
+                client.send_message(
+                    Message(u'PRIVMSG #{0} :{1}\n'.format(message.channel, message.content), message.type,
+                            message.channel))
                 break
 
     def backup_thread(self):
@@ -228,40 +239,18 @@ class TwitchChat(object):
                     self.leave_twitch_channel(channel)
             elif ans == "reload":
                 commands.reload()
-            elif ans == "toggle spam":
-                self.state[MessageType.SPAM.name] = str(not convert(self.state.get(MessageType.SPAM.name, "True")))
-            elif ans == "toggle command":
-                self.state[MessageType.COMMAND.name] = str(
-                    not convert(self.state.get(MessageType.COMMAND.name, "True")))
-            elif ans == "toggle bld":
-                self.state[MessageType.BLACKLISTED.name] = str(
-                    not convert(self.state.get(MessageType.BLACKLISTED.name, "True")))
-            elif ans == "toggle helpful":
-                self.state[MessageType.HELPFUL.name] = str(
-                    not convert(self.state.get(MessageType.HELPFUL.name, "True")))
-            elif ans == "toggle special":
-                self.state[MessageType.SPECIAL.name] = str(
-                    not convert(self.state.get(MessageType.SPECIAL.name, "True")))
-            elif ans == "toggle sub":
-                self.state[MessageType.SUBSCRIBER.name] = str(
-                    not convert(self.state.get(MessageType.SUBSCRIBER.name, "True")))
-            elif ans == "toggle all":
-                for key in self.state:
-                    val = self.state.get(key)
-                    if val == "False" or val == "True":
-                        self.state[key] = str(not convert(val))
             elif ans == "state":
                 print(self.state)
             elif ans == "db":
                 print(commands.temp_db)
             elif match:
-                msg = Message(match.group(1), MessageType.CHAT)
                 print("channel?")
                 ans = input()
                 if ans in self.channels:
-                    self.send_message(ans, msg)
+                    msg = Message(match.group(1), MessageType.CHAT, ans)
+                    self.send_message(msg)
             else:
-                print("save\nstop\njoin\nleave\nreload\nstate\ndb\nsend (msg)\ntoggle (type)")
+                print("save\nstop\njoin\nleave\nreload\nstate\ndb\nsend (msg)")
 
 
 MAX_SEND_RATE = 20
@@ -351,7 +340,7 @@ class IrcClient(asynchat.async_chat, object):
             if len(self.messages_sent) < MAX_SEND_RATE:
                 if not self.message_queue.empty():
                     to_send = self.message_queue.get()
-                    if self.allowed_callback(to_send.type):
+                    if self.allowed_callback(to_send.channel, to_send.type):
                         try:
                             self.push(to_send.content.encode("UTF-8"))
                             self.logger.info(to_send)

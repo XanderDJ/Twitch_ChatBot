@@ -3,7 +3,10 @@
 
     @command = this will add the method to the commands that are called when a PRIVMSG appears
     @admin = This will call the command only when the admin of the bot (bot defined in ChatBot.py or credentials.py) types the command in chat
+    @returns = This is for commands where other commands shouldn't run
+    @save = called in save method every 10 minutes.
     @notice = This will call the command when an USERNOTICE is send in chat.
+
 
     LINES = contains all RandomLinePickers used in commands. These are stored in twitchchat.chat.TwitchChat.line_pickers.
 """
@@ -46,7 +49,7 @@ line_pickers = {
 
 lurkers = dict()
 previous_lurker_get = time.time() - 600
-ignore_list = txt_to_set("texts/ignore.txt")
+ignore_list = f.load("texts/ignore.txt", [])
 
 
 def load_emotes():
@@ -62,13 +65,13 @@ def load_emotes():
 
 
 emote_dict = load_emotes()
-blacklisted = txt_to_set("texts/blacklisted.txt")
+blacklisted = f.load("texts/blacklisted.txt", [])
 
 
 def reload():
     global emote_dict, blacklisted
     emote_dict = load_emotes()
-    blacklisted = txt_to_set("texts/blacklisted.txt")
+    blacklisted = f.load("texts/blacklisted.txt", [])
 
 
 # DECORATORS
@@ -151,7 +154,7 @@ def save_mentions():
 @save
 def save_ignore_list():
     global ignore_list
-    set_to_txt(ignore_list, "texts/ignore.txt")
+    f.save(ignore_list, "texts/ignore.txt")
 
 
 @command
@@ -194,19 +197,19 @@ def dct(bot: 'TwitchChat', args, msg, username, channel, send):
         if dictionary.check(word):
             try:
                 definition = define(word)
-                message = Message("@" + username + ", " + definition, MessageType.COMMAND)
-                message = change_if_blacklisted(username, message)
-                bot.send_message(channel, message)
+                message = Message("@" + username + ", " + definition, MessageType.COMMAND, channel)
+                message = change_if_blacklisted(username, message, channel)
+                bot.send_message(message)
             except Exception:
                 message = Message("@" + username + " couldn't look up the definition of " + word,
-                                  MessageType.COMMAND)
-                message = change_if_blacklisted(username, message)
-                bot.send_message(channel, message)
+                                  MessageType.COMMAND, channel)
+                message = change_if_blacklisted(username, message, channel)
+                bot.send_message(message)
         else:
             message = Message("@" + username + ", " + word + " is not an english word.",
-                              MessageType.COMMAND)
-            message = change_if_blacklisted(username, message)
-            bot.send_message(channel, message)
+                              MessageType.COMMAND, channel)
+            message = change_if_blacklisted(username, message, channel)
+            bot.send_message(message)
 
 
 def define(word):
@@ -216,9 +219,9 @@ def define(word):
     return defs[0]
 
 
-def change_if_blacklisted(username, msg):
+def change_if_blacklisted(username, msg, channel):
     if username.lower() in blacklisted:
-        return Message("@" + username + " ludwigSpectrum " * random.randint(1, 3), MessageType.BLACKLISTED)
+        return Message("@" + username + " ludwigSpectrum " * random.randint(1, 3), MessageType.BLACKLISTED, channel)
     return msg
 
 
@@ -232,23 +235,23 @@ def send_pog(bot: 'TwitchChat', args):
     elif is_word(tipe, ["sub", "resub"]):
         amount_of_months = args.get("msg-param-cumulative-months", None)
         type_sub = subscriber_type(amount_of_months)
-        message = Message("@" + username + " POGGIES " + type_sub + "!", MessageType.SUBSCRIBER)
-        bot.send_message(channel, message)
+        message = Message("@" + username + " POGGIES " + type_sub + "!", MessageType.SUBSCRIBER, channel)
+        bot.send_message(message)
     elif tipe == "subgift":
         amount_of_gifts = args.get("msg-param-sender-count")
         if amount_of_gifts != "0" and amount_of_gifts is not None:
             message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
-                              MessageType.SUBSCRIBER)
-            bot.send_message(channel, message)
+                              MessageType.SUBSCRIBER, channel)
+            bot.send_message(message)
     elif tipe == "submysterygift":
         amount_of_gifts = args.get("msg-param-sender-count", "0")
         if amount_of_gifts != "0" and amount_of_gifts is not None:
             message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
-                              MessageType.SUBSCRIBER)
-            bot.send_message(channel, message)
+                              MessageType.SUBSCRIBER, channel)
+            bot.send_message(message)
     elif tipe == "anonsubgift":
-        message = Message("POGGIES", MessageType.SUBSCRIBER)
-        bot.send_message(channel, message)
+        message = Message("POGGIES", MessageType.SUBSCRIBER, channel)
+        bot.send_message(message)
     else:
         return
 
@@ -278,9 +281,9 @@ def schleem(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!schleem" == msg:
         if bot.limiter.can_send(channel, "schleem", 10):
-            message = Message("Get outta town", MessageType.COMMAND)
-            message = change_if_blacklisted(username, message)
-            bot.send_message(channel, message)
+            message = Message("Get outta town", MessageType.COMMAND, channel)
+            message = change_if_blacklisted(username, message, channel)
+            bot.send_message(message)
 
 
 @command
@@ -289,45 +292,12 @@ def time_out(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     username = username
     if "time out" in msg and username == bot.admin:
-        message = Message("Gift me PepeLaugh", MessageType.SPECIAL)
-        bot.send_message(channel, message)
+        message = Message("Gift me PepeLaugh", MessageType.SPECIAL, channel)
+        bot.send_message(message)
     elif "time out" in msg:
-        message = Message("@" + username + " What's the password", MessageType.SPAM)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(args['channel'], message)
-
-
-@command
-@unwrap_command_args
-def bye(bot: 'TwitchChat', args, msg, username, channel, send):
-    msg = msg.lower()
-    if contains_word(msg, ["cya", "goodbye", "bye", "pppoof"]):
-        if bot.limiter.can_send(channel, "bye", 60, True):
-            message = Message("@" + username
-                              + ", " + line_pickers.get("byes").get_line()
-                              + " " + line_pickers.get("friends").get_line() + " peepoHug"
-                              , MessageType.HELPFUL)
-            bot.send_message(channel, message)
-
-
-@command
-@unwrap_command_args
-def gn(bot: 'TwitchChat', args, msg, username, channel, send):
-    msg = msg.lower()
-    if contains_word(msg, [" gn ", "good night", "goodnight", "to sleep", "bedtime", "to bed"]):
-        if bot.limiter.can_send(channel, "bye", 60, True):
-            message = Message("@" + username + ", " + "gn ppPoof , sleep tight!", MessageType.HELPFUL)
-            bot.send_message(channel, message)
-
-
-@command
-@unwrap_command_args
-def ping_if_asked(bot: 'TwitchChat', args, msg, username, channel, send):
-    msg = msg.lower()
-    if contains_word(msg, [" ping me ", " give me attention"]):
-        message = Message("@" + username + " " + line_pickers.get("greetings").get_line(), MessageType.SPECIAL)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
+        message = Message("@" + username + " What's the password", MessageType.SPAM, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
 
 
 @command
@@ -336,42 +306,9 @@ def give_fact(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!fact", "!facts", "give me a fact"]):
         message = Message("@" + username + ", did you know that " + line_pickers.get("facts").get_line(),
-                          MessageType.COMMAND)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
-
-
-@command
-@unwrap_command_args
-def reply_if_yo(bot: 'TwitchChat', args, msg, username, channel, send):
-    msg = msg.lower()
-    if len(msg) > 2 and "yo" in msg and count_os(msg) > 2:
-        message = Message("@" + username + ", " + line_pickers.get("greetings").get_line() + " peepoHappy",
-                          MessageType.SPECIAL)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
-        return True
-    return False
-
-
-def count_os(msg):
-    count = 0
-    max_count = 0
-    prev_char = ""
-    for char in msg:
-        if prev_char == "y" and char.lower() == "o":
-            count += 1
-        elif char.lower() == "o" and prev_char == "o" and count > 0:
-            count += 1
-        else:
-            if count > max_count:
-                max_count = count
-            count = 0
-        prev_char = char.lower()
-
-    if count > max_count:
-        max_count = count
-    return max_count
+                          MessageType.COMMAND, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
 
 
 @command
@@ -379,9 +316,9 @@ def count_os(msg):
 def eight_ball(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!8ball" in msg or "!eightball" in msg:
-        message = Message("@" + username + " " + line_pickers.get("8ball").get_line(), MessageType.COMMAND)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
+        message = Message("@" + username + " " + line_pickers.get("8ball").get_line(), MessageType.COMMAND, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
         return True
 
 
@@ -390,9 +327,9 @@ def eight_ball(bot: 'TwitchChat', args, msg, username, channel, send):
 def dance(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg
     if contains_word(msg, [" ludwigGun "]) and bot.limiter.can_send(channel, "dance", 25, True):
-        message = Message("pepeD " * random.randint(1, 9), MessageType.SPAM)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
+        message = Message("pepeD " * random.randint(1, 9), MessageType.SPAM, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
 
 
 @command
@@ -401,9 +338,9 @@ def quote(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg
     username = username
     if is_word(msg, ["!inspire"]):
-        message = Message("@" + username + ", " + line_pickers.get("quotes").get_line(), MessageType.COMMAND)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
+        message = Message("@" + username + ", " + line_pickers.get("quotes").get_line(), MessageType.COMMAND, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
 
 
 @command
@@ -411,9 +348,9 @@ def quote(bot: 'TwitchChat', args, msg, username, channel, send):
 def iamhere(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_all(msg, ["who", "is", "here"]):
-        message = Message("I am here peepoPog", MessageType.SPECIAL)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
+        message = Message("I am here peepoPog", MessageType.SPECIAL, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
 
 
 @command
@@ -423,9 +360,9 @@ def respond(bot: 'TwitchChat', args, msg, username, channel, send):
     if contains_word(msg, ["@" + bot.user, bot.user]):
         message = Message("@" + username +
                           ", Beep Boop MrDestructoid"
-                          , MessageType.SPAM)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
+                          , MessageType.SPAM, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
 
 
 @command
@@ -434,11 +371,11 @@ def lacking(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     channel = channel
     if msg == "!lacking":
-        amount = bot.state.get(channel + "lacking", "0")
+        amount = bot.state.get(channel, {}).get("lacking", "0")
         message = Message("@" + username + ", " + amount + " people have been caught lacking PepeLaugh",
-                          MessageType.SPECIAL)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
+                          MessageType.SPECIAL, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
 
 
 @command
@@ -446,9 +383,9 @@ def lacking(bot: 'TwitchChat', args, msg, username, channel, send):
 def aniki(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if msg == "!aniki":
-        message = Message("Sleep tight PepeHands", MessageType.COMMAND)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
+        message = Message("Sleep tight PepeHands", MessageType.COMMAND, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
 
 
 @command
@@ -456,9 +393,9 @@ def aniki(bot: 'TwitchChat', args, msg, username, channel, send):
 def pickup(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!pickup", "!pickupline", "!pickups", "!pickuplines"]):
-        message = Message("@" + username + ", " + line_pickers.get("pickups").get_line(), MessageType.COMMAND)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
+        message = Message("@" + username + ", " + line_pickers.get("pickups").get_line(), MessageType.COMMAND, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
 
 
 @command
@@ -466,9 +403,9 @@ def pickup(bot: 'TwitchChat', args, msg, username, channel, send):
 def joke(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!joke", "!jokes", " give me a joke "]):
-        message = Message("@" + username + ", " + line_pickers.get("jokes").get_line(), MessageType.COMMAND)
-        message = change_if_blacklisted(username, message)
-        bot.send_message(channel, message)
+        message = Message("@" + username + ", " + line_pickers.get("jokes").get_line(), MessageType.COMMAND, channel)
+        message = change_if_blacklisted(username, message, channel)
+        bot.send_message(message)
 
 
 @command
@@ -479,8 +416,8 @@ def weird_jokes(bot: 'TwitchChat', args, msg, username, channel, send):
             or contains_all(msg, ["slime", "pee"]) \
             or contains_all(msg, ["bus", "lud"]) \
             or contains_all(msg, ["bus", "hit"]):
-        message = Message("@" + username + ", FeelsWeirdMan", MessageType.SPAM)
-        bot.send_message(channel, message)
+        message = Message("@" + username + ", FeelsWeirdMan", MessageType.SPAM, channel)
+        bot.send_message(message)
 
 
 @command
@@ -489,9 +426,9 @@ def suicune(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!suicune" == msg:
         if bot.limiter.can_send(channel, "suicune", 5, True):
-            message = Message("bitch", MessageType.COMMAND)
-            message = change_if_blacklisted(username, message)
-            bot.send_message(channel, message)
+            message = Message("bitch", MessageType.COMMAND, channel)
+            message = change_if_blacklisted(username, message, channel)
+            bot.send_message(message)
 
 
 @command
@@ -500,9 +437,9 @@ def spam(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!spam" == msg:
         if bot.limiter.can_send(channel, "spam", 5, True):
-            message = Message("not cool peepoWTF", MessageType.COMMAND)
-            message = change_if_blacklisted(username, message)
-            bot.send_message(channel, message)
+            message = Message("not cool peepoWTF", MessageType.COMMAND, channel)
+            message = change_if_blacklisted(username, message, channel)
+            bot.send_message(message)
 
 
 @command
@@ -528,12 +465,12 @@ def validate_emotes(bot: 'TwitchChat', args, msg, username, channel, send):
                     update_emotes(channel, word, val.correct)
                     wrong_emotes.append(word)
     if len(wrong_emotes) != 0:
-        amount = bot.state.get(channel + "lacking", "0")
-        bot.state[channel + "lacking"] = str(int(amount) + len(wrong_emotes))
+        amount = bot.state.get(channel).get("lacking", "0")
+        bot.state[channel]["lacking"] = str(int(amount) + len(wrong_emotes))
         if send:
             txt = " ".join(wrong_emotes)
-            message = Message("@" + username + ", " + txt + " PepeLaugh", MessageType.SPAM)
-            bot.send_message(channel, message)
+            message = Message("@" + username + ", " + txt + " PepeLaugh", MessageType.SPAM, channel)
+            bot.send_message(message)
 
 
 def validate_emote(emote, emotes):
@@ -564,8 +501,8 @@ def tyke(bot: 'TwitchChat', args, msg, username, channel, send):
             for i in range(3):
                 parity = i % 2
                 txt = "blobDance RareChar blobDance RareChar blobDance " if parity == 0 else "RareChar blobDance RareChar blobDance RareChar "
-                message = Message(txt, MessageType.SPAM)
-                bot.send_message(channel, message)
+                message = Message(txt, MessageType.SPAM, channel)
+                bot.send_message(message)
 
 
 @admin
@@ -578,32 +515,33 @@ def toggle(bot: 'TwitchChat', args, msg, username, channel, send):
         if ans == "on":
             for tipe in MessageType:
                 if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
-                    bot.state[tipe.name] = str(True)
-                    message = Message("@" + username + " bot is now toggled on.", MessageType.CHAT)
-            bot.send_message(channel, message)
+                    bot.state[channel][tipe.name] = str(True)
+            message = Message("@" + username + " bot is now toggled on.", MessageType.CHAT, channel)
+            bot.send_message(message)
         elif ans == "off":
             for tipe in MessageType:
                 if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
-                    bot.state[tipe.name] = str(False)
-                    message = Message("@" + username + " bot is now toggled off.", MessageType.CHAT)
-            bot.send_message(channel, message)
+                    bot.state[channel][tipe.name] = str(False)
+            message = Message("@" + username + " bot is now toggled off.", MessageType.CHAT, channel)
+            bot.send_message(message)
         elif ans == "spam":
-            bot.state[MessageType.SPAM.name] = str(not convert(bot.state.get(MessageType.SPAM.name, "True")))
+            bot.state[channel][MessageType.SPAM.name] = str(
+                not convert(bot.state.get(channel).get(MessageType.SPAM.name, "True")))
         elif ans == "command":
-            bot.state[MessageType.COMMAND.name] = str(
-                not convert(bot.state.get(MessageType.COMMAND.name, "True")))
+            bot.state[channel][MessageType.COMMAND.name] = str(
+                not convert(bot.state.get(channel).get(MessageType.COMMAND.name, "True")))
         elif ans == "bld":
-            bot.state[MessageType.BLACKLISTED.name] = str(
-                not convert(bot.state.get(MessageType.BLACKLISTED.name, "True")))
+            bot.state[channel][MessageType.BLACKLISTED.name] = str(
+                not convert(bot.state.get(channel).get(MessageType.BLACKLISTED.name, "True")))
         elif ans == "helpful":
-            bot.state[MessageType.HELPFUL.name] = str(
-                not convert(bot.state.get(MessageType.HELPFUL.name, "True")))
+            bot.state[channel][MessageType.HELPFUL.name] = str(
+                not convert(bot.state.get(channel).get(MessageType.HELPFUL.name, "True")))
         elif ans == "special":
-            bot.state[MessageType.SPECIAL.name] = str(
-                not convert(bot.state.get(MessageType.SPECIAL.name, "True")))
+            bot.state[channel][MessageType.SPECIAL.name] = str(
+                not convert(bot.state.get(channel).get(MessageType.SPECIAL.name, "True")))
         elif ans == "sub":
-            bot.state[MessageType.SUBSCRIBER.name] = str(
-                not convert(bot.state.get(MessageType.SUBSCRIBER.name, "True")))
+            bot.state[channel][MessageType.SUBSCRIBER.name] = str(
+                not convert(bot.state.get(channel).get(MessageType.SUBSCRIBER.name, "True")))
         else:
             return
 
@@ -649,8 +587,8 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel, send):
         if bot.limiter.can_send(channel, "lurker", 1200, True):
             lurker = random.choice(lurkers.get(channel, [None]))
             txt = lurker + " is lurking in chat right now monkaW ." if lurker is not None else "No lurkers in chat FeelsBadMan "
-            message = Message(txt, MessageType.COMMAND)
-            bot.send_message(channel, message)
+            message = Message(txt, MessageType.COMMAND, channel)
+            bot.send_message(message)
 
 
 @command
@@ -659,8 +597,8 @@ def aaron(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!ap"]):
         if bot.limiter.can_send(channel, "aaron", 60, False):
-            message = Message("Wizard Toad wishes you a good day =)", MessageType.COMMAND)
-            bot.send_message(channel, message)
+            message = Message("Wizard Toad wishes you a good day =)", MessageType.COMMAND, channel)
+            bot.send_message(message)
 
 
 @command
@@ -669,8 +607,8 @@ def lone(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!lone" == msg:
         if bot.limiter.can_send(channel, "lone", 60):
-            message = Message("blobDance PrideLion blobDance PrideLion blobDance", MessageType.SPAM)
-            bot.send_message(channel, message)
+            message = Message("blobDance PrideLion blobDance PrideLion blobDance", MessageType.SPAM, channel)
+            bot.send_message(message)
 
 
 @command
@@ -679,8 +617,8 @@ def replay(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!replay"]):
         if bot.limiter.can_send(channel, "replay", 60, True):
-            message = Message("No longer green PepeHands", MessageType.COMMAND)
-            bot.send_message(channel, message)
+            message = Message("Green FeelsOkayMan", MessageType.COMMAND, channel)
+            bot.send_message(message)
 
 
 @returns
@@ -695,24 +633,24 @@ def correct(bot: 'TwitchChat', args, msg, username, channel, send):
             if correct_emote is None:
                 message = Message(
                     "@" + username + ", that emote wasn't in my emote database. "
-                                     "So I can't tell you the correct way to spell it.", MessageType.COMMAND)
-                bot.send_message(channel, message)
+                                     "So I can't tell you the correct way to spell it.", MessageType.COMMAND, channel)
+                bot.send_message(message)
                 return True
             if emote == correct_emote:
                 message = Message("@" + username + ", you wrote " + emote + " correctly! Good job FeelsWowMan",
-                                  MessageType.COMMAND)
-                bot.send_message(channel, message)
+                                  MessageType.COMMAND, channel)
+                bot.send_message(message)
                 return True
             else:
                 message = Message(
                     "@" + username + ", you wrote " + emote + " incorrectly FeelsBadMan . "
                                                               "The correct way of spelling it is " + correct_emote,
-                    MessageType.COMMAND)
-                bot.send_message(channel, message)
+                    MessageType.COMMAND, channel)
+                bot.send_message(message)
                 return True
         else:
-            message = Message("@" + username + " can't fool me PepeLaugh", MessageType.COMMAND)
-            bot.send_message(channel, message)
+            message = Message("@" + username + " can't fool me PepeLaugh", MessageType.COMMAND, channel)
+            bot.send_message(message)
             return True
     return False
 
@@ -727,16 +665,16 @@ def limit(bot: 'TwitchChat', args, msg, username, channel, send):
         s = bot.limiter.seconds_since_limit(channel, cmd)
         txt = "@" + username + ", " + str(s) + " seconds since command !" + cmd + " was used." \
             if s != 0 else "@" + username + ", that command wasn't used yet"
-        message = Message(txt, MessageType.COMMAND)
-        bot.send_message(channel, message)
+        message = Message(txt, MessageType.COMMAND, channel)
+        bot.send_message(message)
 
 
 @admin
 @unwrap_command_args
 def ping(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg == "!ping":
-        message = Message("Pong, I'm alive!", MessageType.FUNCTIONAL)
-        bot.send_message(channel, message)
+        message = Message("Pong, I'm alive!", MessageType.FUNCTIONAL, channel)
+        bot.send_message(message)
 
 
 @returns
@@ -746,8 +684,8 @@ def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if msg == "!unignore me":
         ignore_list.remove(username)
-        message = Message("@" + username + ", welcome back PrideLion !", MessageType.COMMAND)
-        bot.send_message(channel, message)
+        message = Message("@" + username + ", welcome back PrideLion !", MessageType.COMMAND, channel)
+        bot.send_message(message)
         return True
     return False
 
@@ -755,8 +693,8 @@ def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
 @returns
 @unwrap_command_args
 def ignore(bot: 'TwitchChat', args, msg, username, channel, send):
-    validate_emotes(bot, args, False)
     if username in ignore_list:
+        validate_emotes(bot, args, False)
         return True
     return False
 
@@ -768,5 +706,5 @@ def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if msg == "!ignore me":
         ignore_list.add(username)
-        message = Message("@" + username + ", from now on you will be ignored PrideLion", MessageType.COMMAND)
-        bot.send_message(channel, message)
+        message = Message("@" + username + ", from now on you will be ignored PrideLion", MessageType.COMMAND, channel)
+        bot.send_message(message)
