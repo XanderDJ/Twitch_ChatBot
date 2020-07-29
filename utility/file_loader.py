@@ -100,7 +100,7 @@ def iterable_to_strings(iterable, pretty=False):
 
 
 def clean_txt(txt):
-    return "".join(char for char in txt if char != " " and char != "\n")
+    return "".join(char for char in txt if char not in [" ", "\n", "\t"])
 
 
 def from_text(txt):
