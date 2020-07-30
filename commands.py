@@ -710,3 +710,12 @@ def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
         ignore_list.add(username)
         message = Message("@" + username + ", from now on you will be ignored PrideLion", MessageType.COMMAND, channel)
         bot.send_message(message)
+
+
+@command
+@unwrap_command_args
+def seal(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if msg.lower() == "!seal":
+        if bot.limiter.can_send(channel,"seal",20):
+            message = Message("Such a brave bird PrideLion", MessageType.COMMAND, channel)
+            bot.send_message(message)
