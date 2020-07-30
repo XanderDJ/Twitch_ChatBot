@@ -32,6 +32,7 @@ class TwitchChat(object):
         self.saves = commands.SAVE
         self.state = self.load_state()
         self.limiter = MessageLimiter()
+        self.twitch_status = TwitchStatus(channels)
         self.active = True
         self.command_thread = Thread(target=self.handle_commandline_input)
         self.command_thread.daemon = True

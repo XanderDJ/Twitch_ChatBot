@@ -134,8 +134,9 @@ def save_emotes():
             col = db[emote]
             wrong_emotes_to_insert = []
             if emote != "count":
-                for misspell, count in wrong_emotes.items():
-                    item = {"count": count, "spelling": misspell, "timestamp": datetime.datetime.utcnow()}
+                for (misspell, activity), count in wrong_emotes.items():
+                    item = {"count": count, "spelling": misspell, "activity": activity,
+                            "timestamp": datetime.datetime.utcnow()}
                     wrong_emotes_to_insert.append(item)
                 col.insert_many(wrong_emotes_to_insert)
     temp_db["emotes"] = dict()
@@ -451,18 +452,19 @@ def validate_emotes(bot: 'TwitchChat', args, msg, username, channel, send):
     words = msg.split()
     emotes = emote_dict["all_emotes"]
     wrong_emotes = []
+    status = bot.twitch_status.get_status(channel)
     for word in words:
         lowered_word = word.lower()
         if lowered_word in emote_dict:
             correct_emote = emote_dict.get(lowered_word)
             if word != correct_emote and not dictionary.check(word):
-                update_emotes(channel, word, correct_emote)
+                update_emotes(channel, word, correct_emote, status.get("activity"))
                 wrong_emotes.append(word)
         else:
             val = validate_emote(word, emotes)
             if not val.boolean:
                 if not dictionary.check(word):
-                    update_emotes(channel, word, val.correct)
+                    update_emotes(channel, word, val.correct, status.get("activity"))
                     wrong_emotes.append(word)
     if len(wrong_emotes) != 0:
         amount = bot.state.get(channel).get("lacking", "0")
@@ -481,14 +483,14 @@ def validate_emote(emote, emotes):
     return Validation(True, emote)
 
 
-def update_emotes(channel: str, wrong_emote: str, correct_emote: str) -> None:
+def update_emotes(channel: str, wrong_emote: str, correct_emote: str, activity: str) -> None:
     global temp_db
     temp_db["emotes"][channel] = temp_db.get("emotes").get(channel, dict())
     channel_dict = temp_db.get("emotes").get(channel)
     channel_dict[correct_emote] = channel_dict.get(correct_emote, dict())
     emote_dict = channel_dict.get(correct_emote)
-    count = emote_dict.get(wrong_emote, 0)
-    emote_dict[wrong_emote] = count + 1
+    count = emote_dict.get((wrong_emote, activity), 0)
+    emote_dict[(wrong_emote, activity)] = count + 1
     channel_dict["count"] = channel_dict.get("count", 0) + 1
 
 

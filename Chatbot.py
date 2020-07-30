@@ -1,5 +1,5 @@
 from twitchchat import TwitchChat
-from credentials import *
+from credentials.credentials import *
 import sys
 import logging
 

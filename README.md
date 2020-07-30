@@ -26,7 +26,7 @@ If you don't want this functionality remove "save_mentions", "update_mentions" a
 # Usage
 ```python
 from twitchchat import TwitchChat
-from credentials import * #You need to create credentials.py and define username, oauth and admin in it
+from credentials.credentials import * #You need to create credentials.py and define username, oauth and admin in it
 import logging
 
 

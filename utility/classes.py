@@ -4,6 +4,7 @@ import time
 import urllib3
 from threading import Thread
 import json
+from credentials.api_credentials import client_id, secret
 
 
 class MessageType(Enum):
@@ -84,17 +85,19 @@ class MessageLimiter:
 
 
 class TwitchStatus:
-    def __init__(self, client_id: str, secret: str, channels: list):
+    def __init__(self, channels: list):
         self._client = client_id
         self._secret = secret
-        self._channels = channels
+        self.state = {}
+        self._channels = []
+        for chan in channels:
+            self.add_channel(chan)
         self._manager = urllib3.PoolManager()
         self._bearer = self._get_bearer()
-        self.state = {}
+        self.alive = True
         self.update_thread = Thread(target=self._update_channels)
         self.update_thread.daemon = True
         self.update_thread.start()
-        self.alive = True
 
     def stop(self):
         self.alive = False
@@ -113,7 +116,7 @@ class TwitchStatus:
         js = json.loads(response.data.decode("UTF-8"))
         return js.get("access_token")
 
-    def _is_live(self, channel):
+    def _update_channel(self, channel):
         base = "https://api.twitch.tv/helix/streams"
         parameters = {"user_login": channel}
         headers = {
@@ -124,19 +127,41 @@ class TwitchStatus:
         if response.status == 401:
             # Bearer has expired
             self._bearer = self._get_bearer()
-            return self._is_live(channel)
+            self._update_channel(channel)
+        elif response.status != 200:
+            # Something weird happened so we do nothing
+            return
         else:
+            # 200 ok
             dct = json.loads(response.data.decode("UTF-8"))
             data = dct.get("data")
             if len(data) == 0:
-                return False
-            return True
+                # not live
+                self.state[channel]["live"] = False
+                self.state[channel]["activity"] = "Prechat"
+                return
+            # live
+            self.state[channel]["live"] = True
+            # get game
+            game_id = data[0].get("game_id")
+            base = "https://api.twitch.tv/helix/games"
+            parameters = {
+                "id": game_id
+            }
+            response = self._manager.request("GET", base, fields=parameters, headers=headers)
+            dct = json.loads(response.data.decode("UTF-8"))
+            data = dct.get("data")
+            if len(data) == 0:
+                # something weird happened
+                return
+            self.state[channel]["activity"] = data[0].get("name")
 
     def get_status(self, channel):
-        return self.state.get(channel, True)
+        return self.state.get(channel, {"live": False, "activity": "Prechat"})
 
     def add_channel(self, channel):
         self._channels.append(channel)
+        self.state[channel] = self.state.get(channel, {"live": False, "activity": "Prechat"})
 
     def delete_channel(self, channel):
         if self._channels.__contains__(channel):
@@ -144,8 +169,7 @@ class TwitchStatus:
 
     def _update_channels(self):
         while self.alive:
-            time.sleep(15)
             for channel in self._channels:
                 time.sleep(1)
-                status = self._is_live(channel)
-                self.state[channel] = status
+                self._update_channel(channel)
+            time.sleep(15)
