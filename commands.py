@@ -49,7 +49,7 @@ line_pickers = {
 
 lurkers = dict()
 previous_lurker_get = time.time() - 600
-ignore_list = f.load("texts/ignore.txt", {[]})
+ignore_list = f.load("texts/ignore.txt", set())
 
 
 def load_emotes():
