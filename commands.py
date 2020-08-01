@@ -722,3 +722,10 @@ def seal(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             message = Message("Such a brave bird PrideLion", MessageType.COMMAND, channel)
             bot.send_message(message)
 
+@command
+@unwrap_command_args
+def thor(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if msg.lower() == "!thor":
+        if bot.limiter.can_send(channel, "seal", 20):
+            message = Message("Just beat it 4Head", MessageType.COMMAND, channel)
+            bot.send_message(message)
