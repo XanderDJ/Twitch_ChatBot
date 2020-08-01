@@ -718,6 +718,15 @@ def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def seal(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!seal":
-        if bot.limiter.can_send(channel,"seal",20):
+        if bot.limiter.can_send(channel, "seal", 20):
             message = Message("Such a brave bird PrideLion", MessageType.COMMAND, channel)
             bot.send_message(message)
+
+
+@command
+@unwrap_command_args
+def harknezz101(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if username == "harknezz101":
+        spectrum = "ludwigSpectrum " * random.randint(1, 25)
+        message = Message("@harknezz101, " + spectrum, MessageType.SPAM, channel)
+        bot.send_message(message)
