@@ -726,7 +726,7 @@ def seal(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @command
 @unwrap_command_args
 def harknezz101(bot: 'TwitchChat', args, msg, username, channel, send: bool):
-    if username == "harknezz101":
+    if username.lower() == "harknezz101":
         spectrum = "ludwigSpectrum " * random.randint(1, 25)
         message = Message("@harknezz101, " + spectrum, MessageType.SPAM, channel)
         bot.send_message(message)
