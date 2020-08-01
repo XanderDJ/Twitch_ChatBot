@@ -726,6 +726,14 @@ def seal(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @unwrap_command_args
 def thor(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!thor":
-        if bot.limiter.can_send(channel, "seal", 20):
+        if bot.limiter.can_send(channel, "thor", 20):
             message = Message("Just beat it 4Head", MessageType.COMMAND, channel)
+            bot.send_message(message)
+
+@command
+@unwrap_command_args
+def psy(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if msg.lower() == "!psy":
+        if bot.limiter.can_send(channel, "psy", 20):
+            message = Message("@psygs daily ping or however many times people use this command PrideLion", MessageType.COMMAND, channel)
             bot.send_message(message)
