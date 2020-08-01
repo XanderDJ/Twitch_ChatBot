@@ -185,6 +185,7 @@ def english_dictionary():
     english_dict.add("poro")
     english_dict.add("png")
     english_dict.add("PNG")
+    english_dict.add("ppl")
     return english_dict
 
 
