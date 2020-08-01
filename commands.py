@@ -44,7 +44,8 @@ line_pickers = {
     "byes": RandomLinePicker("texts/goodbyes.txt"),
     "jokes": RandomLinePicker("texts/jokes.txt"),
     "pickups": RandomLinePicker("texts/pickuplines.txt"),
-    "quotes": RandomLinePicker("texts/quotes.txt")
+    "quotes": RandomLinePicker("texts/quotes.txt"),
+    "lilb": RandomLinePicker("texts/lilb.txt")
 }
 
 lurkers = dict()
@@ -607,16 +608,6 @@ def aaron(bot: 'TwitchChat', args, msg, username, channel, send):
 
 @command
 @unwrap_command_args
-def lone(bot: 'TwitchChat', args, msg, username, channel, send):
-    msg = msg.lower()
-    if "!lone" == msg:
-        if bot.limiter.can_send(channel, "lone", 60):
-            message = Message("blobDance PrideLion blobDance PrideLion blobDance", MessageType.SPAM, channel)
-            bot.send_message(message)
-
-
-@command
-@unwrap_command_args
 def replay(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!replay"]):
@@ -722,6 +713,7 @@ def seal(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             message = Message("Such a brave bird PrideLion", MessageType.COMMAND, channel)
             bot.send_message(message)
 
+
 @command
 @unwrap_command_args
 def thor(bot: 'TwitchChat', args, msg, username, channel, send: bool):
@@ -730,10 +722,21 @@ def thor(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             message = Message("Just beat it 4Head", MessageType.COMMAND, channel)
             bot.send_message(message)
 
+
 @command
 @unwrap_command_args
 def psy(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!psy":
         if bot.limiter.can_send(channel, "psy", 20):
-            message = Message("@psygs daily ping or however many times people use this command PrideLion", MessageType.COMMAND, channel)
+            message = Message("@psygs daily ping or however many times people use this command PrideLion",
+                              MessageType.COMMAND, channel)
+            bot.send_message(message)
+
+
+@command
+@unwrap_command_args
+def lilb(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if msg.lower() == "!lilb":
+        if bot.limiter.can_send(channel, "lilb", 20):
+            message = Message(line_pickers.get("lilb").get_line(), MessageType.COMMAND, channel)
             bot.send_message(message)
