@@ -755,3 +755,12 @@ def nuggles(bot: 'TwitchChat', args, msg, username, channel, send: bool):
                 "So click the fuckin subscribe button and join the party, you’ll be glad you did! FeelsOkayMan ",
                 MessageType.COMMAND, channel)
             bot.send_message(message)
+
+
+@command
+@unwrap_command_args
+def xray(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if msg.lower() == "!xray":
+        if bot.limiter.can_send(channel, "xray", 20):
+            message = Message("* peepoHug intensifies *", MessageType.COMMAND, channel)
+            bot.send_message(message)
