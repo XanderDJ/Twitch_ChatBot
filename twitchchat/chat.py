@@ -167,7 +167,7 @@ class TwitchChat(object):
         # Turn bot off when joining a channel (except for functional and chat messages.
         for tipe in MessageType:
             if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
-                self.state[channel][tipe.name] = "False"
+                self.state[channel][tipe.name] = "True"
         self.logger.info('Joining channel {0}'.format(channel))
         channels = self.channel_servers.get('irc.chat.twitch.tv:6667').get("channel_set")
         if channel not in channels:
