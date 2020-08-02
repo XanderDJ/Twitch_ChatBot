@@ -764,3 +764,18 @@ def xray(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "xray", 20):
             message = Message("* peepoHug intensifies *", MessageType.COMMAND, channel)
             bot.send_message(message)
+
+
+@command
+@unwrap_command_args
+def deane(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if msg.lower() == "!deane":
+        if bot.limiter.can_send(channel, "deane", 120):
+            message = Message("peepoArrive", MessageType.COMMAND, channel)
+            bot.send_message(message)
+            time.sleep(0.5)
+            message = Message("hi", MessageType.COMMAND, channel)
+            bot.send_message(message)
+            time.sleep(0.5)
+            message = Message("ppPoof", MessageType.COMMAND, channel)
+            bot.send_message(message)
