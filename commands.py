@@ -741,3 +741,17 @@ def lilb(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "lilb", 20):
             message = Message(line_pickers.get("lilb").get_line(), MessageType.COMMAND, channel)
             bot.send_message(message)
+
+
+@command
+@unwrap_command_args
+def nuggles(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if msg.lower() == "!nuggles":
+        if bot.limiter.can_send(channel, "nuggles", 40, True):
+            message = Message(
+                "Hey I’m Brett from LA and if you wanna see some sick montage parodies "
+                "this is the channel to subscribe to. You got memes! You got the illuminati!"
+                " Mountain Dew! Doritos! Basically everything that’s cool on the internet. "
+                "So click the fuckin subscribe button and join the party, you’ll be glad you did! FeelsOkayMan ",
+                MessageType.COMMAND, channel)
+            bot.send_message(message)
