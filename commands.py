@@ -796,5 +796,5 @@ def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @unwrap_command_args
 def test(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!test":
-        message = Message("test4", MessageType.COMMAND, channel)
+        message = Message("test5", MessageType.COMMAND, channel)
         bot.send_message(message)
