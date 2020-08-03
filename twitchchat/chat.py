@@ -22,6 +22,7 @@ def handle_pull_event(state: dict, bot: 'TwitchChat'):
     state["clm"] = state.get("clm", cm_time)
     clm_time = state.get("clm")
     if cm_time > clm_time:
+        state["clm"] = cm_time
         logger.info("commands.py has been changed")
         # Commands.py has been modified due to a git pull
         # Check if twitchchat.chat.py has been modified, if so then bot should stop and restart manually
