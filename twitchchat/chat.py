@@ -13,10 +13,6 @@ import os
 logger = logging.getLogger(name="tmi")
 
 
-def reload():
-    importlib.reload(commands)
-
-
 def handle_pull_event(state: dict, bot: 'TwitchChat'):
     cm_time = os.stat("commands.py").st_mtime
     state["clm"] = state.get("clm", cm_time)
@@ -37,7 +33,7 @@ def handle_pull_event(state: dict, bot: 'TwitchChat'):
             logger.info("Reloading command.py")
             logger.info(commands.ADMIN)
             # chat.py wasn't modified so it's safe to reload commands.py
-            reload()
+            bot.reload()
             logger.info(commands.ADMIN)
 
 
@@ -87,6 +83,14 @@ class TwitchChat(object):
     @staticmethod
     def load_state():
         return f.load("texts/global_state.txt", default=dict())
+
+    def reload(self):
+        importlib.reload(commands)
+        self.admins = commands.ADMIN
+        self.commands = commands.COMMAND
+        self.notice = commands.NOTICE
+        self.returns = commands.RETURNS
+        self.saves = commands.SAVE
 
     def start(self):
         for handler in self.irc_handlers:
