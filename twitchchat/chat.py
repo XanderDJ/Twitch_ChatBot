@@ -1,18 +1,38 @@
 from localasync import asynchat, asyncore
 import logging
 import socket
-import sys
 from utility import *
 import re
 import commands
 from datetime import datetime, timedelta
 from threading import Thread
-
-PY3 = sys.version_info[0] == 3
-if PY3:
-    from queue import Queue
+from queue import Queue
+import importlib
+import os
 
 logger = logging.getLogger(name="tmi")
+
+
+def reload():
+    importlib.reload(commands)
+
+
+def handle_pull_event(state: dict, bot: 'TwitchChat'):
+    cm_time = os.stat("commands.py").st_mtime
+    state["clm"] = state.get("lm", cm_time)
+    clm_time = state.get("clm")
+    if cm_time > clm_time:
+        # Commands.py has been modified due to a git pull
+        # Check if twitchchat.chat.py has been modified, if so then bot should stop and restart manually
+        chm_time = os.stat("twitchchat/chat.py").st_mtime
+        state["chlm"] = state.get("chlm", chm_time)
+        chlm_time = state.get("chlm")
+        if chm_time > chlm_time:
+            # chat.py was modified so program has to shutdown
+            bot.stop_all()
+        else:
+            # chat.py wasn't modified so it's safe to reload commands.py
+            reload()
 
 
 class TwitchChat(object):
@@ -32,6 +52,7 @@ class TwitchChat(object):
         self.saves = commands.SAVE
         self.state = self.load_state()
         self.limiter = MessageLimiter()
+        self.update_checker = EventHandler(handle_pull_event, 5, self)
         self.twitch_status = TwitchStatus(channels)
         self.active = True
         self.command_thread = Thread(target=self.handle_commandline_input)

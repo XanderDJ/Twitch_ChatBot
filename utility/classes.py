@@ -173,3 +173,40 @@ class TwitchStatus:
                 time.sleep(1)
                 self._update_channel(channel)
             time.sleep(15)
+
+
+class EventHandler:
+    def __init__(self, func, loop_time, manager=None):
+        self.func = func
+        self.loop_time = loop_time
+        self.manager = manager
+        self.state = {}
+        self.alive = False
+        self.thread = Thread(target=self.run)
+        self.thread.daemon = True
+
+    def start(self):
+        self.alive = True
+        self.thread.start()
+
+    def join(self):
+        self.thread.join()
+
+    def stop(self):
+        self.alive = False
+        self.join()
+
+    def restart(self):
+        if not self.alive:
+            self.alive = True
+            self.thread = Thread(target=self.run)
+            self.thread.daemon = True
+            self.thread.start()
+
+    def run(self):
+        while self.alive:
+            if self.manager is None:
+                self.func(self.state)
+            else:
+                self.func(self.state, self.manager)
+            time.sleep(self.loop_time)
