@@ -789,5 +789,5 @@ def deane(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!auto":
         if bot.limiter.can_send(channel, "auto", 20):
-            message = Message("Yellow PogChamp , red also PogChamp", MessageType.COMMAND, channel)
+            message = Message("ludwigSpectrum red gang ludwigSpectrum ", MessageType.COMMAND, channel)
             bot.send_message(message)
