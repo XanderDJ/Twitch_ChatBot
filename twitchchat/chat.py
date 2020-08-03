@@ -18,21 +18,27 @@ def reload():
 
 
 def handle_pull_event(state: dict, bot: 'TwitchChat'):
+    logger.info("Checking to see if a new command has been added")
     cm_time = os.stat("commands.py").st_mtime
     state["clm"] = state.get("lm", cm_time)
     clm_time = state.get("clm")
     if cm_time > clm_time:
+        logger.info("commands.py has been changed")
         # Commands.py has been modified due to a git pull
         # Check if twitchchat.chat.py has been modified, if so then bot should stop and restart manually
         chm_time = os.stat("twitchchat/chat.py").st_mtime
         state["chlm"] = state.get("chlm", chm_time)
         chlm_time = state.get("chlm")
         if chm_time > chlm_time:
+            logger.info("chat.py has changed")
             # chat.py was modified so program has to shutdown
             bot.stop_all()
         else:
+            logger.info("Reloading command.py")
+            logger.info(commands.ADMIN)
             # chat.py wasn't modified so it's safe to reload commands.py
             reload()
+            logger.info(commands.ADMIN)
 
 
 class TwitchChat(object):
