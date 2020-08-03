@@ -240,18 +240,18 @@ def send_pog(bot: 'TwitchChat', args):
     elif is_word(tipe, ["sub", "resub"]):
         amount_of_months = args.get("msg-param-cumulative-months", None)
         type_sub = subscriber_type(amount_of_months)
-        message = Message("@" + username + " POGGIES " + type_sub + "!", MessageType.SUBSCRIBER, channel)
+        message = Message("POGGIES " + type_sub + "!", MessageType.SUBSCRIBER, channel)
         bot.send_message(message)
     elif tipe == "subgift":
         amount_of_gifts = args.get("msg-param-sender-count")
         if amount_of_gifts != "0" and amount_of_gifts is not None:
-            message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
+            message = Message("POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
                               MessageType.SUBSCRIBER, channel)
             bot.send_message(message)
     elif tipe == "submysterygift":
         amount_of_gifts = args.get("msg-param-sender-count", "0")
         if amount_of_gifts != "0" and amount_of_gifts is not None:
-            message = Message("@" + username + " POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
+            message = Message("POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
                               MessageType.SUBSCRIBER, channel)
             bot.send_message(message)
     elif tipe == "anonsubgift":
