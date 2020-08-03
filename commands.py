@@ -781,3 +781,13 @@ def deane(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             time.sleep(0.5)
             message = Message("ppPoof", MessageType.COMMAND, channel)
             bot.send_message(message)
+
+
+
+@command
+@unwrap_command_args
+def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if msg.lower() == "!auto":
+        if bot.limiter.can_send(channel, "auto", 20):
+            message = Message("YELLOW GANG ALL MY HOMIES LOVE YELLOW GANG", MessageType.COMMAND, channel)
+            bot.send_message(message)
