@@ -18,9 +18,8 @@ def reload():
 
 
 def handle_pull_event(state: dict, bot: 'TwitchChat'):
-    logger.info("Checking to see if a new command has been added")
     cm_time = os.stat("commands.py").st_mtime
-    state["clm"] = state.get("lm", cm_time)
+    state["clm"] = state.get("clm", cm_time)
     clm_time = state.get("clm")
     if cm_time > clm_time:
         logger.info("commands.py has been changed")
