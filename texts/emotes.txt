@@ -146,6 +146,7 @@ pugPls2
 RareChar
 blobDance
 RarePepe
+WeirdChamp
 PauseChamp
 PainsChamp
 SadChamp
@@ -158,5 +159,13 @@ widepeepoHappy
 widepeepoSad
 Kreygasm
 PogO
-Jouch
 HandsUp
+gachiHYPER
+gachiPRIDE
+gachiBASS
+GachiPls
+ludpeepoGoose
+Kippa
+4Weird
+4WeirdW
+YEP
