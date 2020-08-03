@@ -29,10 +29,12 @@ def convert(boolean: str) -> bool:
 
 
 def hammington(str1, str2):
-    str1 = str1.lower()
-    str2 = str2.lower()
     len1 = len(str1)
     len2 = len(str2)
+    if len1 == 0 or len2 == 0:
+        return max(len1, len2) + 1
+    str1 = str1.lower()
+    str2 = str2.lower()
     smallest = min(len1, len2)
     starting_dist = abs(len1 - len2)
     if str1[0] != str2[0] or str1[0:smallest] == str2[0:smallest]:
