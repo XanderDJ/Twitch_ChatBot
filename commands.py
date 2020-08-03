@@ -790,11 +790,3 @@ def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "auto", 20):
             message = Message("Something something to be changed later", MessageType.COMMAND, channel)
             bot.send_message(message)
-
-
-@admin
-@unwrap_command_args
-def test(bot: 'TwitchChat', args, msg, username, channel, send: bool):
-    if msg.lower() == "!test":
-        message = Message("test7", MessageType.COMMAND, channel)
-        bot.send_message(message)
