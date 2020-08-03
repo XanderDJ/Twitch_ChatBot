@@ -795,7 +795,7 @@ def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @command
 @unwrap_command_args
 def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
-    if username.lower() == "cardinal256" and msg.rstrip().lower() == "ptidelio PepeLaugh":
+    if username.lower() == "cardinal256" and msg.rstrip().lower() == "ptidelio pepelaugh":
         message = Message("@" + username + ", PogOff card you're not funny " + "PogOff" * random.randint(1, 6),
                           MessageType.SPAM, channel)
         bot.send_message(message)
