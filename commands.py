@@ -451,13 +451,15 @@ def spam(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def validate_emotes(bot: 'TwitchChat', args, msg, username, channel, send):
     global emote_dict
-    msg = cleanup(msg)
     channel = channel
     words = msg.split()
     emotes = emote_dict["all_emotes"]
     wrong_emotes = []
     status = bot.twitch_status.get_status(channel)
     for word in words:
+        if len(word) > 2 and word[0] == "\"" and word[-1] == "\"":
+            continue
+        word = cleanup(word)
         lowered_word = word.lower()
         if lowered_word in emote_dict:
             correct_emote = emote_dict.get(lowered_word)
