@@ -783,11 +783,18 @@ def deane(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             bot.send_message(message)
 
 
-
 @command
 @unwrap_command_args
 def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!auto":
         if bot.limiter.can_send(channel, "auto", 20):
-            message = Message("ludwigSpectrum red gang ludwigSpectrum ", MessageType.COMMAND, channel)
+            message = Message("Something something to be changed later", MessageType.COMMAND, channel)
             bot.send_message(message)
+
+
+@admin
+@unwrap_command_args
+def test(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if msg.lower() == "!test":
+        message = Message("test", MessageType.COMMAND, channel)
+        bot.send_message(message)
