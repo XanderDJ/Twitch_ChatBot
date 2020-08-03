@@ -59,6 +59,7 @@ class TwitchChat(object):
         self.state = self.load_state()
         self.limiter = MessageLimiter()
         self.update_checker = EventHandler(handle_pull_event, 5, self)
+        self.update_checker.start()
         self.twitch_status = TwitchStatus(channels)
         self.active = True
         self.command_thread = Thread(target=self.handle_commandline_input)
