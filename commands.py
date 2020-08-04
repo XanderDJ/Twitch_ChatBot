@@ -776,10 +776,10 @@ def deane(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "deane", 120):
             message = Message("peepoArrive", MessageType.COMMAND, channel)
             bot.send_message(message)
-            time.sleep(1)
+            time.sleep(2)
             message = Message("hi", MessageType.COMMAND, channel)
             bot.send_message(message)
-            time.sleep(1)
+            time.sleep(2)
             message = Message("ppPoof", MessageType.COMMAND, channel)
             bot.send_message(message)
 
