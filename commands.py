@@ -417,10 +417,10 @@ def joke(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def weird_jokes(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
-    if contains_all(msg, ["slime", "piss"]) \
-            or contains_all(msg, ["slime", "pee"]) \
-            or contains_all(msg, ["bus", "lud"]) \
-            or contains_all(msg, ["bus", "hit"]):
+    if contains_all(msg, [" slime ", " piss "]) \
+            or contains_all(msg, [" slime ", " pee "]) \
+            or contains_all(msg, [" bus ", " lud "]) \
+            or contains_all(msg, [" bus ", " hit "]):
         message = Message("@" + username + ", FeelsWeirdMan", MessageType.SPAM, channel)
         bot.send_message(message)
 
