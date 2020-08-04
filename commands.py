@@ -811,6 +811,6 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 def card(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg == "!card":
         if bot.limiter.can_send(channel, "card", 20, True):
-            message = Message("@" + username + ", PogOff card you're not funny " + "PogOff " * random.randint(1, 6),
+            message = Message("@Cardinal256, PogOff card you're not funny " + "PogOff " * random.randint(1, 6),
                               MessageType.COMMAND, channel)
             bot.send_message(message)
