@@ -352,7 +352,7 @@ def quote(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def iamhere(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
-    if contains_all(msg, ["who", "is", "here"]):
+    if contains_all(msg, [" who ", " is ", " here "]):
         message = Message("I am here peepoPog", MessageType.SPECIAL, channel)
         message = change_if_blacklisted(username, message, channel)
         bot.send_message(message)
