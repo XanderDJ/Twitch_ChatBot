@@ -511,6 +511,7 @@ def tyke(bot: 'TwitchChat', args, msg, username, channel, send):
                 txt = "blobDance RareChar blobDance RareChar blobDance " if parity == 0 else "RareChar blobDance RareChar blobDance RareChar "
                 message = Message(txt, MessageType.SPAM, channel)
                 bot.send_message(message)
+                time.sleep(2)
 
 
 @admin
