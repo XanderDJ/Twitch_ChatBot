@@ -798,8 +798,11 @@ def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @unwrap_command_args
 def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     msg = cleanup(msg)
-    if (username.lower() == "cardinal256"
-        or username.lower() == "lil_schleem"
+    if (username.lower() in
+        [
+            "cardinal256",
+            "lil_schleem"
+        ]
     ) and \
             (
                     contains_all(msg.rstrip().lower(), ["ptidelio", "pepelaugh"])
