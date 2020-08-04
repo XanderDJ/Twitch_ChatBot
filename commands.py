@@ -806,14 +806,3 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         message = Message("@" + username + ", PogOff card you're not funny " + "PogOff " * random.randint(1, 6),
                           MessageType.SPAM, channel)
         bot.send_message(message)
-
-
-@command
-@unwrap_command_args
-def vod(bot: 'TwitchChat', args, msg, username, channel, send: bool):
-    if contains_all(msg.lower(), ["what", "happened", "vod"]):
-        if bot.limiter.can_send(channel, "vod", 20):
-            message = Message(
-                "@" + username + ", It got nuked, maybe an address leak since people were spamming that in chat while the stream was going.",
-                MessageType.COMMAND, channel)
-            bot.send_message(message)
