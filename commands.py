@@ -791,7 +791,7 @@ def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "auto", 20):
             message = Message("Certified vod frog that misses all the best vods PepeLaugh", MessageType.COMMAND,
                               channel)
-            bot.send_message(message)
+            #bot.send_message(message)
 
 
 @command
