@@ -789,9 +789,9 @@ def deane(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!auto":
         if bot.limiter.can_send(channel, "auto", 20):
-            message = Message("Certified vod frog that misses all the best vods PepeLaugh", MessageType.COMMAND,
+            message = Message("peepoPog person with a cool command response", MessageType.COMMAND,
                               channel)
-            # bot.send_message(message)
+            bot.send_message(message)
 
 
 @command
