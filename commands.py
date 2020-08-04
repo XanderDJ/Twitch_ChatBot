@@ -791,7 +791,7 @@ def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "auto", 20):
             message = Message("Certified vod frog that misses all the best vods PepeLaugh", MessageType.COMMAND,
                               channel)
-            #bot.send_message(message)
+            # bot.send_message(message)
 
 
 @command
@@ -813,3 +813,12 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         message = Message("@" + username + ", PogOff you're not funny " + "PogOff " * random.randint(1, 6),
                           MessageType.SPAM, channel)
         bot.send_message(message)
+
+
+@returns
+@unwrap_command_args
+def tj(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if msg.lower() == "!tj":
+        if bot.limiter.can_send(channel, "tj", 20):
+            message = Message("fuck texas ludwigSpectrum (uni)", MessageType.COMMAND, channel)
+            bot.send_message(message)
