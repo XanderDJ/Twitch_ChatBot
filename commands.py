@@ -450,6 +450,8 @@ def spam(bot: 'TwitchChat', args, msg, username, channel, send):
 @command
 @unwrap_command_args
 def validate_emotes(bot: 'TwitchChat', args, msg, username, channel, send):
+    if username == bot.user:
+        return
     global emote_dict
     channel = channel
     words = msg.split()
