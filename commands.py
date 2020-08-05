@@ -835,6 +835,7 @@ def tj(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @command
 @unwrap_command_args
 def whois(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    global alts
     match = re.match(r'!whois\s(\w+)', msg.lower())
     if match:
         alt = match.group(1)
@@ -859,6 +860,7 @@ def whois(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @admin
 @unwrap_command_args
 def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    global alts
     match = re.match(r'!(addalt|namechange)\s(\w+)\s(\w+)', msg.lower())
     if match:
         alt = match.group(2)
@@ -870,3 +872,20 @@ def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             channel
         )
         bot.send_message(message)
+
+
+@admin
+@unwrap_command_args
+def delete_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    global alts
+    match = re.match(r'!delalt\s(\w+)', msg.lower())
+    if match:
+        alt = match.group(1)
+        if alt in alts:
+            alts.pop(alt)
+            message = Message(
+                "@" + username + ", pffft " + alt + " never heard of them PepeLaugh",
+                MessageType.CHAT,
+                channel
+            )
+            bot.send_message(message)
