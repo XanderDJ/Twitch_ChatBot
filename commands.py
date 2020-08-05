@@ -576,6 +576,7 @@ def tj(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "tj", 20):
             message = Message("fuck texas ludwigSpectrum (uni)", MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -601,6 +602,7 @@ def whois(bot: 'TwitchChat', args, msg, username, channel, send: bool):
                 channel
             )
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -649,6 +651,7 @@ def tyke(bot: 'TwitchChat', args, msg, username, channel, send):
                 message = Message(txt, MessageType.SPAM, channel)
                 bot.send_message(message)
                 time.sleep(2)
+        return True
 
 
 @returns
@@ -669,6 +672,7 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel, send):
             txt = lurker + " is lurking in chat right now monkaW ." if lurker is not None else "No lurkers in chat FeelsBadMan "
             message = Message(txt, MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -679,6 +683,7 @@ def aaron(bot: 'TwitchChat', args, msg, username, channel, send):
         if bot.limiter.can_send(channel, "aaron", 60, False):
             message = Message("Wizard Toad wishes you a good day =)", MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -689,6 +694,7 @@ def replay(bot: 'TwitchChat', args, msg, username, channel, send):
         if bot.limiter.can_send(channel, "replay", 60, True):
             message = Message("Green FeelsOkayMan", MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -703,6 +709,7 @@ def limit(bot: 'TwitchChat', args, msg, username, channel, send):
             if s != 0 else "@" + username + ", that command wasn't used yet"
         message = Message(txt, MessageType.COMMAND, channel)
         bot.send_message(message)
+        return True
 
 
 @returns
@@ -714,6 +721,7 @@ def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
         ignore_list.add(username)
         message = Message("@" + username + ", from now on you will be ignored PrideLion", MessageType.COMMAND, channel)
         bot.send_message(message)
+        return True
 
 
 @returns
@@ -723,6 +731,7 @@ def seal(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "seal", 20):
             message = Message("Such a brave bird PrideLion", MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -732,6 +741,7 @@ def thor(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "thor", 20):
             message = Message("Just beat it 4Head", MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -742,6 +752,7 @@ def psy(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             message = Message("@psygs daily ping or however many times people use this command PrideLion",
                               MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -751,6 +762,7 @@ def lilb(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "lilb", 20):
             message = Message(line_pickers.get("lilb").get_line(), MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -765,6 +777,7 @@ def nuggles(bot: 'TwitchChat', args, msg, username, channel, send: bool):
                 "So click the fuckin subscribe button and join the party, you’ll be glad you did! FeelsOkayMan ",
                 MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -774,6 +787,7 @@ def xray(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "xray", 20):
             message = Message("* peepoHug intensifies *", MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -789,6 +803,7 @@ def deane(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             time.sleep(2)
             message = Message("ppPoof", MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -799,6 +814,7 @@ def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             message = Message("peepoPog person with a cool command response", MessageType.COMMAND,
                               channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -810,6 +826,7 @@ def suicune(bot: 'TwitchChat', args, msg, username, channel, send):
             message = Message("bitch", MessageType.COMMAND, channel)
             message = change_if_blacklisted(username, message, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -821,6 +838,7 @@ def spam(bot: 'TwitchChat', args, msg, username, channel, send):
             message = Message("not cool peepoWTF", MessageType.COMMAND, channel)
             message = change_if_blacklisted(username, message, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -832,6 +850,7 @@ def schleem(bot: 'TwitchChat', args, msg, username, channel, send):
             message = Message("Get outta town", MessageType.COMMAND, channel)
             message = change_if_blacklisted(username, message, channel)
             bot.send_message(message)
+        return True
 
 
 @returns
@@ -843,6 +862,7 @@ def give_fact(bot: 'TwitchChat', args, msg, username, channel, send):
                           MessageType.COMMAND, channel)
         message = change_if_blacklisted(username, message, channel)
         bot.send_message(message)
+        return True
 
 
 @returns
@@ -865,6 +885,7 @@ def quote(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message("@" + username + ", " + line_pickers.get("quotes").get_line(), MessageType.COMMAND, channel)
         message = change_if_blacklisted(username, message, channel)
         bot.send_message(message)
+        return True
 
 
 @returns
@@ -878,6 +899,7 @@ def lacking(bot: 'TwitchChat', args, msg, username, channel, send):
                           MessageType.SPECIAL, channel)
         message = change_if_blacklisted(username, message, channel)
         bot.send_message(message)
+        return True
 
 
 @returns
@@ -888,6 +910,7 @@ def aniki(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message("Sleep tight PepeHands", MessageType.COMMAND, channel)
         message = change_if_blacklisted(username, message, channel)
         bot.send_message(message)
+        return True
 
 
 @returns
@@ -898,6 +921,7 @@ def pickup(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message("@" + username + ", " + line_pickers.get("pickups").get_line(), MessageType.COMMAND, channel)
         message = change_if_blacklisted(username, message, channel)
         bot.send_message(message)
+        return True
 
 
 @returns
@@ -908,6 +932,14 @@ def joke(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message("@" + username + ", " + line_pickers.get("jokes").get_line(), MessageType.COMMAND, channel)
         message = change_if_blacklisted(username, message, channel)
         bot.send_message(message)
+        return True
+
+
+@returns
+@unwrap_command_args
+def test(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg == "!test":
+        return True
 
 
 # REPEATS
