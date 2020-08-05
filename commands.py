@@ -29,7 +29,7 @@ if TYPE_CHECKING:
 # Imports of stuff I don't want on github directly
 from pings import pings
 
-# DICTS
+# LOADING STUFF
 
 ADMIN = {}
 COMMAND = {}
@@ -49,8 +49,9 @@ line_pickers = {
 }
 
 lurkers = dict()
-previous_lurker_get = time.time() - 600
+previous_lurker_ts = time.time() - 600
 ignore_list = f.load("texts/ignore.txt", set())
+alts = f.load("texts/alts.txt", dict())
 
 
 def load_emotes():
@@ -65,6 +66,7 @@ def load_emotes():
     return emotes
 
 
+temp_db = {"emotes": dict(), "mentions": []}
 emote_dict = load_emotes()
 blacklisted = f.load("texts/blacklisted.txt", [])
 
@@ -121,7 +123,6 @@ def unwrap_command_args(func):
 # COMMANDS AND HELPER FUNCTIONS
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
-temp_db = {"emotes": dict(), "mentions": []}
 
 
 @save
@@ -157,6 +158,12 @@ def save_mentions():
 def save_ignore_list():
     global ignore_list
     f.save(ignore_list, "texts/ignore.txt")
+
+
+@save
+def save_alts():
+    global alts
+    f.save(alts, "texts/alts.txt")
 
 
 @command
@@ -584,15 +591,15 @@ def part(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def lurk(bot: 'TwitchChat', args, msg, username, channel, send):
     global lurkers
-    global previous_lurker_get
+    global previous_lurker_ts
     msg = msg.lower()
     if "!lurker" in msg:
-        if len(lurkers.get(channel, [])) == 0 or time.time() - previous_lurker_get > 600:
+        if len(lurkers.get(channel, [])) == 0 or time.time() - previous_lurker_ts > 600:
             js = http.request("GET", "https://tmi.twitch.tv/group/user/" + channel + "/chatters").data.decode("UTF-8")
             chatters = json.loads(js)
             lurkers[channel] = chatters.get("chatters").get("viewers")
             lurkers[channel] = [None] if len(lurkers.get(channel)) == 0 else lurkers.get(channel)
-            previous_lurker_get = time.time()
+            previous_lurker_ts = time.time()
         if bot.limiter.can_send(channel, "lurker", 1200, True):
             lurker = random.choice(lurkers.get(channel, [None]))
             txt = lurker + " is lurking in chat right now monkaW ." if lurker is not None else "No lurkers in chat FeelsBadMan "
@@ -823,3 +830,42 @@ def tj(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         if bot.limiter.can_send(channel, "tj", 20):
             message = Message("fuck texas ludwigSpectrum (uni)", MessageType.COMMAND, channel)
             bot.send_message(message)
+
+
+@command
+@unwrap_command_args
+def whois(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    match = re.match(r'!whois\s(\w+)', msg.lower())
+    if match:
+        alt = match.group(1)
+        while alt in alts:
+            alt = alts[alt]
+        if alt == match.group(1):
+            message = Message(
+                "@" + username + ", " + alt + " is " + alt + " PrideLion",
+                MessageType.COMMAND,
+                channel
+            )
+            bot.send_message(message)
+        else:
+            message = Message(
+                "@" + username + ", " + match.group(1) + " is " + alt + " PrideLion",
+                MessageType.COMMAND,
+                channel
+            )
+            bot.send_message(message)
+
+
+@admin
+@unwrap_command_args
+def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    match = re.match(r'!addalt\s(\w+)\s(\w+)', msg.lower())
+    if match:
+        alt = match.group(1)
+        main = match.group(2)
+        alts[alt] = main
+        message = Message(
+            "@" + username + ", " + alt + " is " + main + " PepoG",
+            MessageType.CHAT,
+            channel
+        )
