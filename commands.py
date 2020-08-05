@@ -910,15 +910,6 @@ def joke(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
 
 
-@returns
-@unwrap_command_args
-def test(bot: 'TwitchChat', args, msg, username, channel, send):
-    msg = msg.lower()
-    if msg == "!test":
-        message = Message("test", MessageType.COMMAND, channel)
-        bot.send_message(message)
-
-
 # REPEATS
 
 @repeat(5)
