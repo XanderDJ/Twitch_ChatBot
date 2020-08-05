@@ -654,7 +654,7 @@ def correct(bot: 'TwitchChat', args, msg, username, channel, send):
     return False
 
 
-@admin
+@command
 @unwrap_command_args
 def limit(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
