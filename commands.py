@@ -660,7 +660,7 @@ def limit(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     match = re.match(r'!(limit|cooldown) (\w+)', msg)
     if match:
-        cmd = match.group(1)
+        cmd = match.group(2)
         s = bot.limiter.seconds_since_limit(channel, cmd)
         txt = "@" + username + ", " + str(s) + " seconds since command !" + cmd + " was used." \
             if s != 0 else "@" + username + ", that command wasn't used yet"
