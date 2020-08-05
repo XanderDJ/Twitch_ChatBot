@@ -939,6 +939,8 @@ def joke(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def test(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg == "!test":
+        message = Message("test", MessageType.COMMAND, channel)
+        bot.send_message(message)
         return True
 
 
