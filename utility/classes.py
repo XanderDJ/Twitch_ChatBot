@@ -194,7 +194,6 @@ class EventHandler:
 
     def stop(self):
         self.alive = False
-        self.join()
 
     def restart(self):
         if not self.alive:
