@@ -910,6 +910,15 @@ def joke(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
 
 
+@returns
+@unwrap_command_args
+def test(bot: 'TwitchChat', args, msg, username, channel, send):
+    msg = msg.lower()
+    if msg == "!test":
+        message = Message("test", MessageType.COMMAND, channel)
+        bot.send_message(message)
+
+
 # REPEATS
 
 @repeat(5)
@@ -926,6 +935,7 @@ def handle_pull_event(state: dict, bot: 'TwitchChat'):
         chlm_time = state.get("chlm")
         if chm_time > chlm_time:
             # chat.py was modified so program has to shutdown
+            bot.save()
             bot.stop_all()
         else:
             # chat.py wasn't modified so it's safe to reload commands.py
@@ -945,7 +955,8 @@ def check_for_title_change(state: dict, bot: 'TwitchChat'):
                 MessageType.CHAT,
                 channel
             )
-            bot.send_message(message)
+            if old_title != "":
+                bot.send_message(message)
 
 
 def get_id(pool_manager, name):
