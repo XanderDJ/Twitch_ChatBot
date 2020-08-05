@@ -29,7 +29,7 @@ class TwitchChat(object):
         self.saves = commands.SAVE
         self.state = self.load_state()
         self.limiter = MessageLimiter()
-        self.repeating_tasks = [EventHandler(func, loop_time, self) for func_name, (func, loop_time) in commands.REPEAT]
+        self.repeating_tasks = [EventHandler(func, loop_time, self) for func_name, (func, loop_time) in commands.REPEAT.items()]
         self.twitch_status = TwitchStatus(channels)
         self.active = True
         self.command_thread = Thread(target=self.handle_commandline_input)
@@ -67,7 +67,7 @@ class TwitchChat(object):
         self.saves = commands.SAVE
         for repeating_task in self.repeating_tasks:
             repeating_task.stop()
-        self.repeating_tasks = [EventHandler(func, loop_time, self) for func_name, (func, loop_time) in commands.REPEAT]
+        self.repeating_tasks = [EventHandler(func, loop_time, self) for func_name, (func, loop_time) in commands.REPEAT.items()]
         for repeating_task in self.repeating_tasks:
             repeating_task.start()
 
