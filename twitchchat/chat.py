@@ -8,28 +8,8 @@ from datetime import datetime, timedelta
 from threading import Thread
 from queue import Queue
 import importlib
-import os
 
 logger = logging.getLogger(name="tmi")
-
-
-def handle_pull_event(state: dict, bot: 'TwitchChat'):
-    cm_time = os.stat("commands.py").st_mtime
-    state["clm"] = state.get("clm", cm_time)
-    clm_time = state.get("clm")
-    if cm_time > clm_time:
-        state["clm"] = cm_time
-        # Commands.py has been modified due to a git pull
-        # Check if twitchchat.chat.py has been modified, if so then bot should stop and restart manually
-        chm_time = os.stat("twitchchat/chat.py").st_mtime
-        state["chlm"] = state.get("chlm", chm_time)
-        chlm_time = state.get("chlm")
-        if chm_time > chlm_time:
-            # chat.py was modified so program has to shutdown
-            bot.stop_all()
-        else:
-            # chat.py wasn't modified so it's safe to reload commands.py
-            bot.reload()
 
 
 class TwitchChat(object):
@@ -49,8 +29,7 @@ class TwitchChat(object):
         self.saves = commands.SAVE
         self.state = self.load_state()
         self.limiter = MessageLimiter()
-        self.update_checker = EventHandler(handle_pull_event, 5, self)
-        self.update_checker.start()
+        self.repeating_tasks = [EventHandler(func, loop_time, self) for func_name, (func, loop_time) in commands.REPEAT]
         self.twitch_status = TwitchStatus(channels)
         self.active = True
         self.command_thread = Thread(target=self.handle_commandline_input)
@@ -86,10 +65,17 @@ class TwitchChat(object):
         self.notice = commands.NOTICE
         self.returns = commands.RETURNS
         self.saves = commands.SAVE
+        for repeating_task in self.repeating_tasks:
+            repeating_task.stop()
+        self.repeating_tasks = [EventHandler(func, loop_time, self) for func_name, (func, loop_time) in commands.REPEAT]
+        for repeating_task in self.repeating_tasks:
+            repeating_task.start()
 
     def start(self):
         for handler in self.irc_handlers:
             handler.start()
+        for repeating_task in self.repeating_tasks:
+            repeating_task.start()
 
     def join(self):
         for handler in self.irc_handlers:
