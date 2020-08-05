@@ -859,10 +859,10 @@ def whois(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @admin
 @unwrap_command_args
 def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
-    match = re.match(r'!addalt\s(\w+)\s(\w+)', msg.lower())
+    match = re.match(r'!(addalt|namechange)\s(\w+)\s(\w+)', msg.lower())
     if match:
-        alt = match.group(1)
-        main = match.group(2)
+        alt = match.group(2)
+        main = match.group(3)
         alts[alt] = main
         message = Message(
             "@" + username + ", " + alt + " is " + main + " PepoG",
