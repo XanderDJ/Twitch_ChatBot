@@ -869,3 +869,4 @@ def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             MessageType.CHAT,
             channel
         )
+        bot.send_message(message)
