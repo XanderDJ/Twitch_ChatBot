@@ -658,7 +658,7 @@ def correct(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def limit(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
-    match = re.match(r'!limit (\w+)', msg)
+    match = re.match(r'!(limit|cooldown) (\w+)', msg)
     if match:
         cmd = match.group(1)
         s = bot.limiter.seconds_since_limit(channel, cmd)
