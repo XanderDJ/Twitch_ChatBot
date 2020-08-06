@@ -947,6 +947,45 @@ def joke(bot: 'TwitchChat', args, msg, username, channel, send):
         return True
 
 
+@returns
+@unwrap_command_args
+def pyramid(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r'!pyramid\s(\d+)\s(.+)', msg)
+    if match:
+        layers = match.group(1)
+        try:
+            layers = int(layers)
+        except ValueError:
+            message = Message(
+                "@" + username + ", is " + layers + " a natural number huh?! is it?! I didn't think so peepoWTF",
+                MessageType.COMMAND, channel)
+            bot.send_message(message)
+            return True
+        if layers > 7:
+            message = Message("@" + username + ", you're a greedy one ain'tcha peepoWTF", MessageType.COMMAND, channel)
+            bot.send_message(message)
+            return True
+        elif layers <= 0:
+            message = Message("@" + username + ", wtf am I supposed to do with a non positive number peepoWTF",
+                              MessageType.COMMAND, channel)
+            bot.send_message(message)
+            return True
+        else:
+            pyramid_emotes = match.group(2).split()
+            correct_emotes = emote_dict["all_emotes"]
+            for emote in pyramid_emotes:
+                if emote not in correct_emotes:
+                    return False
+            if bot.limiter.can_send(channel, "pyramid", 300):
+                pyramid = word_pyramid(layers, pyramid_emotes)
+                for pyramid_msg in pyramid:
+                    message = Message(pyramid_msg, MessageType.SPAM, channel)
+                    bot.send_message(message)
+                    time.sleep(1.5)
+                return True
+            return True
+
+
 # REPEATS and REPEATS_SETUP
 
 @repeat(5)

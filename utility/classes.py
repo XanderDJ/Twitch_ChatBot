@@ -215,3 +215,20 @@ class TimedTask:
             else:
                 self.func(self.state, self.manager)
             time.sleep(self.loop_time)
+
+
+class CircularArray:
+    def __init__(self, positionable_iterable):
+        self.array = positionable_iterable
+        self.len = len(positionable_iterable)
+        self.pos = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.pos == self.len:
+            self.pos = 0
+        item = self.array[self.pos]
+        self.pos += 1
+        return item

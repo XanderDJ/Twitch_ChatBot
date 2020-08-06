@@ -1,5 +1,5 @@
 import string
-
+import utility.classes as c
 
 def contains_word(msg, words):
     for word in words:
@@ -57,3 +57,15 @@ def is_anagram(w1: str, w2: str):
 
 def cleanup(word: str):
     return word.translate(str.maketrans('', '', string.punctuation.replace("'", "")))
+
+
+def word_pyramid(count, emote_list):
+    iterable = iter(c.CircularArray(emote_list))
+    pyramid = []
+    text = ""
+    for i in range(count):
+        text = next(iterable) + " " + text
+        pyramid.append(text)
+    for i in range(len(pyramid) - 2, -1, -1):
+        pyramid.append(pyramid[i])
+    return pyramid
