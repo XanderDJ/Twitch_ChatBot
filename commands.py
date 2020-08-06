@@ -961,7 +961,7 @@ def pyramid(bot: 'TwitchChat', args, msg, username, channel, send):
                 MessageType.COMMAND, channel)
             bot.send_message(message)
             return True
-        if layers > 3:
+        if layers > 3 and username != bot.admin:
             message = Message("@" + username + ", you're a greedy one ain'tcha peepoWTF", MessageType.COMMAND, channel)
             bot.send_message(message)
             return True
