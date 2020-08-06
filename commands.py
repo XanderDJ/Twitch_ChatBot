@@ -39,6 +39,7 @@ NOTICE = {}
 RETURNS = {}
 SAVE = {}
 REPEAT = {}
+REPEAT_SETUP = {}
 line_pickers = {
     "greetings": RandomLinePicker("texts/hello.txt"),
     "8ball": RandomLinePicker("texts/8ball.txt"),
@@ -112,6 +113,17 @@ def repeat(seconds):
         return func
 
     return repeat_inner
+
+
+def repeat_setup(func_name):
+    if func_name not in REPEAT:
+        return
+
+    def setup_inner(func):
+        REPEAT_SETUP[func_name] = func
+        return func
+
+    return setup_inner
 
 
 def unwrap_command_args(func):
@@ -935,7 +947,7 @@ def joke(bot: 'TwitchChat', args, msg, username, channel, send):
         return True
 
 
-# REPEATS
+# REPEATS and REPEATS_SETUP
 
 @repeat(5)
 def handle_pull_event(state: dict, bot: 'TwitchChat'):
@@ -966,7 +978,13 @@ def check_for_title_change(state: dict, bot: 'TwitchChat'):
     channels = bot.channels
     for channel in channels:
         old_title = state.get(channel, "")
-        current_title = get_title(http, channel)
+        if channel not in state["ids"]:
+            user_id = get_id(http, channel)
+            state["ids"][channel] = user_id
+            f.save(state["ids"], "texts/streamer_ids.txt", True)
+        else:
+            user_id = state["ids"][channel]
+        current_title = get_title(http, channel, user_id)
         if old_title != current_title:
             state[channel] = current_title
             message = Message(
@@ -976,6 +994,11 @@ def check_for_title_change(state: dict, bot: 'TwitchChat'):
             )
             if old_title != "":
                 bot.send_message(message)
+
+
+@repeat_setup(check_for_title_change.__name__)
+def check_for_title_change_setup(state: dict, bot: 'TwitchChat'):
+    state["ids"] = f.load("texts/streamer_ids.txt", {})
 
 
 def get_id(pool_manager, name):
@@ -992,8 +1015,7 @@ def get_id(pool_manager, name):
     return data.get("users")[0].get("_id")
 
 
-def get_title(pool_manager, channel):
-    id = get_id(pool_manager, channel)
+def get_title(pool_manager, channel, user_id):
     headers = {
         "Client-id": client_id,
         "Accept": "application/vnd.twitchtv.v5+json"
@@ -1001,6 +1023,6 @@ def get_title(pool_manager, channel):
     fields = {
         "stream_type": "all"
     }
-    base = "https://api.twitch.tv/kraken/channels/" + id
+    base = "https://api.twitch.tv/kraken/channels/" + user_id
     response = pool_manager.request("GET", base, headers=headers, fields=fields).data.decode("UTF-8")
     return json.loads(response).get("status")

@@ -175,7 +175,7 @@ class TwitchStatus:
             time.sleep(15)
 
 
-class EventHandler:
+class TimedTask:
     def __init__(self, func, loop_time, manager=None):
         self.func = func
         self.loop_time = loop_time
@@ -201,6 +201,12 @@ class EventHandler:
             self.thread = Thread(target=self.run)
             self.thread.daemon = True
             self.thread.start()
+
+    def setup(self, func):
+        if self.manager is None:
+            func(self.state)
+        else:
+            func(self.state, self.manager)
 
     def run(self):
         while self.alive:
