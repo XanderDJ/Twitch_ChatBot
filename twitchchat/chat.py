@@ -68,7 +68,7 @@ class TwitchChat(object):
         self.notice = commands.NOTICE
         self.returns = commands.RETURNS
         self.saves = commands.SAVE
-        for repeating_task in self.repeating_tasks:
+        for repeating_task in self.repeating_tasks.values():
             repeating_task.stop()
         self.repeating_tasks = {func_name: TimedTask(func, loop_time, self) for func_name, (func, loop_time) in
                                 commands.REPEAT.items()}
