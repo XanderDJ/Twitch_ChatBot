@@ -976,6 +976,10 @@ def pyramid(bot: 'TwitchChat', args, msg, username, channel, send):
             for emote in pyramid_emotes:
                 if emote not in correct_emotes:
                     return False
+                if emote == "WeirdChamp":
+                    message = Message("@" + username + " can't fool me PepeLaugh", MessageType.COMMAND, channel)
+                    bot.send_message(message)
+                    return True
             if bot.limiter.can_send(channel, "pyramid", 300):
                 pyramid = word_pyramid(layers, pyramid_emotes)
                 for pyramid_msg in pyramid:
