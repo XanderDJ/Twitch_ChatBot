@@ -950,7 +950,7 @@ def joke(bot: 'TwitchChat', args, msg, username, channel, send):
 @returns
 @unwrap_command_args
 def pyramid(bot: 'TwitchChat', args, msg, username, channel, send):
-    match = re.match(r'!pyramid\s(\.+)\s(.+)', msg)
+    match = re.match(r'!pyramid\s(.+)\s(.+)', msg)
     if match:
         layers = match.group(1)
         try:
