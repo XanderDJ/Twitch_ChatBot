@@ -21,6 +21,7 @@ import time
 import datetime
 import pymongo
 import json
+from threading import Lock
 
 # THIS IS TO AVOID CYCLICAL IMPORTS BUT STILL ALLOWS TYPE CHECKING
 from typing import TYPE_CHECKING
@@ -147,10 +148,14 @@ def unwrap_command_args(func):
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 
+# lock
+save_lock = Lock()
+
 
 @save
 def save_emotes():
-    global temp_db, client
+    global temp_db, client, save_lock
+    save_lock.acquire()
     for channel, collections in temp_db.get("emotes").items():
         db = client[channel]
         global_coll = db["global"]
@@ -165,28 +170,35 @@ def save_emotes():
                     wrong_emotes_to_insert.append(item)
                 col.insert_many(wrong_emotes_to_insert)
     temp_db["emotes"] = dict()
+    save_lock.release()
 
 
 @save
 def save_mentions():
-    global temp_db, client
+    global temp_db, client, save_lock
+    save_lock.acquire()
     db = client["twitch"]
     col = db["twitch"]
     if len(temp_db["mentions"]) != 0:
         col.insert_many(temp_db.get("mentions"))
     temp_db["mentions"] = []
+    save_lock.release()
 
 
 @save
 def save_ignore_list():
-    global ignore_list
+    global ignore_list, save_lock
+    save_lock.acquire()
     f.save(ignore_list, "texts/ignore.txt")
+    save_lock.release()
 
 
 @save
 def save_alts():
-    global alts
+    global alts, save_lock
+    save_lock.acquire()
     f.save(alts, "texts/alts.txt")
+    save_lock.release()
 
 
 # ADMIN
@@ -199,35 +211,25 @@ def toggle(bot: 'TwitchChat', args, msg, username, channel, send):
     if match:
         ans = match.group(1)
         if ans == "on":
-            for tipe in MessageType:
-                if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
-                    bot.state[channel][tipe.name] = str(True)
-            message = Message("@" + username + " bot is now toggled on.", MessageType.CHAT, channel)
+            bot.toggle_channel(channel, ToggleType.ON)
+            message = Message("Hey guys PrideLion !", MessageType.CHAT, channel)
             bot.send_message(message)
         elif ans == "off":
-            for tipe in MessageType:
-                if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
-                    bot.state[channel][tipe.name] = str(False)
-            message = Message("@" + username + " bot is now toggled off.", MessageType.CHAT, channel)
+            bot.toggle_channel(channel, ToggleType.OFF)
+            message = Message("Bye guys PrideLion !", MessageType.CHAT, channel)
             bot.send_message(message)
         elif ans == "spam":
-            bot.state[channel][MessageType.SPAM.name] = str(
-                not convert(bot.state.get(channel).get(MessageType.SPAM.name, "True")))
+            bot.toggle_channel(channel, ToggleType.SPAM)
         elif ans == "command":
-            bot.state[channel][MessageType.COMMAND.name] = str(
-                not convert(bot.state.get(channel).get(MessageType.COMMAND.name, "True")))
+            bot.toggle_channel(channel, ToggleType.COMMAND)
         elif ans == "bld":
-            bot.state[channel][MessageType.BLACKLISTED.name] = str(
-                not convert(bot.state.get(channel).get(MessageType.BLACKLISTED.name, "True")))
+            bot.toggle_channel(channel, ToggleType.BLACKLISTED)
         elif ans == "helpful":
-            bot.state[channel][MessageType.HELPFUL.name] = str(
-                not convert(bot.state.get(channel).get(MessageType.HELPFUL.name, "True")))
+            bot.toggle_channel(channel, ToggleType.HELPFUL)
         elif ans == "special":
-            bot.state[channel][MessageType.SPECIAL.name] = str(
-                not convert(bot.state.get(channel).get(MessageType.SPECIAL.name, "True")))
+            bot.toggle_channel(channel, ToggleType.SPECIAL)
         elif ans == "sub":
-            bot.state[channel][MessageType.SUBSCRIBER.name] = str(
-                not convert(bot.state.get(channel).get(MessageType.SUBSCRIBER.name, "True")))
+            bot.toggle_channel(channel, ToggleType.SUBSCRIBER)
         else:
             return
 
@@ -268,12 +270,14 @@ def ping(bot: 'TwitchChat', args, msg, username, channel, send):
 @admin
 @unwrap_command_args
 def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
-    global alts
+    global alts, save_lock
     match = re.match(r'!(addalt|namechange)\s(\w+)\s(\w+)', msg.lower())
     if match:
         alt = match.group(2)
         main = match.group(3)
+        save_lock.acquire()
         alts[alt] = main
+        save_lock.release()
         message = Message(
             "@" + username + ", " + alt + " is " + main + " PepoG",
             MessageType.CHAT,
@@ -285,12 +289,14 @@ def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @admin
 @unwrap_command_args
 def delete_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
-    global alts
+    global alts, save_lock
     match = re.match(r'!delalt\s(\w+)', msg.lower())
     if match:
         alt = match.group(1)
         if alt in alts:
+            save_lock.acquire()
             alts.pop(alt)
+            save_lock.release()
             message = Message(
                 "@" + username + ", pffft " + alt + " never heard of them PepeLaugh",
                 MessageType.CHAT,
@@ -304,7 +310,7 @@ def delete_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @command
 @unwrap_command_args
 def update_mentions(bot: 'TwitchChat', args, msg, username, channel, send):
-    global temp_db
+    global temp_db, save_lock
     if contains_word(msg.lower(), pings):
         doc = {
             "user": username,
@@ -312,8 +318,10 @@ def update_mentions(bot: 'TwitchChat', args, msg, username, channel, send):
             "channel": channel,
             "timestamp": datetime.datetime.utcnow()
         }
+        save_lock.acquire()
         mentions = temp_db["mentions"]
         mentions.append(doc)
+        save_lock.release()
 
 
 http = urllib3.PoolManager()
@@ -473,7 +481,8 @@ def validate_emote(emote, emotes):
 
 
 def update_emotes(channel: str, wrong_emote: str, correct_emote: str, activity: str) -> None:
-    global temp_db
+    global temp_db, save_lock
+    save_lock.acquire()
     temp_db["emotes"][channel] = temp_db.get("emotes").get(channel, dict())
     channel_dict = temp_db.get("emotes").get(channel)
     channel_dict[correct_emote] = channel_dict.get(correct_emote, dict())
@@ -481,6 +490,7 @@ def update_emotes(channel: str, wrong_emote: str, correct_emote: str, activity: 
     count = emote_dict.get((wrong_emote, activity), 0)
     emote_dict[(wrong_emote, activity)] = count + 1
     channel_dict["count"] = channel_dict.get("count", 0) + 1
+    save_lock.release()
 
 
 @command
@@ -1070,3 +1080,11 @@ def get_title(pool_manager, channel, user_id):
     base = "https://api.twitch.tv/kraken/channels/" + user_id
     response = pool_manager.request("GET", base, headers=headers, fields=fields).data.decode("UTF-8")
     return json.loads(response).get("status")
+
+
+@repeat(5)
+def toggle_if_live(state, bot: 'TwitchChat'):
+    for channel in bot.channels:
+        live = bot.twitch_status.get_status(channel)["live"]
+        if live:
+            bot.toggle_channel(channel, ToggleType.OFF)

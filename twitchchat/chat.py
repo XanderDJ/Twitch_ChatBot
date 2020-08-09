@@ -184,9 +184,8 @@ class TwitchChat(object):
     def join_twitch_channel(self, channel: str):
         self.state[channel] = self.state.get(channel, dict())
         # Turn bot off when joining a channel (except for functional and chat messages.
-        for tipe in MessageType:
-            if tipe != MessageType.FUNCTIONAL and tipe != MessageType.CHAT:
-                self.state[channel][tipe.name] = "True"
+        if len(self.state[channel]) == 0:
+            self.toggle_channel(channel, ToggleType.ON)
         self.logger.info('Joining channel {0}'.format(channel))
         channels = self.channel_servers.get('irc.chat.twitch.tv:6667').get("channel_set")
         if channel not in channels:
@@ -204,6 +203,18 @@ class TwitchChat(object):
         updated_channels = [chan for chan in channels if chan != channel]
         self.channel_servers['irc.chat.twitch.tv:6667']['channel_set'] = updated_channels
         self.channels = updated_channels
+
+    def toggle_channel(self, channel, toggle_type: ToggleType):
+        if toggle_type == ToggleType.ON:
+            for tipe in ToggleType:
+                if tipe.value > 2:
+                    self.state[channel][tipe.name] = "True"
+        elif toggle_type == ToggleType.OFF:
+            for tipe in ToggleType:
+                if tipe.value > 2:
+                    self.state[channel][tipe.name] = "False"
+        else:
+            self.state[channel][toggle_type.name] = str(not convert(self.state.get(channel).get(toggle_type.name)))
 
     def handle_message(self, irc_message, client):
         """Handle incoming IRC messages"""

@@ -1,24 +1,40 @@
 import random
-from enum import Enum
+from enum import Enum, auto
 import time
 import urllib3
 from threading import Thread
 import json
 from credentials.api_credentials import client_id, secret
 
+TOGGLEABLE = 3
+
 
 class MessageType(Enum):
-    FUNCTIONAL = 1
-    COMMAND = 2
-    SPAM = 3
-    HELPFUL = 4
-    SPECIAL = 5
-    SUBSCRIBER = 6
-    CHAT = 7
-    BLACKLISTED = 8
+    FUNCTIONAL = auto()
+    CHAT = auto()
+    COMMAND = auto()
+    SPAM = auto()
+    HELPFUL = auto()
+    SPECIAL = auto()
+    SUBSCRIBER = auto()
+    BLACKLISTED = auto()
 
     def __str__(self):
         return self.name
+
+
+class ToggleType(Enum):
+    ON = auto()
+    OFF = auto()
+    COMMAND = auto()
+    SPAM = auto()
+    HELPFUL = auto()
+    SPECIAL = auto()
+    SUBSCRIBER = auto()
+    BLACKLISTED = auto()
+
+    def can_toggle(self, tipe):
+        return tipe.value >= TOGGLEABLE
 
 
 class Message:

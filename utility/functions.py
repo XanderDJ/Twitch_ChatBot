@@ -1,6 +1,7 @@
 import string
 import utility.classes as c
 
+
 def contains_word(msg, words):
     for word in words:
         if word in " " + msg + " ":
