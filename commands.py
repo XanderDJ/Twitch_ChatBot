@@ -1086,6 +1086,13 @@ def get_title(pool_manager, channel, user_id):
 def toggle_if_live(state, bot: 'TwitchChat'):
     for channel in bot.channels:
         live = bot.twitch_status.get_status(channel)["live"]
-        if live:
+        if live and live != state[channel]:
+            state[channel] = live
             bot.logger.info(channel + " went live toggling bot off")
             bot.toggle_channel(channel, ToggleType.OFF)
+
+
+@repeat_setup(toggle_if_live.__name__)
+def toggle_if_live(state, bot: 'TwitchChat'):
+    for channel in bot.channels:
+        state[channel] = bot.twitch_status.get_status(channel)["live"]
