@@ -1087,4 +1087,5 @@ def toggle_if_live(state, bot: 'TwitchChat'):
     for channel in bot.channels:
         live = bot.twitch_status.get_status(channel)["live"]
         if live:
+            bot.logger.info(channel + " went live toggling bot off")
             bot.toggle_channel(channel, ToggleType.OFF)
