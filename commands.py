@@ -197,7 +197,7 @@ def save_ignore_list():
     global ignore_list
     ignore_list.access(lambda lst, kwargs: f.save(lst, "texts/ignore.txt"))
     # clear buffer
-    ignore_list.buffered_write(append_to_list)
+    ignore_list.buffered_write(add_to_container)
     ignore_list.buffered_write(delete_from_list)
 
 
@@ -503,7 +503,7 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             "cardinal256",
             "lil_schleem"
         ]
-    ) and \
+        ) and \
             (
                     contains_all(msg.rstrip().lower(), ["ptidelio", "pepelaugh"])
                     or contains_all(msg.rstrip().lower(), ["ptideiio", "pepelaugh"])
@@ -577,7 +577,7 @@ def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if msg == "!ignore me":
         if not ignore_list.access(contains, elem=username):
-            ignore_list.buffered_write(append_to_list, elem=username)
+            ignore_list.buffered_write(add_to_container, elem=username)
             message = Message("@" + username + ", from now on you will be ignored PrideLion", MessageType.COMMAND,
                               channel)
             bot.send_message(message)

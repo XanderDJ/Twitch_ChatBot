@@ -18,9 +18,15 @@ def delete_from_list(lst, kwargs):
         lst.remove(kwargs.get("elem"))
 
 
-def append_to_list(lst, kwargs):
+def add_to_container(container, kwargs):
     if "elem" in kwargs:
-        lst.append(kwargs.get("elem"))
+        elem = kwargs.get("elem")
+        if isinstance(container, list):
+            container.append(elem)
+        elif isinstance(container, set):
+            container.add(elem)
+        else:
+            pass
 
 
 def contains(container, kwargs):
