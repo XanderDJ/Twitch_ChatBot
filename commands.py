@@ -755,7 +755,7 @@ def replay(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!replay"]):
         if bot.limiter.can_send(channel, "replay", 60, True):
-            message = Message("Green FeelsOkayMan", MessageType.COMMAND, channel)
+            message = Message("PogWomen hater", MessageType.COMMAND, channel)
             bot.send_message(message)
         return True
 
