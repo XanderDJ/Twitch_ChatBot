@@ -6,6 +6,7 @@ def save(obj, fp: str, pretty=True):
         print(e)
     else:
         txt = to_pretty_txt(obj) if pretty else to_txt(obj)
+        print(txt)
         fh = open(fp, "w+")
         fh.write(txt)
         fh.flush()
@@ -76,7 +77,7 @@ def to_pretty_txt(obj):
     elif isinstance(obj, set):
         items = iterable_to_strings(obj, True)
         txt += "{[\n"
-        txt += ",\b".join(items)
+        txt += ",\n".join(items)
         txt += "\n]}"
         return txt
     elif isinstance(obj, dict):
