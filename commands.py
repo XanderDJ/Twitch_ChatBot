@@ -346,6 +346,7 @@ def english_dictionary():
     english_dict.add("png")
     english_dict.add("PNG")
     english_dict.add("ppl")
+    english_dict.add("nvm")
     return english_dict
 
 
