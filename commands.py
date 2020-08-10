@@ -1039,7 +1039,9 @@ def color(bot: 'TwitchChat', args, msg, username, channel, send):
         user = match.group(2)
         if colors.access(contains, elem=user):
             color = colors.access(get_val, key=user)
-            message = Message("@" + username + ", the last hex/color of " + user + " seen is " + color,
+            color_name = get_color_name(color, http)
+            clarification = " which is " + color_name if len(color_name) != 0 else ""
+            message = Message("@" + username + ", the last hex/color of " + user + " seen is " + color + clarification,
                               MessageType.COMMAND, channel)
             bot.send_message(message)
         else:
@@ -1048,6 +1050,18 @@ def color(bot: 'TwitchChat', args, msg, username, channel, send):
             bot.send_message(message)
         return True
     return False
+
+
+def get_color_name(hex_code: str, pm: urllib3.PoolManager):
+    color_code = hex_code[1:]
+    base = "https://www.color-hex.com/color/" + color_code.lower()
+    response = pm.request("GET", base).data.decode("UTF-8")
+    iteration = re.finditer(r'<title>' + hex_code.lower() + r' Color Hex (.+)</title>', response)
+    try:
+        first = next(iteration)
+        return first.group(1)
+    except StopIteration:
+        return ""
 
 
 # REPEATS and REPEATS_SETUP
