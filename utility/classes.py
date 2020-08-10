@@ -2,7 +2,7 @@ import random
 from enum import Enum, auto
 import time
 import urllib3
-from threading import Thread
+from threading import Thread, Lock
 import json
 from credentials.api_credentials import client_id, secret
 
@@ -248,3 +248,33 @@ class CircularArray:
         item = self.array[self.pos]
         self.pos += 1
         return item
+
+
+class LockedData:
+    def __init__(self, obj):
+        self.data = obj
+        self.lock = Lock()
+        self.buffer_dict = dict()
+
+    def read(self, func, **kwargs):
+        self.lock.acquire()
+        func(self.data, kwargs)
+        self.lock.release()
+
+    def write(self, func, **kwargs):
+        self.lock.acquire()
+        func(self.data, kwargs)
+        self.lock.release()
+
+    def buffered_write(self, func, **kwargs):
+        locked = self.lock.acquire(False)
+        self.buffer_dict[func.__name__] = self.buffer_dict.get(func.__name__, [])
+        if locked:
+            if len(self.buffer_dict.get(func.__name__)) != 0:
+                for kwarg in self.buffer_dict.get(func.__name__):
+                    func(self.data, kwarg)
+                self.buffer_dict[func.__name__] = []
+            func(self.data, kwargs)
+            self.lock.release()
+        else:
+            self.buffer_dict.get(func.__name__).append(kwargs)

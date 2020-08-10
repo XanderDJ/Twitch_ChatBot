@@ -57,7 +57,7 @@ def is_anagram(w1: str, w2: str):
 
 
 def cleanup(word: str):
-    return word.translate(str.maketrans('', '', string.punctuation.replace("'", "")))
+    return word.translate(str.maketrans('', '', string.punctuation.replace("'", "") + "”"))
 
 
 def word_pyramid(count, emote_list):
