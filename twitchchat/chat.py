@@ -29,12 +29,12 @@ class TwitchChat(object):
         self.saves = commands.SAVE
         self.state = self.load_state()
         self.limiter = MessageLimiter()
+        self.twitch_status = TwitchStatus(channels)
+        self.active = True
         self.repeating_tasks = {func_name: TimedTask(func, loop_time, self) for func_name, (func, loop_time) in
                                 commands.REPEAT.items()}
         for func_name, setup_func in commands.REPEAT_SETUP.items():
             self.repeating_tasks.get(func_name).setup(setup_func)
-        self.twitch_status = TwitchStatus(channels)
-        self.active = True
         self.command_thread = Thread(target=self.handle_commandline_input)
         self.command_thread.daemon = True
         self.command_thread.start()
