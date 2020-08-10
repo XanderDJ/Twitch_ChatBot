@@ -57,6 +57,7 @@ lurkers = dict()
 previous_lurker_ts = time.time() - 600
 ignore_list = LockedData(f.load("texts/ignore.txt", set()))
 alts = LockedData(f.load("texts/alts.txt", dict()))
+colors = LockedData(f.load("texts/colors_users.txt", dict()))
 
 
 def load_emotes():
@@ -207,6 +208,14 @@ def save_alts():
     alts.access(lambda alts_set, kwargs: f.save(alts_set, "texts/alts.txt"))
     # clear buffer
     alts.buffered_write(write_to_dict)
+
+
+@save
+def save_colors():
+    global colors
+    colors.access(lambda colors_dict, kwargs: f.save(colors_dict, "texts/colors_users.txt"))
+    # clear buffer
+    colors.buffered_write(write_to_dict)
 
 
 # ADMIN
@@ -503,7 +512,7 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             "cardinal256",
             "lil_schleem"
         ]
-        ) and \
+    ) and \
             (
                     contains_all(msg.rstrip().lower(), ["ptidelio", "pepelaugh"])
                     or contains_all(msg.rstrip().lower(), ["ptideiio", "pepelaugh"])
@@ -572,7 +581,18 @@ def subscriber_type(months):
 
 @returns
 @unwrap_command_args
+def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
+    color = args['color']
+    color = color if len(color) != 0 else "#808080"
+    if not colors.access(contains, key=username):
+        colors.buffered_write(write_to_dict, key=username, val=color)
+    return False
+
+
+@returns
+@unwrap_command_args
 def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
+    print(args)
     global ignore_list
     msg = msg.lower()
     if msg == "!ignore me":
@@ -1008,7 +1028,27 @@ def pyramid(bot: 'TwitchChat', args, msg, username, channel, send):
                     time.sleep(1.5)
                 return True
             return True
-        return False
+    return False
+
+
+@returns
+@unwrap_command_args
+def color(bot: 'TwitchChat', args, msg, username, channel, send):
+    msg = msg.lower()
+    match = re.match(r'!(hex|color)\s(\w+)', msg)
+    if match:
+        user = match.group(2)
+        if colors.access(contains, elem=user):
+            color = colors.access(get_val, key=user)
+            message = Message("@" + username + ", the last hex/color of " + user + " seen is " + color,
+                              MessageType.COMMAND, channel)
+            bot.send_message(message)
+        else:
+            message = Message("@" + username + ", I have never seen this person type in the chat O.o",
+                              MessageType.COMMAND, channel)
+            bot.send_message(message)
+        return True
+    return False
 
 
 # REPEATS and REPEATS_SETUP
