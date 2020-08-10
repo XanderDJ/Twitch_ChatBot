@@ -55,8 +55,8 @@ line_pickers = {
 
 lurkers = dict()
 previous_lurker_ts = time.time() - 600
-ignore_list = f.load("texts/ignore.txt", set())
-alts = f.load("texts/alts.txt", dict())
+ignore_list = LockedData(f.load("texts/ignore.txt", set()))
+alts = LockedData(f.load("texts/alts.txt", dict()))
 
 
 def load_emotes():
@@ -71,7 +71,7 @@ def load_emotes():
     return emotes
 
 
-temp_db = {"emotes": dict(), "mentions": []}
+db = LockedData({"emotes": dict(), "mentions": []})
 emote_dict = load_emotes()
 blacklisted = f.load("texts/blacklisted.txt", [])
 
@@ -148,57 +148,65 @@ def unwrap_command_args(func):
 
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 
-# lock
-save_lock = Lock()
-
 
 @save
 def save_emotes():
-    global temp_db, client, save_lock
-    save_lock.acquire()
-    for channel, collections in temp_db.get("emotes").items():
-        db = client[channel]
-        global_coll = db["global"]
-        global_coll.insert_one({"count": collections.get("count"), "timestamp": datetime.datetime.utcnow()})
-        for emote, wrong_emotes in collections.items():
-            col = db[emote]
-            wrong_emotes_to_insert = []
-            if emote != "count":
-                for (misspell, activity), count in wrong_emotes.items():
-                    item = {"count": count, "spelling": misspell, "activity": activity,
-                            "timestamp": datetime.datetime.utcnow()}
-                    wrong_emotes_to_insert.append(item)
-                col.insert_many(wrong_emotes_to_insert)
-    temp_db["emotes"] = dict()
-    save_lock.release()
+    global db, client
+
+    def save_emotes_inner(temp_db, kwargs):
+        for channel, collections in temp_db.get("emotes").items():
+            db = client[channel]
+            global_coll = db["global"]
+            global_coll.insert_one({"count": collections.get("count"), "timestamp": datetime.datetime.utcnow()})
+            for emote, wrong_emotes in collections.items():
+                col = db[emote]
+                wrong_emotes_to_insert = []
+                if emote != "count":
+                    for (misspell, activity), count in wrong_emotes.items():
+                        item = {"count": count, "spelling": misspell, "activity": activity,
+                                "timestamp": datetime.datetime.utcnow()}
+                        wrong_emotes_to_insert.append(item)
+                    col.insert_many(wrong_emotes_to_insert)
+        temp_db["emotes"] = dict()
+
+    db.access(save_emotes_inner)
+    # clear buffer for any emotes caught during saving
+    db.buffered_write(update_emotes)
 
 
 @save
 def save_mentions():
-    global temp_db, client, save_lock
-    save_lock.acquire()
-    db = client["twitch"]
-    col = db["twitch"]
-    if len(temp_db["mentions"]) != 0:
-        col.insert_many(temp_db.get("mentions"))
-    temp_db["mentions"] = []
-    save_lock.release()
+    global db, client
+
+    def save_mentions_inner(mongo_db, kwargs):
+        if "client" in kwargs:
+            client = kwargs.get("client")
+            db = client["twitch"]
+            col = db["twitch"]
+            if len(mongo_db["mentions"]) != 0:
+                col.insert_many(mongo_db.get("mentions"))
+            mongo_db["mentions"] = []
+
+    db.access(save_mentions_inner, client=client)
+    # clear buffer that might have build up during save
+    db.buffered_write(append_to_list_in_dict)
 
 
 @save
 def save_ignore_list():
-    global ignore_list, save_lock
-    save_lock.acquire()
-    f.save(ignore_list, "texts/ignore.txt")
-    save_lock.release()
+    global ignore_list
+    ignore_list.access(lambda lst, kwargs: f.save(lst, "texts/ignore.txt"))
+    # clear buffer
+    ignore_list.buffered_write(append_to_list)
+    ignore_list.buffered_write(delete_from_list)
 
 
 @save
 def save_alts():
-    global alts, save_lock
-    save_lock.acquire()
-    f.save(alts, "texts/alts.txt")
-    save_lock.release()
+    global alts
+    alts.access(lambda alts_set, kwargs: f.save(alts_set, "texts/alts.txt"))
+    # clear buffer
+    alts.buffered_write(write_to_dict)
 
 
 # ADMIN
@@ -270,14 +278,12 @@ def ping(bot: 'TwitchChat', args, msg, username, channel, send):
 @admin
 @unwrap_command_args
 def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
-    global alts, save_lock
+    global alts
     match = re.match(r'!(addalt|namechange)\s(\w+)\s(\w+)', msg.lower())
     if match:
         alt = match.group(2)
         main = match.group(3)
-        save_lock.acquire()
-        alts[alt] = main
-        save_lock.release()
+        alts.buffered_write(write_to_dict, key=alt, val=main)
         message = Message(
             "@" + username + ", " + alt + " is " + main + " PepoG",
             MessageType.CHAT,
@@ -289,14 +295,12 @@ def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @admin
 @unwrap_command_args
 def delete_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
-    global alts, save_lock
+    global alts
     match = re.match(r'!delalt\s(\w+)', msg.lower())
     if match:
         alt = match.group(1)
-        if alt in alts:
-            save_lock.acquire()
-            alts.pop(alt)
-            save_lock.release()
+        if alts.access(contains, elem=alt):
+            alts.access(delete_from_dict, key=alt)
             message = Message(
                 "@" + username + ", pffft " + alt + " never heard of them PepeLaugh",
                 MessageType.CHAT,
@@ -310,7 +314,7 @@ def delete_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @command
 @unwrap_command_args
 def update_mentions(bot: 'TwitchChat', args, msg, username, channel, send):
-    global temp_db, save_lock
+    global db
     if contains_word(msg.lower(), pings):
         doc = {
             "user": username,
@@ -318,10 +322,7 @@ def update_mentions(bot: 'TwitchChat', args, msg, username, channel, send):
             "channel": channel,
             "timestamp": datetime.datetime.utcnow()
         }
-        save_lock.acquire()
-        mentions = temp_db["mentions"]
-        mentions.append(doc)
-        save_lock.release()
+        db.buffered_write(append_to_list_in_dict, key="mentions", val=doc)
 
 
 http = urllib3.PoolManager()
@@ -353,17 +354,17 @@ def dct(bot: 'TwitchChat', args, msg, username, channel, send):
             try:
                 definition = define(word)
                 message = Message("@" + username + ", " + definition, MessageType.COMMAND, channel)
-                message = change_if_blacklisted(username, message, channel)
+
                 bot.send_message(message)
             except Exception:
                 message = Message("@" + username + " couldn't look up the definition of " + word,
                                   MessageType.COMMAND, channel)
-                message = change_if_blacklisted(username, message, channel)
+
                 bot.send_message(message)
         else:
             message = Message("@" + username + ", " + word + " is not an english word.",
                               MessageType.COMMAND, channel)
-            message = change_if_blacklisted(username, message, channel)
+
             bot.send_message(message)
 
 
@@ -390,7 +391,7 @@ def time_out(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
     elif "time out" in msg:
         message = Message("@" + username + " What's the password", MessageType.SPAM, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
 
 
@@ -400,7 +401,7 @@ def dance(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg
     if contains_word(msg, [" ludwigGun "]) and bot.limiter.can_send(channel, "dance", 25, True):
         message = Message("pepeD " * random.randint(1, 9), MessageType.SPAM, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
 
 
@@ -410,7 +411,7 @@ def iamhere(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_all(msg, [" who ", " is ", " here "]):
         message = Message("I am here peepoPog", MessageType.SPECIAL, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
 
 
@@ -422,7 +423,7 @@ def respond(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message("@" + username +
                           ", Beep Boop MrDestructoid"
                           , MessageType.SPAM, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
 
 
@@ -441,7 +442,7 @@ def weird_jokes(bot: 'TwitchChat', args, msg, username, channel, send):
 def validate_emotes(bot: 'TwitchChat', args, msg, username, channel, send):
     if username == bot.user:
         return
-    global emote_dict
+    global emote_dict, db
     channel = channel
     words = msg.split()
     emotes = emote_dict["all_emotes"]
@@ -455,13 +456,13 @@ def validate_emotes(bot: 'TwitchChat', args, msg, username, channel, send):
         if lowered_word in emote_dict:
             correct_emote = emote_dict.get(lowered_word)
             if word != correct_emote and not dictionary.check(word):
-                update_emotes(channel, word, correct_emote, status.get("activity"))
+                db.buffered_write(update_emotes, chan=channel, we=word, ce=correct_emote, ac=status.get("activity"))
                 wrong_emotes.append(word)
         else:
             val = validate_emote(word, emotes)
             if not val.boolean:
                 if not dictionary.check(word):
-                    update_emotes(channel, word, val.correct, status.get("activity"))
+                    db.buffered_write(update_emotes, chan=channel, we=word, ce=val.correct, ac=status.get("activity"))
                     wrong_emotes.append(word)
     if len(wrong_emotes) != 0:
         amount = bot.state.get(channel).get("lacking", "0")
@@ -480,17 +481,17 @@ def validate_emote(emote, emotes):
     return Validation(True, emote)
 
 
-def update_emotes(channel: str, wrong_emote: str, correct_emote: str, activity: str) -> None:
-    global temp_db, save_lock
-    save_lock.acquire()
-    temp_db["emotes"][channel] = temp_db.get("emotes").get(channel, dict())
-    channel_dict = temp_db.get("emotes").get(channel)
-    channel_dict[correct_emote] = channel_dict.get(correct_emote, dict())
-    emote_dict = channel_dict.get(correct_emote)
-    count = emote_dict.get((wrong_emote, activity), 0)
-    emote_dict[(wrong_emote, activity)] = count + 1
-    channel_dict["count"] = channel_dict.get("count", 0) + 1
-    save_lock.release()
+def update_emotes(db, kwargs) -> None:
+    if "chan" in kwargs and "we" in kwargs and "ce" in kwargs and "ac" in kwargs:
+        channel, wrong_emote, correct_emote, activity = kwargs.get("chan"), kwargs.get("we"), \
+                                                        kwargs.get("ce"), kwargs.get("ac")
+        db["emotes"][channel] = db.get("emotes").get(channel, dict())
+        channel_dict = db.get("emotes").get(channel)
+        channel_dict[correct_emote] = channel_dict.get(correct_emote, dict())
+        emote_dict = channel_dict.get(correct_emote)
+        count = emote_dict.get((wrong_emote, activity), 0)
+        emote_dict[(wrong_emote, activity)] = count + 1
+        channel_dict["count"] = channel_dict.get("count", 0) + 1
 
 
 @command
@@ -571,11 +572,29 @@ def subscriber_type(months):
 
 @returns
 @unwrap_command_args
+def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
+    global ignore_list
+    msg = msg.lower()
+    if msg == "!ignore me":
+        if not ignore_list.access(contains, elem=username):
+            ignore_list.buffered_write(append_to_list, elem=username)
+            message = Message("@" + username + ", from now on you will be ignored PrideLion", MessageType.COMMAND,
+                              channel)
+            bot.send_message(message)
+        else:
+            message = Message("@" + username + ", You're already ignored 4Head", MessageType.COMMAND, channel)
+            bot.send_message(message)
+        return True
+    return False
+
+
+@returns
+@unwrap_command_args
 def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
     global ignore_list
     msg = msg.lower()
     if msg == "!unignore me":
-        ignore_list.remove(username)
+        ignore_list.buffered_write(delete_from_dict, elem=username)
         message = Message("@" + username + ", welcome back PrideLion !", MessageType.COMMAND, channel)
         bot.send_message(message)
         return True
@@ -585,7 +604,7 @@ def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
 @returns
 @unwrap_command_args
 def ignore(bot: 'TwitchChat', args, msg, username, channel, send):
-    if username in ignore_list:
+    if ignore_list.access(contains, elem=username):
         validate_emotes(bot, args, False)
         return True
     return False
@@ -608,8 +627,8 @@ def whois(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     match = re.match(r'!whois\s(\w+)', msg.lower())
     if match:
         alt = match.group(1)
-        while alt in alts:
-            alt = alts[alt]
+        while alts.access(contains, elem=alt):
+            alt = alts.access(get_val, key=alt)
         if alt == match.group(1):
             message = Message(
                 "@" + username + ", " + alt + " is " + alt + " PrideLion",
@@ -669,7 +688,8 @@ def tyke(bot: 'TwitchChat', args, msg, username, channel, send):
         if bot.limiter.can_send(channel, "tyke", 300, True):
             for i in range(3):
                 parity = i % 2
-                txt = "blobDance RareChar blobDance RareChar blobDance " if parity == 0 else "RareChar blobDance RareChar blobDance RareChar "
+                txt = "blobDance RareChar blobDance RareChar blobDance " \
+                    if parity == 0 else "RareChar blobDance RareChar blobDance RareChar "
                 message = Message(txt, MessageType.SPAM, channel)
                 bot.send_message(message)
                 time.sleep(2)
@@ -691,7 +711,8 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel, send):
             previous_lurker_ts = time.time()
         if bot.limiter.can_send(channel, "lurker", 1200, True):
             lurker = random.choice(lurkers.get(channel, [None]))
-            txt = lurker + " is lurking in chat right now monkaW ." if lurker is not None else "No lurkers in chat FeelsBadMan "
+            txt = lurker + " is lurking in chat right now monkaW ." \
+                if lurker is not None else "No lurkers in chat FeelsBadMan "
             message = Message(txt, MessageType.COMMAND, channel)
             bot.send_message(message)
         return True
@@ -736,24 +757,13 @@ def limit(bot: 'TwitchChat', args, msg, username, channel, send):
 
 @returns
 @unwrap_command_args
-def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
-    global ignore_list
-    msg = msg.lower()
-    if msg == "!ignore me":
-        ignore_list.add(username)
-        message = Message("@" + username + ", from now on you will be ignored PrideLion", MessageType.COMMAND, channel)
-        bot.send_message(message)
-        return True
-
-
-@returns
-@unwrap_command_args
 def seal(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!seal":
         if bot.limiter.can_send(channel, "seal", 20):
             message = Message("Such a brave bird PrideLion", MessageType.COMMAND, channel)
             bot.send_message(message)
         return True
+    return False
 
 
 @returns
@@ -771,7 +781,7 @@ def thor(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 def psy(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!psy":
         if bot.limiter.can_send(channel, "psy", 20):
-            message = Message("@psygs daily ping or however many times people use this command PrideLion",
+            message = Message("@psygs daily ping or however many times people access this command PrideLion",
                               MessageType.COMMAND, channel)
             bot.send_message(message)
         return True
@@ -846,7 +856,7 @@ def suicune(bot: 'TwitchChat', args, msg, username, channel, send):
     if "!suicune" == msg:
         if bot.limiter.can_send(channel, "suicune", 5, True):
             message = Message("bitch", MessageType.COMMAND, channel)
-            message = change_if_blacklisted(username, message, channel)
+
             bot.send_message(message)
         return True
 
@@ -858,7 +868,7 @@ def spam(bot: 'TwitchChat', args, msg, username, channel, send):
     if "!spam" == msg:
         if bot.limiter.can_send(channel, "spam", 5, True):
             message = Message("not cool peepoWTF", MessageType.COMMAND, channel)
-            message = change_if_blacklisted(username, message, channel)
+
             bot.send_message(message)
         return True
 
@@ -870,7 +880,7 @@ def schleem(bot: 'TwitchChat', args, msg, username, channel, send):
     if "!schleem" == msg:
         if bot.limiter.can_send(channel, "schleem", 10):
             message = Message("Get outta town", MessageType.COMMAND, channel)
-            message = change_if_blacklisted(username, message, channel)
+
             bot.send_message(message)
         return True
 
@@ -882,7 +892,7 @@ def give_fact(bot: 'TwitchChat', args, msg, username, channel, send):
     if contains_word(msg, ["!fact", "!facts", "give me a fact"]):
         message = Message("@" + username + ", did you know that " + line_pickers.get("facts").get_line(),
                           MessageType.COMMAND, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
         return True
 
@@ -893,7 +903,7 @@ def eight_ball(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if "!8ball" in msg or "!eightball" in msg:
         message = Message("@" + username + " " + line_pickers.get("8ball").get_line(), MessageType.COMMAND, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
         return True
 
@@ -905,7 +915,7 @@ def quote(bot: 'TwitchChat', args, msg, username, channel, send):
     username = username
     if is_word(msg, ["!inspire"]):
         message = Message("@" + username + ", " + line_pickers.get("quotes").get_line(), MessageType.COMMAND, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
         return True
 
@@ -919,7 +929,7 @@ def lacking(bot: 'TwitchChat', args, msg, username, channel, send):
         amount = bot.state.get(channel, {}).get("lacking", "0")
         message = Message("@" + username + ", " + amount + " people have been caught lacking PepeLaugh",
                           MessageType.SPECIAL, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
         return True
 
@@ -930,7 +940,7 @@ def aniki(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if msg == "!aniki":
         message = Message("Sleep tight PepeHands", MessageType.COMMAND, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
         return True
 
@@ -941,7 +951,7 @@ def pickup(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!pickup", "!pickupline", "!pickups", "!pickuplines"]):
         message = Message("@" + username + ", " + line_pickers.get("pickups").get_line(), MessageType.COMMAND, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
         return True
 
@@ -952,7 +962,7 @@ def joke(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!joke", "!jokes", " give me a joke "]):
         message = Message("@" + username + ", " + line_pickers.get("jokes").get_line(), MessageType.COMMAND, channel)
-        message = change_if_blacklisted(username, message, channel)
+
         bot.send_message(message)
         return True
 

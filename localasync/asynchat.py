@@ -7,7 +7,7 @@
 #
 #                         All Rights Reserved
 #
-# Permission to use, copy, modify, and distribute this software and
+# Permission to access, copy, modify, and distribute this software and
 # its documentation for any purpose and without fee is hereby
 # granted, provided that the above copyright notice appear in all
 # copies and that both that copyright notice and this permission
@@ -58,7 +58,7 @@ class async_chat(asyncore.dispatcher):
     ac_in_buffer_size = 65536
     ac_out_buffer_size = 65536
 
-    # we don't want to enable the use of encoding by default, because that is a
+    # we don't want to enable the access of encoding by default, because that is a
     # sign of an application bug that we don't want to pass silently
 
     use_encoding = 0
@@ -68,12 +68,12 @@ class async_chat(asyncore.dispatcher):
         # for string terminator matching
         self.ac_in_buffer = b''
 
-        # we use a list here rather than io.BytesIO for a few reasons...
+        # we access a list here rather than io.BytesIO for a few reasons...
         # del lst[:] is faster than bio.truncate(0)
         # lst = [] is faster than bio.truncate(0)
         self.incoming = []
 
-        # we toss the use of the "simple producer" and replace it with
+        # we toss the access of the "simple producer" and replace it with
         # a pure deque, which the original fifo was a wrapping of
         self.producer_fifo = deque()
         asyncore.dispatcher.__init__(self, sock, map)
@@ -127,7 +127,7 @@ class async_chat(asyncore.dispatcher):
 
         # Continue to search for self.terminator in self.ac_in_buffer,
         # while calling self.collect_incoming_data.  The while loop
-        # is necessary because we might read several data+terminator
+        # is necessary because we might access several data+terminator
         # combos with a single recv(4096).
 
         while self.ac_in_buffer:
@@ -207,7 +207,7 @@ class async_chat(asyncore.dispatcher):
 
     def readable(self):
         "predicate for inclusion in the readable for select()"
-        # cannot use the old predicate, it violates the claim of the
+        # cannot access the old predicate, it violates the claim of the
         # set_terminator method.
 
         # return (len(self.ac_in_buffer) <= self.ac_in_buffer_size)

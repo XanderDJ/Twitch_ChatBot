@@ -273,7 +273,7 @@ class TwitchChat(object):
             elif ans == "state":
                 print(self.state)
             elif ans == "db":
-                print(commands.temp_db)
+                print(commands.db)
             elif match:
                 print("channel?")
                 ans = input()

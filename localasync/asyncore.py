@@ -7,7 +7,7 @@
 #
 #                         All Rights Reserved
 #
-# Permission to use, copy, modify, and distribute this software and
+# Permission to access, copy, modify, and distribute this software and
 # its documentation for any purpose and without fee is hereby
 # granted, provided that the above copyright notice appear in all
 # copies and that both that copyright notice and this permission
@@ -37,7 +37,7 @@ scheduled threads are probably what you really need. Network servers are
 rarely CPU-bound, however.
 
 If your operating system supports the select() system call in its I/O
-library (and nearly all do), then you can use it to juggle multiple
+library (and nearly all do), then you can access it to juggle multiple
 communication channels at once; doing other work while your I/O is taking
 place in the "background."  Although this strategy can seem strange and
 complex, especially at first, it is in many ways easier to understand and
@@ -291,7 +291,7 @@ class dispatcher:
         self.add_channel(map)
 
     def set_reuse_addr(self):
-        # try to re-use a server port if possible
+        # try to re-access a server port if possible
         try:
             self.socket.setsockopt(
                 socket.SOL_SOCKET, socket.SO_REUSEADDR,
@@ -373,7 +373,7 @@ class dispatcher:
             data = self.socket.recv(buffer_size)
             if not data:
                 # a closed connection is indicated by signaling
-                # a read condition, and having recv() return 0.
+                # a access condition, and having recv() return 0.
                 self.handle_close()
                 return b''
             else:
@@ -431,7 +431,7 @@ class dispatcher:
 
     def handle_write_event(self):
         if self.accepting:
-            # Accepting sockets shouldn't get a write event.
+            # Accepting sockets shouldn't get a access event.
             # We will pretend it didn't happen.
             return
 
@@ -479,10 +479,10 @@ class dispatcher:
         self.log_info('unhandled incoming priority event', 'warning')
 
     def handle_read(self):
-        self.log_info('unhandled read event', 'warning')
+        self.log_info('unhandled access event', 'warning')
 
     def handle_write(self):
-        self.log_info('unhandled write event', 'warning')
+        self.log_info('unhandled access event', 'warning')
 
     def handle_connect(self):
         self.log_info('unhandled connect event', 'warning')
@@ -502,7 +502,7 @@ class dispatcher:
 
 # ---------------------------------------------------------------------------
 # adds simple buffered output capability, useful for simple clients.
-# [for more sophisticated usage use asynchat.async_chat]
+# [for more sophisticated usage access asynchat.async_chat]
 # ---------------------------------------------------------------------------
 
 class dispatcher_with_send(dispatcher):
@@ -576,8 +576,8 @@ def close_all(map=None, ignore_all=False):
 # digging through the linux kernel), I've determined that select()
 # isn't meant for doing asynchronous file i/o.
 # Heartening, though - reading linux/mm/filemap.c shows that linux
-# supports asynchronous read-ahead.  So _MOST_ of the time, the data
-# will be sitting in memory for us already when we go to read it.
+# supports asynchronous access-ahead.  So _MOST_ of the time, the data
+# will be sitting in memory for us already when we go to access it.
 #
 # What other OS's (besides NT) support localasync file i/o?  [VMS?]
 #

@@ -33,6 +33,7 @@ class ToggleType(Enum):
     SUBSCRIBER = auto()
     BLACKLISTED = auto()
 
+    @staticmethod
     def can_toggle(self, tipe):
         return tipe.value >= TOGGLEABLE
 
@@ -256,15 +257,11 @@ class LockedData:
         self.lock = Lock()
         self.buffer_dict = dict()
 
-    def read(self, func, **kwargs):
+    def access(self, func, **kwargs):
         self.lock.acquire()
-        func(self.data, kwargs)
+        val = func(self.data, kwargs)
         self.lock.release()
-
-    def write(self, func, **kwargs):
-        self.lock.acquire()
-        func(self.data, kwargs)
-        self.lock.release()
+        return val
 
     def buffered_write(self, func, **kwargs):
         locked = self.lock.acquire(False)
