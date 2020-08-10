@@ -592,7 +592,6 @@ def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
 @returns
 @unwrap_command_args
 def add_to_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
-    print(args)
     global ignore_list
     msg = msg.lower()
     if msg == "!ignore me":
