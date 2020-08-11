@@ -1034,7 +1034,7 @@ def color(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r'!(hex|color)\s(\w+)', msg)
     if match:
         user = match.group(2)
-        color = get_color(username.lower())
+        color = get_color(user.lower())
         if color is not None:
             color_name = get_color_name(color, http)
             clarification = " which is " + color_name if len(color_name) != 0 else ""
