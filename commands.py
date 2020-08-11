@@ -20,6 +20,7 @@ import enchant
 import time
 import datetime
 import pymongo
+from pymongo.errors import ConnectionFailure
 import json
 from threading import Lock
 
@@ -57,7 +58,6 @@ lurkers = dict()
 previous_lurker_ts = time.time() - 600
 ignore_list = LockedData(f.load("texts/ignore.txt", set()))
 alts = LockedData(f.load("texts/alts.txt", dict()))
-colors = LockedData(f.load("texts/colors_users.txt", dict()))
 
 
 def load_emotes():
@@ -585,8 +585,12 @@ def subscriber_type(months):
 def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
     color = args['color']
     color = color if len(color) != 0 else "#808080"
-    if not colors.access(contains, key=username):
-        colors.buffered_write(write_to_dict, key=username, val=color)
+    try:
+        doc = client.colors.users.find({"username": username.lower()})[0]
+        if doc["hex"] != color:
+            client.colors.users.replace_one(doc, {"username": username.lower(), "hex": color})
+    except IndexError:
+        client.colors.users.insert_one({"username": username.lower(), "hex": color})
     return False
 
 
@@ -1038,8 +1042,8 @@ def color(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r'!(hex|color)\s(\w+)', msg)
     if match:
         user = match.group(2)
-        if colors.access(contains, elem=user):
-            color = colors.access(get_val, key=user)
+        color = get_color(username.lower())
+        if color is not None:
             color_name = get_color_name(color, http)
             clarification = " which is " + color_name if len(color_name) != 0 else ""
             message = Message("@" + username + ", the last hex/color of " + user + " seen is " + color + clarification,
@@ -1054,15 +1058,29 @@ def color(bot: 'TwitchChat', args, msg, username, channel, send):
 
 
 def get_color_name(hex_code: str, pm: urllib3.PoolManager):
-    color_code = hex_code[1:]
-    base = "https://www.color-hex.com/color/" + color_code.lower()
-    response = pm.request("GET", base).data.decode("UTF-8")
-    iteration = re.finditer(r'<title>' + hex_code.lower() + r' Color Hex (.+)</title>', response)
     try:
-        first = next(iteration)
-        return first.group(1)
-    except StopIteration:
-        return ""
+        color_name = client.colors.names.find({"hex": hex_code})[0]
+        return color_name.get("name")
+    except IndexError:
+        color_code = hex_code[1:]
+        base = "https://www.color-hex.com/color/" + color_code.lower()
+        response = pm.request("GET", base).data.decode("UTF-8")
+        iteration = re.finditer(r'<title>' + hex_code.lower() + r' Color Hex (.+)</title>', response)
+        try:
+            first = next(iteration)
+            client.colors.names.insert_one({"hex": hex_code, "name": first.group(1)})
+            return first.group(1)
+        except StopIteration:
+            client.colors.names.insert_one({"hex": hex_code, "name": ""})
+            return ""
+
+
+def get_color(username):
+    try:
+        doc = client.colors.users.find({"username": username})[0]
+        return doc.get("hex")
+    except IndexError:
+        return None
 
 
 # REPEATS and REPEATS_SETUP
