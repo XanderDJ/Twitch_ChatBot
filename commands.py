@@ -210,14 +210,6 @@ def save_alts():
     alts.buffered_write(write_to_dict)
 
 
-@save
-def save_colors():
-    global colors
-    colors.access(lambda colors_dict, kwargs: f.save(colors_dict, "texts/colors_users.txt"))
-    # clear buffer
-    colors.buffered_write(write_to_dict)
-
-
 # ADMIN
 
 @admin
@@ -759,7 +751,7 @@ def replay(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_word(msg, ["!replay"]):
         if bot.limiter.can_send(channel, "replay", 60, True):
-            message = Message("Not green FeelsWeirdMan", MessageType.COMMAND, channel)
+            message = Message("Green OkayChamp", MessageType.COMMAND, channel)
             bot.send_message(message)
         return True
 
