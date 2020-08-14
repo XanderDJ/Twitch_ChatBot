@@ -1221,9 +1221,9 @@ def get_color(username):
 
 @returns
 @unwrap_command_args
-def whisper(bot: 'TwitchChat', args, msg, username, channel, send):
-    if msg == "!whisper":
-        message = Message(".w " + username + " this is a whisper", MessageType.COMMAND, channel)
+def request(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg == "!request":
+        message = Message(".w " + username + " https://docs.google.com/forms/d/1NLkm2W281fN_vzv-F-zzc3Npbq3IBf62w-i1Ye-z9oo/", MessageType.COMMAND, channel)
         bot.send_message(message)
 
 
