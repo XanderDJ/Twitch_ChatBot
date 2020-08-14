@@ -673,6 +673,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                     MessageType.COMMAND,
                     channel
                 )
+                bot.send_message(message)
         else:
             val_or_user = val_or_user.lower()
             if username.lower() == val_or_user or username == bot.admin:
@@ -700,6 +701,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                         MessageType.COMMAND,
                         channel
                     )
+                    bot.send_message(message)
             else:
                 # Let user know who can do this command
                 message = Message(
@@ -707,6 +709,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                     MessageType.COMMAND,
                     channel
                 )
+                bot.send_message(message)
         return True
     return False
 
@@ -729,10 +732,10 @@ def get_count(bot: 'TwitchChat', args, msg, username, channel, send):
                             channel
                         )
                         bot.send_message(message)
-                    else:
-                        message = Message("@" + username + ", " + user + " isn't being tracked for " + val,
-                                          MessageType.COMMAND, channel)
-                        bot.send_message(message)
+                else:
+                    message = Message("@" + username + ", " + user + " isn't being tracked for " + val,
+                                      MessageType.COMMAND, channel)
+                    bot.send_message(message)
             else:
                 message = Message("@" + username + ", " + user + " doesn't have any counts", MessageType.COMMAND,
                                   channel)
