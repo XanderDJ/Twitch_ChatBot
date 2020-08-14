@@ -58,6 +58,7 @@ lurkers = dict()
 previous_lurker_ts = time.time() - 600
 ignore_list = LockedData(f.load("texts/ignore.txt", set()))
 alts = LockedData(f.load("texts/alts.txt", dict()))
+bad_words = f.load("texts/bad_words.txt", [])
 
 
 def load_emotes():
@@ -546,7 +547,8 @@ def send_pog(bot: 'TwitchChat', args):
         type_sub = subscriber_type(amount_of_months)
         message = Message("POGGIES " + type_sub + "!", MessageType.SUBSCRIBER, channel)
         bot.send_message(message)
-        bot.state["lonewulfx6"]["counters"]["POGGIES"] = str(int(bot.state.get("lonewulfx6").get("counters").get("POGGIES")) + 1)
+        bot.state["lonewulfx6"]["counters"]["POGGIES"] = str(
+            int(bot.state.get("lonewulfx6").get("counters").get("POGGIES")) + 1)
     elif tipe == "subgift":
         amount_of_gifts = args.get("msg-param-sender-count")
         if amount_of_gifts != "0" and amount_of_gifts is not None:
@@ -566,7 +568,8 @@ def send_pog(bot: 'TwitchChat', args):
     elif tipe == "anonsubgift":
         message = Message("POGGIES", MessageType.SUBSCRIBER, channel)
         bot.send_message(message)
-        bot.state["lonewulfx6"]["counters"]["POGGIES"] = str(int(bot.state.get("lonewulfx6").get("counters").get("POGGIES")) + 1)
+        bot.state["lonewulfx6"]["counters"]["POGGIES"] = str(
+            int(bot.state.get("lonewulfx6").get("counters").get("POGGIES")) + 1)
     else:
         return
 
@@ -655,6 +658,10 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
         val = match.group(2)
         username = username.lower()
         if len(val) == 0:
+            if val_or_user in bad_words:
+                message = Message("@" + username + ", not fucking cool man.", MessageType.COMMAND, channel)
+                bot.send_message(message)
+                return True
             # Add the counter for the user that used this command
             bot.state[username] = bot.state.get(username, dict())
             bot.state[username]["counters"] = bot.state.get(username).get("counters", {})
@@ -681,6 +688,10 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                 )
                 bot.send_message(message)
         else:
+            if val in bad_words:
+                message = Message("@" + username + ", not fucking cool man.", MessageType.COMMAND, channel)
+                bot.send_message(message)
+                return True
             val_or_user = val_or_user.lower()
             if username.lower() == val_or_user or username == bot.admin:
                 # add the counter for the username mentione with
@@ -727,6 +738,10 @@ def get_count(bot: 'TwitchChat', args, msg, username, channel, send):
     if match:
         user = match.group(1).lower()
         val = match.group(2)
+        if val in bad_words:
+            message = Message("@" + username + ", not fucking cool man.", MessageType.COMMAND, channel)
+            bot.send_message(message)
+            return True
         if user in bot.state:
             if len(bot.state.get(user).get("counters", dict())) != 0:
                 counters = bot.state.get(user).get("counters")
