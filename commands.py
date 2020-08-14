@@ -645,6 +645,8 @@ def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
 def ignore(bot: 'TwitchChat', args, msg, username, channel, send):
     if ignore_list.access(contains, elem=username):
         validate_emotes(bot, args, False)
+        card_pogoff(bot, args, True)
+        update_counter(bot, args, False)
         return True
     return False
 
