@@ -546,14 +546,14 @@ def send_pog(bot: 'TwitchChat', args):
         type_sub = subscriber_type(amount_of_months)
         message = Message("POGGIES " + type_sub + "!", MessageType.SUBSCRIBER, channel)
         bot.send_message(message)
-        bot.state["lonewulfx6"]["counters"] = str(int(bot.state.get("lonewulfx6").get("counters").get("POGGIES")) + 1)
+        bot.state["lonewulfx6"]["counters"]["POGGIES"] = str(int(bot.state.get("lonewulfx6").get("counters").get("POGGIES")) + 1)
     elif tipe == "subgift":
         amount_of_gifts = args.get("msg-param-sender-count")
         if amount_of_gifts != "0" and amount_of_gifts is not None:
             message = Message("POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
                               MessageType.SUBSCRIBER, channel)
             bot.send_message(message)
-            bot.state["lonewulfx6"]["counters"] = str(
+            bot.state["lonewulfx6"]["counters"]["POGGIES"] = str(
                 int(bot.state.get("lonewulfx6").get("counters").get("POGGIES")) + 1)
     elif tipe == "submysterygift":
         amount_of_gifts = args.get("msg-param-sender-count", "0")
@@ -561,12 +561,12 @@ def send_pog(bot: 'TwitchChat', args):
             message = Message("POGGIES " + amount_of_gifts + " gifts! Bitch you crazy!",
                               MessageType.SUBSCRIBER, channel)
             bot.send_message(message)
-            bot.state["lonewulfx6"]["counters"] = str(
+            bot.state["lonewulfx6"]["counters"]["POGGIES"] = str(
                 int(bot.state.get("lonewulfx6").get("counters").get("POGGIES")) + 1)
     elif tipe == "anonsubgift":
         message = Message("POGGIES", MessageType.SUBSCRIBER, channel)
         bot.send_message(message)
-        bot.state["lonewulfx6"]["counters"] = str(int(bot.state.get("lonewulfx6").get("counters").get("POGGIES")) + 1)
+        bot.state["lonewulfx6"]["counters"]["POGGIES"] = str(int(bot.state.get("lonewulfx6").get("counters").get("POGGIES")) + 1)
     else:
         return
 
