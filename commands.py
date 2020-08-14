@@ -658,7 +658,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
         val = match.group(2)
         username = username.lower()
         if len(val) == 0:
-            if val_or_user in bad_words:
+            if val_or_user.lower() in bad_words:
                 message = Message("@" + username + ", not fucking cool man.", MessageType.COMMAND, channel)
                 bot.send_message(message)
                 return True
@@ -688,7 +688,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                 )
                 bot.send_message(message)
         else:
-            if val in bad_words:
+            if val.lower() in bad_words:
                 message = Message("@" + username + ", not fucking cool man.", MessageType.COMMAND, channel)
                 bot.send_message(message)
                 return True
@@ -738,7 +738,7 @@ def get_count(bot: 'TwitchChat', args, msg, username, channel, send):
     if match:
         user = match.group(1).lower()
         val = match.group(2)
-        if val in bad_words:
+        if val.lower() in bad_words:
             message = Message("@" + username + ", not fucking cool man.", MessageType.COMMAND, channel)
             bot.send_message(message)
             return True
