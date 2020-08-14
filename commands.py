@@ -684,7 +684,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                     if val not in counters:
                         counters[val] = counters.get(val, "0")
                         message = Message(
-                            "@" + username + ", I will now count how many times you say " + val + " PrideLion",
+                            "@" + username + ", I will now count how many times " + val_or_user + " says " + val + " PrideLion",
                             MessageType.COMMAND, channel)
                         bot.send_message(message)
                     else:
