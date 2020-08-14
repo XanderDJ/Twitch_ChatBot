@@ -500,6 +500,18 @@ def update_emotes(db, kwargs) -> None:
 
 @command
 @unwrap_command_args
+def update_counter(bot: 'TwitchChat', args, msg, username, channel, send):
+    username = username.lower()
+    if username in bot.state and len(bot.state.get(username).get("counters", {})) != 0:
+        counters = bot.state.get(username).get("counters")
+        words = msg.split()
+        for word in words:
+            if word in counters:
+                counters[word] = str(int(counters.get(word)) + 1)
+
+
+@command
+@unwrap_command_args
 def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     msg = cleanup(msg)
     if (username.lower() in
@@ -624,6 +636,110 @@ def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
 def ignore(bot: 'TwitchChat', args, msg, username, channel, send):
     if ignore_list.access(contains, elem=username):
         validate_emotes(bot, args, False)
+        return True
+    return False
+
+
+@returns
+@unwrap_command_args
+def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r'!addcounter\s(\w+)\s*(\w*)', msg)
+    if match:
+        val_or_user = match.group(1)
+        val = match.group(2)
+        username = username.lower()
+        if len(val) == 0:
+            # Add the counter for the user that used this command
+            bot.state[username] = bot.state.get(username, dict())
+            bot.state[username]["counters"] = bot.state.get(username).get("counters", {})
+            counters = bot.state.get(username).get("counters")
+            if len(counters) < 2:
+                if val_or_user not in counters:
+                    counters[val_or_user] = counters.get(val_or_user, "0")
+                    message = Message(
+                        "@" + username + ", I will now count how many times you say " + val_or_user + " PrideLion",
+                        MessageType.COMMAND, channel)
+                    bot.send_message(message)
+                else:
+                    message = Message("@" + username + ", already tracking " + val_or_user + " 4Head",
+                                      MessageType.COMMAND,
+                                      channel
+                                      )
+                    bot.send_message(message)
+            else:
+                message = Message(
+                    "@" + username + ", you already have 2 counters, you can't have more. "
+                                     "Ask " + bot.admin + " nicely to implement a delete counter command",
+                    MessageType.COMMAND,
+                    channel
+                )
+        else:
+            val_or_user = val_or_user.lower()
+            if username.lower() == val_or_user or username == bot.admin:
+                # add the counter for the username mentione with
+                bot.state[val_or_user] = bot.state.get(val_or_user, dict())
+                bot.state[val_or_user]["counters"] = bot.state.get(val_or_user).get("counters", {})
+                counters = bot.state.get(val_or_user).get("counters")
+                if len(counters) < 2:
+                    if val not in counters:
+                        counters[val] = counters.get(val, "0")
+                        message = Message(
+                            "@" + username + ", I will now count how many times you say " + val + " PrideLion",
+                            MessageType.COMMAND, channel)
+                        bot.send_message(message)
+                    else:
+                        message = Message("@" + username + ", already tracking " + val_or_user + " 4Head",
+                                          MessageType.COMMAND,
+                                          channel
+                                          )
+                        bot.send_message(message)
+                else:
+                    message = Message(
+                        "@" + username + ", you already have 2 counters, you can't have more. "
+                                         "Ask " + bot.admin + " nicely to implement a delete counter command",
+                        MessageType.COMMAND,
+                        channel
+                    )
+            else:
+                # Let user know who can do this command
+                message = Message(
+                    "@" + username + ", only " + val_or_user + " and " + bot.admin + " can use this command",
+                    MessageType.COMMAND,
+                    channel
+                )
+        return True
+    return False
+
+
+@returns
+@unwrap_command_args
+def get_count(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r'!count\s(\w+)\s(\w+)', msg)
+    if match:
+        user = match.group(1).lower()
+        val = match.group(2)
+        if user in bot.state:
+            if len(bot.state.get(user).get("counters", dict())) != 0:
+                counters = bot.state.get(user).get("counters")
+                if val in counters:
+                    if bot.limiter.can_send(channel, user, 5):
+                        message = Message(
+                            "@" + username + ", " + user + " has said " + val + " " + counters.get(val) + " times",
+                            MessageType.COMMAND,
+                            channel
+                        )
+                        bot.send_message(message)
+                    else:
+                        message = Message("@" + username + ", " + user + " isn't being tracked for " + val,
+                                          MessageType.COMMAND, channel)
+                        bot.send_message(message)
+            else:
+                message = Message("@" + username + ", " + user + " doesn't have any counts", MessageType.COMMAND,
+                                  channel)
+                bot.send_message(message)
+        else:
+            message = Message("@" + username + ", " + user + " doesn't have any counts", MessageType.COMMAND, channel)
+            bot.send_message(message)
         return True
     return False
 
