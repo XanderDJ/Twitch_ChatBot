@@ -1265,7 +1265,7 @@ def check_for_title_change(state: dict, bot: 'TwitchChat'):
         else:
             user_id = state["ids"][channel]
         current_title = get_title(http, channel, user_id)
-        if old_title != current_title:
+        if old_title != current_title and not bot.twitch_status.get_status(channel)["live"]:
             state[channel] = current_title
             message = Message(
                 "PrideLion TITLE CHANGE PrideLion",
