@@ -1247,7 +1247,7 @@ def unique(bot: 'TwitchChat', args, msg, username, channel, send):
 def jouch(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg.lower() == "!jouch" and bot.limiter.can_send(channel, "jouch", 20):
         emote = random.choice(emote_dict["all_emotes"])
-        message = Message(emote + " on da JOUCH ", MessageType.COMMAND, channel)
+        message = Message(emote + " on da Jouch ", MessageType.COMMAND, channel)
         bot.send_message(message)
 
 
