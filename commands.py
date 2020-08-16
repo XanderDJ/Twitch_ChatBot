@@ -1223,7 +1223,22 @@ def get_color(username):
 @unwrap_command_args
 def request(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg == "!request":
-        message = Message(".w " + username + " https://docs.google.com/forms/d/1NLkm2W281fN_vzv-F-zzc3Npbq3IBf62w-i1Ye-z9oo/", MessageType.COMMAND, channel)
+        message = Message(
+            ".w " + username + " https://docs.google.com/forms/d/1NLkm2W281fN_vzv-F-zzc3Npbq3IBf62w-i1Ye-z9oo/",
+            MessageType.COMMAND, channel)
+        bot.send_message(message)
+
+
+@returns
+@unwrap_command_args
+def unique(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg == "!unique" and bot.limiter.can_send(channel, "unique", 20):
+        users = client["colors"]["users"]
+        unique_users = users.count()
+        message = Message("The number of unique users x6 has seen is " + str(unique_users),
+                          MessageType.COMMAND,
+                          channel
+                          )
         bot.send_message(message)
 
 
