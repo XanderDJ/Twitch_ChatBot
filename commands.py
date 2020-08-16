@@ -939,7 +939,7 @@ def thor(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 @returns
 @unwrap_command_args
 def psy(bot: 'TwitchChat', args, msg, username, channel, send: bool):
-    if msg.lower() == "!psy":
+    if msg.lower() == "!psyg":
         if bot.limiter.can_send(channel, "psy", 20):
             message = Message("no more pings for the broken man PrideLion",
                               MessageType.COMMAND, channel)
