@@ -941,7 +941,7 @@ def thor(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 def psy(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!psy":
         if bot.limiter.can_send(channel, "psy", 20):
-            message = Message("@psygs daily ping or however many times people access this command PrideLion",
+            message = Message("no more pings for the broken man PrideLion",
                               MessageType.COMMAND, channel)
             bot.send_message(message)
         return True
