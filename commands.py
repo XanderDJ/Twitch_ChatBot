@@ -1320,7 +1320,7 @@ def top_streaks(bot: 'TwitchChat', args, msg, username, channel, send):
                 dct[channel] = dct.get(channel, {})
                 for emote, streak in dct[channel].items():
                     streaks.append((emote, streak["max"]))
-                streaks.sort(key=lambda tup: tup[1], reverse=True)
+                streaks.sort(key=lambda tup: int(tup[1]), reverse=True)
                 return streaks[:10]
 
         top = streaks.access(get_top_10_streaks, channel=channel)
