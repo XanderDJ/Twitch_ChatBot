@@ -43,3 +43,21 @@ def contains(container, kwargs):
 def append_to_list_in_dict(dct, kwargs):
     if "key" in kwargs and "val" in kwargs:
         dct.get(kwargs.get("key")).append(kwargs.get("val"))
+
+
+def update_streak_inner(dct, kwargs):
+    if "emotes" in kwargs and "channel" in kwargs:
+        channel = kwargs.get("channel")
+        emotes = kwargs.get("emotes")
+        dct[channel] = dct.get(channel, {})
+        for emote in emotes:
+            if emote not in dct[channel]:
+                dct[channel][emote] = {"current": "0", "max": "0"}
+        for emote, streak in dct[channel].items():
+            if emote in emotes:
+                streak["current"] = str(int(streak.get("current")) + 1)
+            elif streak["current"] > streak["max"]:
+                streak["max"] = streak["current"]
+                streak["current"] = "0"
+            else:
+                streak["current"] = "0"

@@ -59,6 +59,7 @@ previous_lurker_ts = time.time() - 600
 ignore_list = LockedData(f.load("texts/ignore.txt", set()))
 alts = LockedData(f.load("texts/alts.txt", dict()))
 bad_words = f.load("texts/bad_words.txt", [])
+streaks = LockedData(f.load("texts/streaks.txt", {}))
 
 
 def load_emotes():
@@ -211,6 +212,14 @@ def save_alts():
     alts.buffered_write(write_to_dict)
 
 
+@save
+def save_streaks():
+    global streaks
+    streaks.access(lambda streaks, kwargs: f.save(streaks, "texts/streaks.txt"))
+    # clear buffer
+    streaks.buffered_write(update_streak_inner)
+
+
 # ADMIN
 
 @admin
@@ -313,6 +322,86 @@ def delete_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 
 # COMMANDS
 
+
+@command
+@unwrap_command_args
+def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
+    words = msg.split()
+    username = username.lower()
+    # static data
+    counters = bot.state.get(username, {}).get("counters", {})
+    emotes = emote_dict["all_emotes"]
+    unique_emotes = set()
+    wrong_emotes = []
+    status = bot.twitch_status.get_status(channel)
+    # static flags
+    counters_check = username in bot.state and len(counters) != 0
+    not_bot = not username == bot.user
+    for word in words:
+        if counters_check and word in counters:
+            counters[word] = str(int(counters.get(word)) + 1)
+        if not_bot:
+            # Using De morgan laws to turn not (a and b) to not a or not b turns this into harder to understand boolean
+            if len(word) > 2 and not (word[0] == "\"" and word[-1] == "\""):
+                wrong_emote = validate_emotes(channel, status, word, emotes)
+                if wrong_emote is not None:
+                    wrong_emotes.append(wrong_emote)
+        if word in emotes and word not in unique_emotes:
+            unique_emotes.add(word)
+    update_streaks(unique_emotes, channel)
+    # Use data gathered
+    if len(wrong_emotes) != 0:
+        amount = bot.state.get(channel).get("lacking", "0")
+        bot.state[channel]["lacking"] = str(int(amount) + len(wrong_emotes))
+        if send:
+            txt = " ".join(wrong_emotes)
+            message = Message("@" + username + ", " + txt + " PepeLaugh", MessageType.SPAM, channel)
+            bot.send_message(message)
+
+
+def update_streaks(unique_emotes, channel):
+    global streaks
+    streaks.buffered_write(update_streak_inner, emotes=unique_emotes, channel=channel)
+
+
+def validate_emotes(channel, status, word, emotes):
+    global emote_dict, db
+    word = cleanup(word)
+    lowered_word = word.lower()
+    if lowered_word in emote_dict:
+        correct_emote = emote_dict.get(lowered_word)
+        if word != correct_emote and not dictionary.check(word):
+            db.buffered_write(update_emotes, chan=channel, we=word, ce=correct_emote, ac=status.get("activity"))
+            return word
+    else:
+        val = validate_emote(word, emotes)
+        if not val.boolean:
+            if not dictionary.check(word):
+                db.buffered_write(update_emotes, chan=channel, we=word, ce=val.correct, ac=status.get("activity"))
+                return word
+
+
+def validate_emote(emote, emotes):
+    for correct_emote in emotes:
+        dist = hammington(emote, correct_emote)
+        if dist == 1 or is_anagram(correct_emote, emote):
+            return Validation(False, correct_emote)
+    return Validation(True, emote)
+
+
+def update_emotes(db, kwargs) -> None:
+    if "chan" in kwargs and "we" in kwargs and "ce" in kwargs and "ac" in kwargs:
+        channel, wrong_emote, correct_emote, activity = kwargs.get("chan"), kwargs.get("we"), \
+                                                        kwargs.get("ce"), kwargs.get("ac")
+        db["emotes"][channel] = db.get("emotes").get(channel, dict())
+        channel_dict = db.get("emotes").get(channel)
+        channel_dict[correct_emote] = channel_dict.get(correct_emote, dict())
+        emote_dict = channel_dict.get(correct_emote)
+        count = emote_dict.get((wrong_emote, activity), 0)
+        emote_dict[(wrong_emote, activity)] = count + 1
+        channel_dict["count"] = channel_dict.get("count", 0) + 1
+
+
 @command
 @unwrap_command_args
 def update_mentions(bot: 'TwitchChat', args, msg, username, channel, send):
@@ -325,65 +414,6 @@ def update_mentions(bot: 'TwitchChat', args, msg, username, channel, send):
             "timestamp": datetime.datetime.utcnow()
         }
         db.buffered_write(append_to_list_in_dict, key="mentions", val=doc)
-
-
-http = urllib3.PoolManager()
-
-
-def english_dictionary():
-    english_dict = enchant.Dict("en_US")
-    english_dict.add("pov")
-    english_dict.add("POV")
-    english_dict.add("pogo")
-    english_dict.add("poro")
-    english_dict.add("png")
-    english_dict.add("PNG")
-    english_dict.add("ppl")
-    english_dict.add("nvm")
-    english_dict.add("pos")
-    english_dict.add("POS")
-    return english_dict
-
-
-dictionary = english_dictionary()
-
-
-@command
-@unwrap_command_args
-def dct(bot: 'TwitchChat', args, msg, username, channel, send):
-    msg = msg.lower() + " "
-    match = re.match(r"!dict\b(.*) ", msg)
-    if match:
-        word = match.group(1)
-        if dictionary.check(word):
-            try:
-                definition = define(word)
-                message = Message("@" + username + ", " + definition, MessageType.COMMAND, channel)
-
-                bot.send_message(message)
-            except Exception:
-                message = Message("@" + username + " couldn't look up the definition of " + word,
-                                  MessageType.COMMAND, channel)
-
-                bot.send_message(message)
-        else:
-            message = Message("@" + username + ", " + word + " is not an english word.",
-                              MessageType.COMMAND, channel)
-
-            bot.send_message(message)
-
-
-def define(word):
-    html = http.request("GET", "http://dictionary.reference.com/browse/" + word + "?s=t").data.decode("UTF-8")
-    items = re.findall('<meta name=\"description\" content=\"(.*) See more.\">', html, re.S)
-    defs = [re.sub('<.*?>', '', x).strip() for x in items]
-    return defs[0]
-
-
-def change_if_blacklisted(username, msg, channel):
-    if username.lower() in blacklisted:
-        return Message("@" + username + " ludwigSpectrum " * random.randint(1, 3), MessageType.BLACKLISTED, channel)
-    return msg
 
 
 @command
@@ -440,75 +470,6 @@ def weird_jokes(bot: 'TwitchChat', args, msg, username, channel, send):
             or contains_all(msg, [" slime ", " pee "]):
         message = Message("@" + username + ", FeelsWeirdMan", MessageType.SPAM, channel)
         bot.send_message(message)
-
-
-@command
-@unwrap_command_args
-def validate_emotes(bot: 'TwitchChat', args, msg, username, channel, send):
-    if username == bot.user:
-        return
-    global emote_dict, db
-    channel = channel
-    words = msg.split()
-    emotes = emote_dict["all_emotes"]
-    wrong_emotes = []
-    status = bot.twitch_status.get_status(channel)
-    for word in words:
-        if len(word) > 2 and word[0] == "\"" and word[-1] == "\"":
-            continue
-        word = cleanup(word)
-        lowered_word = word.lower()
-        if lowered_word in emote_dict:
-            correct_emote = emote_dict.get(lowered_word)
-            if word != correct_emote and not dictionary.check(word):
-                db.buffered_write(update_emotes, chan=channel, we=word, ce=correct_emote, ac=status.get("activity"))
-                wrong_emotes.append(word)
-        else:
-            val = validate_emote(word, emotes)
-            if not val.boolean:
-                if not dictionary.check(word):
-                    db.buffered_write(update_emotes, chan=channel, we=word, ce=val.correct, ac=status.get("activity"))
-                    wrong_emotes.append(word)
-    if len(wrong_emotes) != 0:
-        amount = bot.state.get(channel).get("lacking", "0")
-        bot.state[channel]["lacking"] = str(int(amount) + len(wrong_emotes))
-        if send:
-            txt = " ".join(wrong_emotes)
-            message = Message("@" + username + ", " + txt + " PepeLaugh", MessageType.SPAM, channel)
-            bot.send_message(message)
-
-
-def validate_emote(emote, emotes):
-    for correct_emote in emotes:
-        dist = hammington(emote, correct_emote)
-        if dist == 1 or is_anagram(correct_emote, emote):
-            return Validation(False, correct_emote)
-    return Validation(True, emote)
-
-
-def update_emotes(db, kwargs) -> None:
-    if "chan" in kwargs and "we" in kwargs and "ce" in kwargs and "ac" in kwargs:
-        channel, wrong_emote, correct_emote, activity = kwargs.get("chan"), kwargs.get("we"), \
-                                                        kwargs.get("ce"), kwargs.get("ac")
-        db["emotes"][channel] = db.get("emotes").get(channel, dict())
-        channel_dict = db.get("emotes").get(channel)
-        channel_dict[correct_emote] = channel_dict.get(correct_emote, dict())
-        emote_dict = channel_dict.get(correct_emote)
-        count = emote_dict.get((wrong_emote, activity), 0)
-        emote_dict[(wrong_emote, activity)] = count + 1
-        channel_dict["count"] = channel_dict.get("count", 0) + 1
-
-
-@command
-@unwrap_command_args
-def update_counter(bot: 'TwitchChat', args, msg, username, channel, send):
-    username = username.lower()
-    if username in bot.state and len(bot.state.get(username).get("counters", {})) != 0:
-        counters = bot.state.get(username).get("counters")
-        words = msg.split()
-        for word in words:
-            if word in counters:
-                counters[word] = str(int(counters.get(word)) + 1)
 
 
 @command
@@ -644,11 +605,65 @@ def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def ignore(bot: 'TwitchChat', args, msg, username, channel, send):
     if ignore_list.access(contains, elem=username):
-        validate_emotes(bot, args, False)
         card_pogoff(bot, args, True)
-        update_counter(bot, args, False)
+        loop_over_words(bot, args, False)
         return True
     return False
+
+
+http = urllib3.PoolManager()
+
+
+def english_dictionary():
+    english_dict = enchant.Dict("en_US")
+    english_dict.add("pov")
+    english_dict.add("POV")
+    english_dict.add("pogo")
+    english_dict.add("poro")
+    english_dict.add("png")
+    english_dict.add("PNG")
+    english_dict.add("ppl")
+    english_dict.add("nvm")
+    english_dict.add("pos")
+    english_dict.add("POS")
+    return english_dict
+
+
+dictionary = english_dictionary()
+
+
+@returns
+@unwrap_command_args
+def dct(bot: 'TwitchChat', args, msg, username, channel, send):
+    msg = msg.lower() + " "
+    match = re.match(r"!dict\b(.*) ", msg)
+    if match:
+        word = match.group(1)
+        if dictionary.check(word):
+            try:
+                definition = define(word)
+                message = Message("@" + username + ", " + definition, MessageType.COMMAND, channel)
+
+                bot.send_message(message)
+            except Exception:
+                message = Message("@" + username + " couldn't look up the definition of " + word,
+                                  MessageType.COMMAND, channel)
+
+                bot.send_message(message)
+        else:
+            message = Message("@" + username + ", " + word + " is not an english word.",
+                              MessageType.COMMAND, channel)
+
+            bot.send_message(message)
+        return True
+    return False
+
+
+def define(word):
+    html = http.request("GET", "http://dictionary.reference.com/browse/" + word + "?s=t").data.decode("UTF-8")
+    items = re.findall('<meta name=\"description\" content=\"(.*) See more.\">', html, re.S)
+    defs = [re.sub('<.*?>', '', x).strip() for x in items]
+    return defs[0]
 
 
 @returns
@@ -1262,6 +1277,37 @@ def generate(bot: 'TwitchChat', args, msg, username, channel, send):
             emote *= random.randint(1, 8)
             message = Message(emote, MessageType.SPAM, channel)
             bot.send_message(message)
+
+
+@returns
+@unwrap_command_args
+def streak(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r'!streak\s(\w+)', msg)
+    if match:
+        def get_streak(dct, kwargs):
+            if "emote" in kwargs and "channel" in kwargs:
+                emote = kwargs.get("emote")
+                channel = kwargs.get("channel")
+                if emote in dct.get(channel, {}):
+                    return dct.get(channel).get(emote)
+
+        emote = match.group(1)
+        streak = streaks.access(get_streak, emote=emote, channel=channel)
+        if streak is None:
+            message = Message("This emote wasn't in the database or hasn't been used yet, sorry PrideLion !",
+                              MessageType.COMMAND,
+                              channel)
+            bot.send_message(message)
+        else:
+            current = streak["current"]
+            max_streak = streak["max"]
+            message = Message("@" + username + ", streak data " + emote + " : current =" + current
+                              + " max =" + max_streak,
+                              MessageType.COMMAND,
+                              channel)
+            bot.send_message(message)
+        return True
+    return False
 
 
 # REPEATS and REPEATS_SETUP
