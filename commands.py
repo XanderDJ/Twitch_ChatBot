@@ -1327,7 +1327,7 @@ def top_streaks(bot: 'TwitchChat', args, msg, username, channel, send):
         if len(top) != 0:
             txt = ""
             for pos, (emote, streak) in enumerate(top, 1):
-                txt += "({}) {} : {}".format(pos, emote, streak)
+                txt += "<{}> {} with {} ".format(pos, emote, streak)
             message = Message(txt, MessageType.COMMAND, channel)
             bot.send_message(message)
         else:
