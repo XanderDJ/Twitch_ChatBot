@@ -1313,17 +1313,24 @@ def streak(bot: 'TwitchChat', args, msg, username, channel, send):
 @returns
 @unwrap_command_args
 def top_streaks(bot: 'TwitchChat', args, msg, username, channel, send):
-    if msg.lower() == "!topstreaks":
+    match = re.match(r'!topstreaks\s*(\d+)')
+    if match:
+        amount = int(match.group(1)) if len(match.group(1)) != 0 else 5
+        if 1 > amount > 10:
+            return True
+
         def get_top_10_streaks(dct, kwargs):
-            if "channel" in kwargs:
+            if "channel" in kwargs and "amount" in kwargs:
+                channel = kwargs.get("channel")
+                amount = kwargs.get("amount")
                 streaks = []
                 dct[channel] = dct.get(channel, {})
                 for emote, streak in dct[channel].items():
                     streaks.append((emote, streak["max"]))
                 streaks.sort(key=lambda tup: int(tup[1]), reverse=True)
-                return streaks[:10]
+                return streaks[:amount]
 
-        top = streaks.access(get_top_10_streaks, channel=channel)
+        top = streaks.access(get_top_10_streaks, channel=channel, amount=amount)
         if len(top) != 0:
             txt = ""
             for pos, (emote, streak) in enumerate(top, 1):
