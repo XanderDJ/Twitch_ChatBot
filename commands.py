@@ -1251,6 +1251,19 @@ def jouch(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
 
 
+@returns
+@unwrap_command_args
+def generate(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r'!generate\s(\w+)', msg)
+    if match:
+        emote = match.group(1)
+        if emote in emote_dict["all_emotes"] and bot.limiter.can_send(channel, "generate", 30):
+            emote += " "
+            emote *= random.randint(1, 8)
+            message = Message(emote, MessageType.SPAM, channel)
+            bot.send_message(message)
+
+
 # REPEATS and REPEATS_SETUP
 
 @repeat(5)
