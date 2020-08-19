@@ -56,7 +56,7 @@ def update_streak_inner(dct, kwargs):
         for emote, streak in dct[channel].items():
             if emote in emotes:
                 streak["current"] = str(int(streak.get("current")) + 1)
-            elif streak["current"] > streak["max"]:
+            elif int(streak["current"]) > int(streak["max"]):
                 streak["max"] = streak["current"]
                 streak["current"] = "0"
             else:
