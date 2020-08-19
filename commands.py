@@ -1333,6 +1333,8 @@ def top_streaks(bot: 'TwitchChat', args, msg, username, channel, send):
         else:
             message = Message("No streaks yet Pridelion", MessageType.COMMAND, channel)
             bot.send_message(message)
+        return True
+    return False
 
 
 # REPEATS and REPEATS_SETUP
