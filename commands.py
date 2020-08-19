@@ -626,6 +626,7 @@ def english_dictionary():
     english_dict.add("nvm")
     english_dict.add("pos")
     english_dict.add("POS")
+    english_dict.add("ludwigs")
     return english_dict
 
 
