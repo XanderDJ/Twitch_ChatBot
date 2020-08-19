@@ -1310,6 +1310,31 @@ def streak(bot: 'TwitchChat', args, msg, username, channel, send):
     return False
 
 
+@returns
+@unwrap_command_args
+def top_streaks(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg.lower() == "!topstreaks":
+        def get_top_10_streaks(dct, kwargs):
+            if "channel" in kwargs:
+                streaks = []
+                dct[channel] = dct.get(channel, {})
+                for emote, streak in dct[channel].items():
+                    streaks.append((emote, streak["max"]))
+                streaks.sort(key=lambda tup: tup[1], reverse=True)
+                return streaks[:10]
+
+        top = streaks.access(get_top_10_streaks, channel=channel)
+        if len(top) != 0:
+            txt = ""
+            for pos, (emote, streak) in enumerate(top, 1):
+                txt += "({}) {} : {}".format(pos, emote, streak)
+            message = Message(txt, MessageType.COMMAND, channel)
+            bot.send_message(message)
+        else:
+            message = Message("No streaks yet Pridelion", MessageType.COMMAND, channel)
+            bot.send_message(message)
+
+
 # REPEATS and REPEATS_SETUP
 
 @repeat(5)
