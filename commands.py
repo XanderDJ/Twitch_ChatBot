@@ -346,7 +346,7 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
                 wrong_emote = validate_emotes(channel, status, word, emotes)
                 if wrong_emote is not None:
                     wrong_emotes.append(wrong_emote)
-        if word in emotes and word not in unique_emotes:
+        if word in emotes and word not in unique_emotes and word != "WeirdChamp":
             unique_emotes.add(word)
     update_streaks(unique_emotes, channel)
     # Use data gathered
