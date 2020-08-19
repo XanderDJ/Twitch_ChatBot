@@ -1316,7 +1316,7 @@ def top_streaks(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r'!topstreaks\s*(\d*)', msg.lower())
     if match:
         amount = int(match.group(1)) if len(match.group(1)) != 0 else 5
-        if 1 > amount > 10:
+        if 10  < amount and amount < 1:
             return True
 
         def get_top_10_streaks(dct, kwargs):
