@@ -228,6 +228,13 @@ def save_emotes_txt():
 
     emote_dict.access(save_emotes_inner)
     # clear buffer
+    emote_dict.access(append_to_list_in_dict)
+    emote_dict.access(write_to_dict)
+
+
+@save
+def save_user_roles():
+    rbac.users.access(lambda db, kwargs: f.save(db, "texts/user_roles.txt"))
 
 
 # ADMIN
@@ -342,13 +349,13 @@ def add_emote(bot: 'TwitchChat', args, msg, username, channel, send):
             message = Message("Already know that emote (albeit in a lowered form) 4Weird", MessageType.COMMAND, channel)
             bot.send_message(message)
         elif contains_check:
-            emote_dict.access(append_to_list_in_dict, key="all_emotes", val=emote)
-            emote_dict.access(append_to_list_in_dict, key=emote.lower(), val=emote)
+            emote_dict.buffered_write(append_to_list_in_dict, key="all_emotes", val=emote)
+            emote_dict.buffered_write(append_to_list_in_dict, key=emote.lower(), val=emote)
             message = Message("I know " + emote + " now OkayChamp", MessageType.COMMAND, channel)
             bot.send_message(message)
         else:
-            emote_dict.access(append_to_list_in_dict, key="all_emotes", val=emote)
-            emote_dict.access(write_to_dict, key=emote.lower(), val=[emote])
+            emote_dict.buffered_write(append_to_list_in_dict, key="all_emotes", val=emote)
+            emote_dict.buffered_write(write_to_dict, key=emote.lower(), val=[emote])
             message = Message("I know " + emote + " now OkayChamp", MessageType.COMMAND, channel)
             bot.send_message(message)
 
@@ -467,7 +474,7 @@ def time_out(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def dance(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg
-    if contains_word(msg, [" ludwigGun "]) and bot.limiter.can_send(channel, "dance", 25, True):
+    if contains_word(msg, [" ludwigGun ", " flyannGun "]) and bot.limiter.can_send(channel, "dance", 25, True):
         message = Message("pepeD " * random.randint(1, 9), MessageType.SPAM, channel)
 
         bot.send_message(message)
@@ -887,7 +894,7 @@ def correct(bot: 'TwitchChat', args, msg, username, channel, send):
                 message = Message(
                     "@" + username + ", you wrote " + emote + " incorrectly FeelsBadMan . "
                                                               "The correct way(s) of spelling it is "
-                                                            + " , ".join(correct_emotes),
+                    + " , ".join(correct_emotes),
                     MessageType.COMMAND, channel)
                 bot.send_message(message)
                 return True
