@@ -73,3 +73,11 @@ def word_pyramid(count, emote_list):
     for i in range(len(pyramid) - 2, -1, -1):
         pyramid.append(pyramid[i])
     return pyramid
+
+
+def count_capitals(text: str):
+    count = 0
+    for char in text:
+        if char.isupper():
+            count += 1
+    return count

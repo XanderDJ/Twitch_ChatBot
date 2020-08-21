@@ -371,7 +371,7 @@ class IrcClient(asynchat.async_chat, object):
             if len(self.messages_sent) < MAX_SEND_RATE:
                 if not self.message_queue.empty():
                     to_send = self.message_queue.get()
-                    if self.allowed_callback(to_send.channel, to_send.type):
+                    if self.allowed_callback(to_send.channel, to_send.type) and count_capitals(to_send.content) < 50:
                         try:
                             self.push(to_send.content.encode("UTF-8"))
                             self.logger.info(to_send)
