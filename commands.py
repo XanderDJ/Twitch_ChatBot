@@ -1062,7 +1062,7 @@ def deane(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!auto":
         if bot.limiter.can_send(channel, "auto", 20):
-            message = Message("hook 'em :v: ", MessageType.COMMAND,
+            message = Message("hook 'em :V: ", MessageType.COMMAND,
                               channel)
             bot.send_message(message)
         return True
