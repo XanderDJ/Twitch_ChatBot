@@ -118,6 +118,7 @@
     KonCha,
     Kreygasm,
     LUL,
+    LuL,
     LULW,
     LesbianPride,
     MVGame,

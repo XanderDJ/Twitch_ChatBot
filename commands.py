@@ -69,9 +69,8 @@ def load_emotes():
     emote_dict["all_emotes"] = all_emotes
     for emote in all_emotes:
         if emote.lower() not in emote_dict:
-            emote_dict[emote.lower()] = emote
-        else:
-            emote_dict["all_emotes"].remove(emote)
+            emote_dict[emote.lower()] = []
+        emote_dict[emote.lower()].append(emote)
     return emote_dict
 
 
@@ -158,17 +157,18 @@ def save_emotes():
     global db, client
 
     def save_emotes_inner(temp_db, kwargs):
+        ts = datetime.datetime.utcnow()
         for channel, collections in temp_db.get("emotes").items():
             db = client[channel]
             global_coll = db["global"]
-            global_coll.insert_one({"count": collections.get("count"), "timestamp": datetime.datetime.utcnow()})
+            global_coll.insert_one({"count": collections.get("count"), "timestamp": ts})
             for emote, wrong_emotes in collections.items():
                 col = db[emote]
                 wrong_emotes_to_insert = []
                 if emote != "count":
                     for (misspell, activity), count in wrong_emotes.items():
                         item = {"count": count, "spelling": misspell, "activity": activity,
-                                "timestamp": datetime.datetime.utcnow()}
+                                "timestamp": ts}
                         wrong_emotes_to_insert.append(item)
                     col.insert_many(wrong_emotes_to_insert)
         temp_db["emotes"] = dict()
@@ -222,7 +222,7 @@ def save_streaks():
 
 
 @save
-def save_emotes():
+def save_emotes_txt():
     global emote_dict
 
     def save_emotes_inner(data, kwargs):
@@ -339,12 +339,18 @@ def add_emote(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r'!addemote\s(\w+)', msg)
     if match:
         emote = match.group(1)
-        if emote_dict.access(contains, elem=emote.lower()):
+        contains_check = emote_dict.access(contains, elem=emote.lower())
+        if contains_check and emote in emote_dict.access(get_val, key=emote.lower()):
             message = Message("Already know that emote (albeit in a lowered form) 4Weird", MessageType.COMMAND, channel)
             bot.send_message(message)
+        elif contains_check:
+            emote_dict.access(append_to_list_in_dict, key="all_emotes", val=emote)
+            emote_dict.access(append_to_list_in_dict, key=emote.lower(), val=emote)
+            message = Message("I know " + emote + " now OkayChamp", MessageType.COMMAND, channel)
+            bot.send_message(message)
         else:
-            emote_dict.access(append_to_list_in_dict, key="all_emotes")
-            emote_dict.access(write_to_dict, key=emote.lower(), val=emote)
+            emote_dict.access(append_to_list_in_dict, key="all_emotes", val=emote)
+            emote_dict.access(write_to_dict, key=emote.lower(), val=[emote])
             message = Message("I know " + emote + " now OkayChamp", MessageType.COMMAND, channel)
             bot.send_message(message)
 
@@ -398,9 +404,9 @@ def validate_emotes(channel, status, word, emotes):
     word = cleanup(word)
     lowered_word = word.lower()
     if emote_dict.access(contains, elem=lowered_word):
-        correct_emote = emote_dict.access(get_val, key=lowered_word)
-        if word != correct_emote and not dictionary.check(word):
-            db.buffered_write(update_emotes, chan=channel, we=word, ce=correct_emote, ac=status.get("activity"))
+        correct_emotes = emote_dict.access(get_val, key=lowered_word)
+        if word not in correct_emotes and not dictionary.check(word):
+            db.buffered_write(update_emotes, chan=channel, we=word, ce=correct_emotes[0], ac=status.get("activity"))
             return word
     else:
         val = validate_emote(word, emotes)
@@ -862,15 +868,13 @@ def correct(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r"!correct (\w+)", msg)
     if match:
         emote = match.group(1)
-        correct_emote = emote_dict.access(get_val, key=emote.lower())
-        if correct_emote != "WeirdChamp":
-            if correct_emote is None:
-                message = Message(
-                    "@" + username + ", that emote wasn't in my emote database. "
-                                     "So I can't tell you the correct way to spell it.", MessageType.COMMAND, channel)
+        correct_emotes = emote_dict.access(get_val, key=emote.lower())
+        if correct_emotes is not None:
+            if "WeirdChamp" in correct_emotes:
+                message = Message("@" + username + " can't fool me PepeLaugh", MessageType.COMMAND, channel)
                 bot.send_message(message)
                 return True
-            if emote == correct_emote:
+            if emote in correct_emotes:
                 message = Message("@" + username + ", you wrote " + emote + " correctly! Good job FeelsWowMan",
                                   MessageType.COMMAND, channel)
                 bot.send_message(message)
@@ -878,14 +882,18 @@ def correct(bot: 'TwitchChat', args, msg, username, channel, send):
             else:
                 message = Message(
                     "@" + username + ", you wrote " + emote + " incorrectly FeelsBadMan . "
-                                                              "The correct way of spelling it is " + correct_emote,
+                                                              "The correct way(s) of spelling it is "
+                                                            + " , ".join(correct_emotes),
                     MessageType.COMMAND, channel)
                 bot.send_message(message)
                 return True
         else:
-            message = Message("@" + username + " can't fool me PepeLaugh", MessageType.COMMAND, channel)
+            message = Message(
+                "@" + username + ", that emote wasn't in my emote database. "
+                                 "So I can't tell you the correct way to spell it.", MessageType.COMMAND, channel)
             bot.send_message(message)
             return True
+
     return False
 
 
