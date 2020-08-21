@@ -20,10 +20,8 @@ import enchant
 import time
 import datetime
 import pymongo
-from pymongo.errors import ConnectionFailure
 import json
 from credentials import mongo_credentials
-from threading import Lock
 
 # THIS IS TO AVOID CYCLICAL IMPORTS BUT STILL ALLOWS TYPE CHECKING
 from typing import TYPE_CHECKING
@@ -32,7 +30,7 @@ if TYPE_CHECKING:
     from twitchchat.chat import TwitchChat
 
 # Imports of stuff I don't want on github directly
-from pings import pings
+from utility.pings import pings
 
 # LOADING STUFF
 
@@ -1064,7 +1062,7 @@ def deane(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 def auto(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     if msg.lower() == "!auto":
         if bot.limiter.can_send(channel, "auto", 20):
-            message = Message("peepoPog person with a cool command response", MessageType.COMMAND,
+            message = Message("hook 'em :v: ", MessageType.COMMAND,
                               channel)
             bot.send_message(message)
         return True
