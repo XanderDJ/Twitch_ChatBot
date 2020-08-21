@@ -1395,8 +1395,8 @@ def top_streaks(bot: 'TwitchChat', args, msg, username, channel, send):
 @returns
 @unwrap_command_args
 def magicseal(bot: 'TwitchChat', args, msg, username, channel, send):
-    if msg == "!magicseal" and bot.limiter.can_send(channel, "magicseal", 60, True):
-        message = Message("Idiot 4WeirdW", MessageType.COMMAND, channel)
+    if msg == "!magicseal" and bot.limiter.can_send(channel, "magicseal", 20, True):
+        message = Message("They're cool in my book FeelsOkayMan", MessageType.COMMAND, channel)
         bot.send_message(message)
 
 
