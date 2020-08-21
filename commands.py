@@ -221,6 +221,17 @@ def save_streaks():
     streaks.buffered_write(update_streak_inner)
 
 
+@save
+def save_emotes():
+    global emote_dict
+
+    def save_emotes_inner(data, kwargs):
+        f.save(data["all_emotes"], "texts/emotes.txt")
+
+    emote_dict.access(save_emotes_inner)
+    # clear buffer
+
+
 # ADMIN
 
 @admin
@@ -318,6 +329,23 @@ def delete_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
                 MessageType.CHAT,
                 channel
             )
+            bot.send_message(message)
+
+
+@admin
+@unwrap_command_args
+def add_emote(bot: 'TwitchChat', args, msg, username, channel, send):
+    global emote_dict
+    match = re.match(r'!addemote\s(\w+)', msg)
+    if match:
+        emote = match.group(1)
+        if emote_dict.access(contains, elem=emote.lower()):
+            message = Message("Already know that emote (albeit in a lowered form) 4Weird", MessageType.COMMAND, channel)
+            bot.send_message(message)
+        else:
+            emote_dict.access(append_to_list_in_dict, key="all_emotes")
+            emote_dict.access(write_to_dict, key=emote.lower(), val=emote)
+            message = Message("I know " + emote + " now OkayChamp", MessageType.COMMAND, channel)
             bot.send_message(message)
 
 
