@@ -68,8 +68,8 @@ def load_emotes():
     all_emotes = f.load("texts/emotes.txt", [])
     emote_dict["all_emotes"] = all_emotes
     for emote in all_emotes:
-        if (el := emote.lower()) not in emote_dict:
-            emote_dict[el] = emote
+        if emote.lower() not in emote_dict:
+            emote_dict[emote.lower()] = emote
         else:
             emote_dict["all_emotes"].remove(emote)
     return emote_dict
