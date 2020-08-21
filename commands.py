@@ -148,7 +148,7 @@ def unwrap_command_args(func):
 
 # SAVES
 
-client = pymongo.MongoClient("mongodb://127.0.0.1:27017/")
+client = pymongo.MongoClient("mongodb://{}:{}@127.0.0.1:27017/".format(mongo_credentials.user, mongo_credentials.pwd))
 
 
 @save
