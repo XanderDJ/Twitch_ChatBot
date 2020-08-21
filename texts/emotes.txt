@@ -1,171 +1,393 @@
-monkaEyes
-monkaHmm
-monkaOMEGA
-monkaS
-monkaSHAKE
-monkaSpeed
-monkaTOS
-monkaW
-peepoArrive
-peepoBlanket
-peepoChat
-peepoClap
-peepoFat
-peepoHappy
-peepoHug
-peepoJAM
-peepoPog
-peepoSad
-peepoSimp
-peepoWTF
-PeoplesChamp
-pepeCD
-pepeClap
-pepeD
-pepeDS
-Pepega
-PepegaAim
-PepegaPls
-Pepege
-PepeHands
-pepeJAM
-PepeLaugh
-pepeMeltdown
-PepeMods
-PepePls
-PepeS
-pepeSadJam
-PepeSpin
-PepoCheer
-PepoG
-PermaSmug
-PETTHELUDWIG
-PETTHELUDWIGJR
-FeelsAmazingMan
-FeelsBadMan
-FeelsBirthdayMan
-FeelsDankMan
-FeelsGoodMan
-FeelsLagMan
-FeelsLateMan
-FeelsOkayMan
-FeelsRainMan
-FeelsStrongMan
-FeelsWeirdMan
-FeelsWowMan
-Pog
-PogChamp
-POGGIES
-PogOff
-PogTasty
-PogU
-PogYou
-PagChomp
-Kapp
-Kappa
-KappaPride
-ludwig7
-ludwigA
-ludwigAwooga
-ludwigAY
-ludwigBan
-ludwigBANGER
-ludwigBlanket
-ludwigBoomer
-ludwigBRB
-ludwigC
-ludwigCD
-ludwigChan
-ludwigChoke
-ludwigClam
-ludwigCroc
-ludwigCute
-ludwigD
-ludwigDance
-ludwigDoc
-ludwigEZ
-ludwigF
-ludwigFarm
-ludwigFC
-ludwigFold
-ludwigG
-ludwigGamer
-ludwigGun
-ludwigHands
-ludwigHeads
-ludwigHi
-ludwigHmm
-ludwigHypers
-ludwigIRS
-ludwigJr
-ludwigKiss
-ludwigLove
-ludwigMagnum
-ludwigMald
-ludwigMelvin
-ludwigMilkers
-ludwigNarc
-ludwigNyah
-ludwigPants
-ludwigPeepawhappy
-ludwigPeepawsad
-ludwigPls
-ludwigPoggert
-ludwigPride
-ludwigRelax
-ludwigS
-ludwigSmooth
-ludwigSmug
-ludwigSpectrum
-ludwigStar
-ludwigStinky
-ludwigT
-ludwigTails
-ludwigU
-ludwigW
-ludwigWC
-ludwigWhat
-ludwigWow
-ludwigYikes
-ludwigYuck
-LULW
-ppBounce
-ppCircle
-ppHop
-ppL
-ppMitosis
-ppOverheat
-ppPoof
-Sadge
-pepeSmoke
-OMEGALUL
-POOGERS
-forsenCD
-forsenPls
-pugPls2
-RareChar
-blobDance
-RarePepe
-WeirdChamp
-PauseChamp
-PainsChamp
-SadChamp
-UnPog
-VisLaud
-POGGERS
-KOUGA
-peepoDog
-widepeepoHappy
-widepeepoSad
-Kreygasm
-PogO
-HandsUp
-gachiHYPER
-gachiPRIDE
-gachiBASS
-GachiPls
-ludpeepoGoose
-Kippa
-4Weird
-4WeirdW
-YEP
+[
+    4Head,
+    4Weird,
+    4WeirdW,
+    ANELE,
+    ArgieB8,
+    ArsonNoSexy,
+    AsexualPride,
+    AsianGlow,
+    BCWarrior,
+    BOP,
+    BabyRage,
+    BasedGod,
+    BatChest,
+    BegWan,
+    BibleThump,
+    BigBrother,
+    BigPhish,
+    BisexualPride,
+    BlackLivesMatter,
+    BlargNaut,
+    BloodTrail,
+    BrainSlug,
+    BrokeBack,
+    BuddhaBar,
+    CTC,
+    CarlSmile,
+    ChefFrank,
+    Clean,
+    CoolCat,
+    CoolStoryBob,
+    CorgiDerp,
+    CrreamAwk,
+    CurseLit,
+    DAESuppy,
+    DBstyle,
+    DansGame,
+    DarkMode,
+    DatSheffy,
+    DendiFace,
+    DogFace,
+    DoritosChip,
+    DrinkPurple,
+    DxCat,
+    EarthDay,
+    EleGiggle,
+    EntropyWins,
+    ExtraLife,
+    FBBlock,
+    FBCatch,
+    FBChallenge,
+    FBPass,
+    FBPenalty,
+    FBRun,
+    FBSpiral,
+    FBtouchdown,
+    FUNgineer,
+    FailFish,
+    FeelsAmazingMan,
+    FeelsBadMan,
+    FeelsBirthdayMan,
+    FeelsDankMan,
+    FeelsGoodMan,
+    FeelsLagMan,
+    FeelsLateMan,
+    FeelsOkayMan,
+    FeelsRainMan,
+    FeelsStrongMan,
+    FeelsWeirdMan,
+    FeelsWowMan,
+    FishMoley,
+    FootBall,
+    FootGoal,
+    FootYellow,
+    FrankerZ,
+    FreakinStinkin,
+    FutureMan,
+    GachiPls,
+    GayPride,
+    GenderFluidPride,
+    GingerPower,
+    GivePLZ,
+    GrammarKing,
+    GreenTeam,
+    GunRun,
+    HSCheers,
+    HSWP,
+    HandsUp,
+    HassaanChop,
+    HassanChop,
+    HeyGuys,
+    HolidayCookie,
+    HolidayLog,
+    HolidayOrnament,
+    HolidayPresent,
+    HolidaySanta,
+    HolidayTree,
+    HotPokket,
+    IntersexPride,
+    InuyoFace,
+    ItsBoshyTime,
+    JKanStyle,
+    Jebaited,
+    JonCarnage,
+    KAPOW,
+    KOUGA,
+    Kapp,
+    Kappa,
+    KappaClaus,
+    KappaPride,
+    KappaRoss,
+    KappaWealth,
+    Kappu,
+    Keepo,
+    KevinTurtle,
+    Kippa,
+    KomodoHype,
+    KonCha,
+    Kreygasm,
+    LUL,
+    LULW,
+    LesbianPride,
+    MVGame,
+    MaN,
+    Mau5,
+    MaxLOL,
+    MercyWing1,
+    MercyWing2,
+    MikeHogu,
+    MingLee,
+    MorphinTime,
+    MrDestructoid,
+    NaM,
+    NinjaGrumpy,
+    NomNom,
+    NonBinaryPride,
+    NotATK,
+    NotLikeThis,
+    OMEGALUL,
+    OSFrog,
+    OhMyDog,
+    OneHand,
+    OpieOP,
+    OptimizePrime,
+    PETTHELUDWIG,
+    PETTHELUDWIGJR,
+    PJSalt,
+    PJSugar,
+    PMSTwin,
+    POGGERS,
+    POGGIES,
+    POOGERS,
+    PRChase,
+    PagChomp,
+    PainsChamp,
+    PanicVis,
+    PansexualPride,
+    PartyHat,
+    PartyTime,
+    PauseChamp,
+    PeoplesChamp,
+    PepeHands,
+    PepeLaugh,
+    PepeMods,
+    PepePls,
+    PepeS,
+    PepeSpin,
+    Pepega,
+    PepegaAim,
+    PepegaPls,
+    Pepege,
+    PepoCheer,
+    PepoG,
+    PermaSmug,
+    PicoMause,
+    PinkMercy,
+    PipeHype,
+    PixelBob,
+    Pog,
+    PogChamp,
+    PogO,
+    PogOff,
+    PogTasty,
+    PogU,
+    PogYou,
+    Poooound,
+    PopCorn,
+    PorscheWIN,
+    PowerUpL,
+    PowerUpR,
+    PraiseIt,
+    PrideLion,
+    PrimeMe,
+    PunOko,
+    PunchTrees,
+    PurpleStar,
+    RaccAttack,
+    RalpherZ,
+    RareChar,
+    RarePepe,
+    RedCoat,
+    RedTeam,
+    ResidentSleeper,
+    RitzMitz,
+    RlyTho,
+    RuleFive,
+    SMOrc,
+    SSSsss,
+    SabaPing,
+    SadChamp,
+    Sadge,
+    SeemsGood,
+    SeriousSloth,
+    ShadyLulu,
+    ShazBotstix,
+    SingsMic,
+    SingsNote,
+    SmoocherZ,
+    SoBayed,
+    SoonerLater,
+    Squid1,
+    Squid2,
+    Squid3,
+    Squid4,
+    StinkyCheese,
+    StoneLightning,
+    StrawBeary,
+    SuperVinlin,
+    SwiftRage,
+    TBAngel,
+    TF2John,
+    TPFufun,
+    TPcrunchyroll,
+    TTours,
+    TakeNRG,
+    TearGlove,
+    TehePelo,
+    ThankEgg,
+    TheIlluminati,
+    TheRinger,
+    TheTarFu,
+    TheThing,
+    ThunBeast,
+    TinyFace,
+    TombRaid,
+    TooSpicy,
+    TransgenderPride,
+    TriHard,
+    TwitchLit,
+    TwitchRPG,
+    TwitchSings,
+    TwitchUnity,
+    TwitchVotes,
+    UWot,
+    UnPog,
+    UnSane,
+    UncleNox,
+    VirtualHug,
+    VisLaud,
+    VoHiYo,
+    VoteNay,
+    VoteYea,
+    WTRuck,
+    WeirdChamp,
+    WholeWheat,
+    WutFace,
+    YEP,
+    YouDontSay,
+    YouWHY,
+    bleedPurple,
+    blobDance,
+    cmonBruh,
+    copyThis,
+    duDudu,
+    forsenCD,
+    forsenPls,
+    gachiBASS,
+    gachiHYPER,
+    gachiPRIDE,
+    imGlitch,
+    ludpeepoGoose,
+    ludwig7,
+    ludwigA,
+    ludwigAY,
+    ludwigAwooga,
+    ludwigBANGER,
+    ludwigBRB,
+    ludwigBan,
+    ludwigBlanket,
+    ludwigBoomer,
+    ludwigC,
+    ludwigCD,
+    ludwigChan,
+    ludwigChoke,
+    ludwigClam,
+    ludwigCroc,
+    ludwigCute,
+    ludwigD,
+    ludwigDance,
+    ludwigDoc,
+    ludwigEZ,
+    ludwigF,
+    ludwigFC,
+    ludwigFarm,
+    ludwigFold,
+    ludwigG,
+    ludwigGamer,
+    ludwigGun,
+    ludwigHands,
+    ludwigHeads,
+    ludwigHi,
+    ludwigHmm,
+    ludwigHypers,
+    ludwigIRS,
+    ludwigJr,
+    ludwigK,
+    ludwigKiss,
+    ludwigLove,
+    ludwigMagnum,
+    ludwigMald,
+    ludwigMelvin,
+    ludwigMilkers,
+    ludwigNarc,
+    ludwigNyah,
+    ludwigPants,
+    ludwigPeepawhappy,
+    ludwigPeepawsad,
+    ludwigPls,
+    ludwigPoggert,
+    ludwigPride,
+    ludwigRelax,
+    ludwigS,
+    ludwigSmooth,
+    ludwigSmug,
+    ludwigSpectrum,
+    ludwigStar,
+    ludwigStinky,
+    ludwigT,
+    ludwigTails,
+    ludwigU,
+    ludwigW,
+    ludwigWC,
+    ludwigWhat,
+    ludwigWow,
+    ludwigYikes,
+    ludwigYuck,
+    mcaT,
+    monkaEyes,
+    monkaHmm,
+    monkaOMEGA,
+    monkaS,
+    monkaSHAKE,
+    monkaSpeed,
+    monkaTOS,
+    monkaW,
+    nuggle1Laugh,
+    panicBasket,
+    pastaThat,
+    peepoArrive,
+    peepoBlanket,
+    peepoChat,
+    peepoClap,
+    peepoDog,
+    peepoFat,
+    peepoHappy,
+    peepoHug,
+    peepoJAM,
+    peepoJAMMER,
+    peepoPog,
+    peepoSad,
+    peepoSimp,
+    peepoWTF,
+    pepeCD,
+    pepeClap,
+    pepeD,
+    pepeDS,
+    pepeJAM,
+    pepeMeltdown,
+    pepeSadJam,
+    pepeSmoke,
+    ppBounce,
+    ppCircle,
+    ppHop,
+    ppL,
+    ppMitosis,
+    ppOverheat,
+    ppPoof,
+    pugPls2,
+    riPepperonis,
+    twitchRaid,
+    widepeepoHappy,
+    widepeepoSad
+]
