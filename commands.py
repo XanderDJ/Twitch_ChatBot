@@ -665,6 +665,7 @@ def english_dictionary():
     english_dict.add("mon")
     english_dict.add("yee")
     english_dict.add("yeh")
+    english_dict.add("lul")
     return english_dict
 
 
