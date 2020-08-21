@@ -668,6 +668,7 @@ def english_dictionary():
     english_dict.add("LOL")
     english_dict.add("lud")
     english_dict.add("bo3")
+    english_dict.add("boi")
     return english_dict
 
 

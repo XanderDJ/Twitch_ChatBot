@@ -391,3 +391,4 @@ class IrcClient(asynchat.async_chat, object):
             asyncore.loop(map=self.map)
         finally:
             self.running = False
+
