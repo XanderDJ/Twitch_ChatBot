@@ -13,6 +13,7 @@
 import os
 
 from utility import *
+from utility import rbac
 import functools
 import re
 import urllib3
@@ -147,7 +148,7 @@ def unwrap_command_args(func):
 
 # SAVES
 
-client = pymongo.MongoClient("mongodb://{}:{}@127.0.0.1:27017/".format(mongo_credentials.user, mongo_credentials.pwd))
+client = pymongo.MongoClient("mongodb://127.0.0.1:27017/")
 
 
 @save
@@ -238,7 +239,7 @@ def save_user_roles():
 
 
 # ADMIN
-
+@rbac.addRole("toggler")
 @admin
 @unwrap_command_args
 def toggle(bot: 'TwitchChat', args, msg, username, channel, send):
@@ -358,6 +359,31 @@ def add_emote(bot: 'TwitchChat', args, msg, username, channel, send):
             emote_dict.buffered_write(write_to_dict, key=emote.lower(), val=[emote])
             message = Message("I know " + emote + " now OkayChamp", MessageType.COMMAND, channel)
             bot.send_message(message)
+
+
+@admin
+@unwrap_command_args
+def add_role(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r'!addrole\s(\w+)\s(\w+)', msg.lower())
+    if match:
+        role = match.group(1)
+        user = match.group(2)
+        rbac.add_role(user, role, channel)
+        message = Message(user + " now has role " + role + " PrideLion", MessageType.COMMAND, channel)
+        bot.send_message(message)
+
+
+@admin
+@unwrap_command_args
+def remove_role(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r'!removerole\s(\w+)\s(\w+)', msg.lower())
+    if match:
+        role = match.group(1)
+        user = match.group(2)
+        rbac.remove_role(user, role, channel)
+        message = Message(user + " no longer has role " + role + " PrideLion . Did they abuse it 4WeirdW ?",
+                          MessageType.COMMAND, channel)
+        bot.send_message(message)
 
 
 # COMMANDS

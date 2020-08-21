@@ -2,6 +2,7 @@ from localasync import asynchat, asyncore
 import logging
 import socket
 from utility import *
+from utility import rbac
 import re
 import commands
 from datetime import datetime, timedelta
@@ -159,6 +160,10 @@ class TwitchChat(object):
                 self.logger.debug(args["message"])
                 if args["username"] == self.admin:
                     for func_name, func in self.admins.items():
+                        func(self, args)
+                if rbac.has_roles(args['username'], args['channel']):
+                    funcs = rbac.get_allowed_functions(args['username'], args['channel'])
+                    for func in funcs:
                         func(self, args)
                 for func_name, func in self.returns.items():
                     if func(self, args):
