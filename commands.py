@@ -22,6 +22,7 @@ import datetime
 import pymongo
 from pymongo.errors import ConnectionFailure
 import json
+from credentials import mongo_credentials
 from threading import Lock
 
 # THIS IS TO AVOID CYCLICAL IMPORTS BUT STILL ALLOWS TYPE CHECKING
@@ -149,7 +150,7 @@ def unwrap_command_args(func):
 
 # SAVES
 
-client = pymongo.MongoClient("mongodb://localhost:27017/")
+client = pymongo.MongoClient("mongodb://{}:{}@127.0.0.1:27017/".format(mongo_credentials.user, mongo_credentials.pwd))
 
 
 @save
