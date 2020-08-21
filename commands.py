@@ -64,19 +64,19 @@ streaks = LockedData(f.load("texts/streaks.txt", {}))
 
 
 def load_emotes():
-    fh = open("texts/emotes.txt", "r")
-    emotes = dict()
-    emotes["all_emotes"] = []
-    for emote in fh:
-        emote = emote.rstrip()
-        emotes["all_emotes"] += [emote]
-        emotes[emote.lower()] = emote
-    fh.close()
-    return emotes
+    emote_dict = {}
+    all_emotes = f.load("texts/emotes.txt", [])
+    emote_dict["all_emotes"] = all_emotes
+    for emote in all_emotes:
+        if el := emote.lower() not in emote_dict:
+            emote_dict[el] = emote
+        else:
+            emote_dict["all_emotes"].remove(emote)
+    return emote_dict
 
 
 db = LockedData({"emotes": dict(), "mentions": []})
-emote_dict = load_emotes()
+emote_dict = LockedData(load_emotes())
 blacklisted = f.load("texts/blacklisted.txt", [])
 
 
@@ -331,7 +331,7 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
     username = username.lower()
     # static data
     counters = bot.state.get(username, {}).get("counters", {})
-    emotes = emote_dict["all_emotes"]
+    emotes = emote_dict.access(get_val, key="all_emotes")
     unique_emotes = set()
     wrong_emotes = []
     status = bot.twitch_status.get_status(channel)
@@ -369,8 +369,8 @@ def validate_emotes(channel, status, word, emotes):
     global emote_dict, db
     word = cleanup(word)
     lowered_word = word.lower()
-    if lowered_word in emote_dict:
-        correct_emote = emote_dict.get(lowered_word)
+    if emote_dict.access(contains, elem=lowered_word):
+        correct_emote = emote_dict.access(get_val, key=lowered_word)
         if word != correct_emote and not dictionary.check(word):
             db.buffered_write(update_emotes, chan=channel, we=word, ce=correct_emote, ac=status.get("activity"))
             return word
@@ -724,7 +724,8 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                     if val not in counters:
                         counters[val] = counters.get(val, "0")
                         message = Message(
-                            "@" + username + ", I will now count how many times " + val_or_user + " says " + val + " PrideLion",
+                            "@" + username + ", I will now count how many times "
+                            + val_or_user + " says " + val + " PrideLion",
                             MessageType.COMMAND, channel)
                         bot.send_message(message)
                     else:
@@ -833,7 +834,7 @@ def correct(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r"!correct (\w+)", msg)
     if match:
         emote = match.group(1)
-        correct_emote = emote_dict.get(emote.lower(), None)
+        correct_emote = emote_dict.access(get_val, key=emote.lower())
         if correct_emote != "WeirdChamp":
             if correct_emote is None:
                 message = Message(
@@ -1172,7 +1173,7 @@ def pyramid(bot: 'TwitchChat', args, msg, username, channel, send):
             return True
         else:
             pyramid_emotes = match.group(2).split()
-            correct_emotes = emote_dict["all_emotes"]
+            correct_emotes = emote_dict.access(get_val, key="all_emotes")
             for emote in pyramid_emotes:
                 if emote not in correct_emotes:
                     return False
@@ -1266,7 +1267,7 @@ def unique(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def jouch(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg.lower() == "!jouch" and bot.limiter.can_send(channel, "jouch", 20):
-        emote = random.choice(emote_dict["all_emotes"])
+        emote = random.choice(emote_dict.access(get_val, key="all_items"))
         message = Message(emote + " on da Jouch ", MessageType.COMMAND, channel)
         bot.send_message(message)
 
@@ -1277,7 +1278,7 @@ def generate(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r'!generate\s(\w+)', msg)
     if match:
         emote = match.group(1)
-        if emote in emote_dict["all_emotes"] and bot.limiter.can_send(channel, "generate", 30):
+        if emote in emote_dict.access(get_val, key="all_emotes") and bot.limiter.can_send(channel, "generate", 30):
             emote += " "
             emote *= random.randint(1, 8)
             message = Message(emote, MessageType.SPAM, channel)
