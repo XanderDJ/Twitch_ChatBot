@@ -296,6 +296,7 @@ def part(bot: 'TwitchChat', args, msg, username, channel, send):
                     bot.leave_twitch_channel(chan)
 
 
+@rbac.addRole("pinger")
 @admin
 @unwrap_command_args
 def ping(bot: 'TwitchChat', args, msg, username, channel, send):
@@ -304,6 +305,7 @@ def ping(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
 
 
+@rbac.addRole("snitch")
 @admin
 @unwrap_command_args
 def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
