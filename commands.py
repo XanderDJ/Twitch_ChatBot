@@ -713,7 +713,7 @@ dictionary = english_dictionary()
 @unwrap_command_args
 def dct(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower() + " "
-    match = re.match(r"!dict\b(.*) ", msg)
+    match = re.match(r"!dict\s(\w+)", msg)
     if match:
         word = match.group(1)
         if dictionary.check(word):
