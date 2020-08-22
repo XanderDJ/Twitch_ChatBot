@@ -1436,6 +1436,14 @@ def magicseal(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
 
 
+@returns
+@unwrap_command_args
+def edubble(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg == "!edubble" and bot.limiter.can_send(channel, "edubble", 20):
+        message = Message("The two tone rebel RIP", MessageType.COMMAND, channel)
+        bot.send_message(message)
+
+
 # REPEATS and REPEATS_SETUP
 
 @repeat(5)
