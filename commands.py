@@ -556,6 +556,7 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
                     or contains_all(msg.rstrip().lower(), ["ptideii", "omegalul"])
                     or contains_all(msg.rstrip().lower(), ["ptideli", "omegalul"])
                     or contains_all(msg.lower().rstrip(), ["wulf", "pogo"])
+                    or contains_all(msg.lower().rstrip(), ["nuggle1laugh", "ptidelio"])
             ):
         message = Message("@" + username + ", PogOff you're not funny " + "PogOff " * random.randint(1, 6),
                           MessageType.SPAM, channel)
