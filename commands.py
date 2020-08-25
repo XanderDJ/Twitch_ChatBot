@@ -1445,7 +1445,6 @@ def magicseal(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
 
 
-
 @returns
 @unwrap_command_args
 def edubble(bot: 'TwitchChat', args, msg, username, channel, send):
