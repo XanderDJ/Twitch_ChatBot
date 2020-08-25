@@ -1473,7 +1473,7 @@ def handle_pull_event(state: dict, bot: 'TwitchChat'):
             for channel in bot.channels:
                 message = Message("I've received a critical update so I'm turning off, bye guys PrideLion !"
                                   , MessageType.HELPFUL, channel)
-                bot.send_message(channel)
+                bot.send_message(message)
             time.sleep(len(bot.channels) * 2)
             bot.logger.info("STOPPING")
             bot.save()
@@ -1483,7 +1483,7 @@ def handle_pull_event(state: dict, bot: 'TwitchChat'):
             for channel in bot.channels:
                 message = Message("I've been upgraded or updated, I don't care, it's cool PrideLion !"
                                   , MessageType.HELPFUL, channel)
-                bot.send_message(channel)
+                bot.send_message(message)
             bot.logger.info("RELOADING")
             bot.reload()
 
