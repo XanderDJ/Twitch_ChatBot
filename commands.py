@@ -394,7 +394,7 @@ def remove_role(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def ping(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
-    if contains_all(msg , [" ping ", " me "]):
+    if contains_all(msg, [" ping ", " me "]):
         message = Message("@" + username + ", ping!", MessageType.HELPFUL, channel)
         bot.send_message(message)
 
@@ -1470,11 +1470,20 @@ def handle_pull_event(state: dict, bot: 'TwitchChat'):
         chlm_time = state.get("chlm")
         if chm_time > chlm_time:
             # chat.py was modified so program has to shutdown
+            for channel in bot.channels:
+                message = Message("I've received a critical update so I'm turning off, bye guys PrideLion !"
+                                  , MessageType.HELPFUL, channel)
+                bot.send_message(channel)
+            time.sleep(len(bot.channels) * 2)
             bot.logger.info("STOPPING")
             bot.save()
             bot.stop_all()
         else:
             # chat.py wasn't modified so it's safe to reload commands.py
+            for channel in bot.channels:
+                message = Message("I've been upgraded or updated, I don't care, it's cool PrideLion !"
+                                  , MessageType.HELPFUL, channel)
+                bot.send_message(channel)
             bot.logger.info("RELOADING")
             bot.reload()
 
@@ -1491,14 +1500,14 @@ def check_for_title_change(state: dict, bot: 'TwitchChat'):
         else:
             user_id = state["ids"][channel]
         current_title = get_title(http, channel, user_id)
-        if old_title != current_title and not bot.twitch_status.get_status(channel)["live"]:
+        if old_title != current_title:
             state[channel] = current_title
             message = Message(
                 "PrideLion TITLE CHANGE PrideLion",
                 MessageType.CHAT,
                 channel
             )
-            if old_title != "":
+            if old_title != "" and not bot.twitch_status.get_status(channel)["live"]:
                 bot.send_message(message)
 
 
@@ -1538,8 +1547,8 @@ def get_title(pool_manager, channel, user_id):
 def toggle_if_live(state, bot: 'TwitchChat'):
     for channel in bot.channels:
         live = bot.twitch_status.get_status(channel)["live"]
-        state[channel] = live
         if live and live != state[channel]:
+            state[channel] = live
             bot.logger.info(channel + " went live toggling bot off")
             bot.toggle_channel(channel, ToggleType.OFF)
 
