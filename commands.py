@@ -758,7 +758,7 @@ def define(word):
 @returns
 @unwrap_command_args
 def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
-    match = re.match(r'!addcounter\s(\w+)\s*(\w*)', msg)
+    match = re.match(r'!addcounter\s([^\s]+)\s*([^\s]+)', msg)
     if match:
         val_or_user = match.group(1)
         val = match.group(2)
