@@ -392,7 +392,7 @@ def remove_role(bot: 'TwitchChat', args, msg, username, channel, send):
 
 @command
 @unwrap_command_args
-def ping(bot: 'TwitchChat', args, msg, username, channel, send):
+def ping_me(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_all(msg, [" ping ", " me "]):
         message = Message("@" + username + ", ping!", MessageType.HELPFUL, channel)
