@@ -714,6 +714,7 @@ def english_dictionary():
     english_dict.add("bo3")
     english_dict.add("boi")
     english_dict.add("mayhap")
+    english_dict.add("luv")
     return english_dict
 
 
