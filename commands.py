@@ -388,6 +388,17 @@ def remove_role(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
 
 
+@admin
+@unwrap_command_args
+def delete_counter(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r'!deletecounter\s([^\s]+)\s([^\s]+)]', msg)
+    if match:
+        user = match.group(1)
+        word = match.group(2)
+        if user in bot.state and "counter" in bot.state.get(user) and word in bot.state.get("counter"):
+            bot.state.get(user).get("counter").pop(word)
+
+
 # COMMANDS
 
 @command
@@ -799,7 +810,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                 bot.send_message(message)
                 return True
             val_or_user = val_or_user.lower()
-            if username.lower() == val_or_user or username == bot.admin:
+            if username.lower() == val_or_user.lower() or username == bot.admin:
                 # add the counter for the username mentione with
                 bot.state[val_or_user] = bot.state.get(val_or_user, dict())
                 bot.state[val_or_user]["counters"] = bot.state.get(val_or_user).get("counters", {})
