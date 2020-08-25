@@ -395,6 +395,7 @@ def delete_counter(bot: 'TwitchChat', args, msg, username, channel, send):
     if match:
         user = match.group(1)
         word = match.group(2)
+        bot.logger.info(user + " : " + word)
         if user in bot.state and "counter" in bot.state.get(user) and word in bot.state.get(user).get("counter"):
             bot.state.get(user).get("counter").pop(word)
 
