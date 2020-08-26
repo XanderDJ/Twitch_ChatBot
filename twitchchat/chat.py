@@ -164,7 +164,6 @@ class TwitchChat(object):
                 if rbac.has_roles(args['username'], args['channel']):
                     funcs = rbac.get_allowed_functions(args['username'], args['channel'])
                     for func in funcs:
-                        self.logger.info("Calling " + func.__name__ + " for " + args["username"] + " with " + args["message"])
                         func(self, args)
                 for func_name, func in self.returns.items():
                     if func(self, args):
