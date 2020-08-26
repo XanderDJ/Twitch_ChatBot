@@ -244,7 +244,7 @@ def save_user_roles():
 @unwrap_command_args
 def toggle(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
-    match = re.match(r"!toggle (\w+)", msg)
+    match = re.match(r"!toggle\s(\w+)", msg)
     if match:
         ans = match.group(1)
         if ans == "on":
