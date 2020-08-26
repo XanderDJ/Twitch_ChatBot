@@ -857,7 +857,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
 @returns
 @unwrap_command_args
 def get_count(bot: 'TwitchChat', args, msg, username, channel, send):
-    match = re.match(r'!count\s(\w+)\s(\w+)', msg)
+    match = re.match(r'!count\s(\w+)\s([^\s]+)', msg)
     if match:
         user = match.group(1).lower()
         val = match.group(2)
