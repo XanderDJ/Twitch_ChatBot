@@ -585,7 +585,6 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         message = Message("@" + username + ", PogOff you're not funny " + "PogOff " * random.randint(1, 6),
                           MessageType.SPAM, channel)
         bot.send_message(message)
-a
 
 # NOTICE
 
