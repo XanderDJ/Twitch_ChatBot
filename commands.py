@@ -730,6 +730,7 @@ def english_dictionary():
     english_dict.add("boi")
     english_dict.add("mayhap")
     english_dict.add("luv")
+    english_dict.add("mtn")
     return english_dict
 
 
