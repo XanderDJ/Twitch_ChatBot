@@ -585,7 +585,7 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         message = Message("@" + username + ", PogOff you're not funny " + "PogOff " * random.randint(1, 6),
                           MessageType.SPAM, channel)
         bot.send_message(message)
-
+a
 
 # NOTICE
 
@@ -774,7 +774,7 @@ def define(word):
 @returns
 @unwrap_command_args
 def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
-    match = re.match(r'!addcounter\s([^\s]+)\s*([^\s]+)', msg)
+    match = re.match(r'!addcounter\s([^\s]+)\s*([^\s]*)', msg)
     if match:
         val_or_user = match.group(1)
         val = match.group(2)
