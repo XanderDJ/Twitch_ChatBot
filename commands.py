@@ -410,7 +410,7 @@ def delete_counter(bot: 'TwitchChat', args, msg, username, channel, send):
                 message = Message("Can't say the word but I wasn't tracking it for " + user + " 4Head",
                                   MessageType.COMMAND, channel)
             else:
-                message = Message("I wasn't tracking " + user + " for " + word + "4Head", MessageType.COMMAND, channel)
+                message = Message("I wasn't tracking " + user + " for " + word + " 4Head", MessageType.COMMAND, channel)
             bot.send_message(message)
 
 
