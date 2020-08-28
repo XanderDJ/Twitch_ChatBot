@@ -77,6 +77,8 @@ db = LockedData({"emotes": dict(), "mentions": []})
 emote_dict = LockedData(load_emotes())
 blacklisted = f.load("texts/blacklisted.txt", [])
 
+ID_cache = IDCache()
+
 
 def reload():
     global emote_dict, blacklisted
@@ -586,6 +588,7 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
                           MessageType.SPAM, channel)
         bot.send_message(message)
 
+
 # NOTICE
 
 @notice
@@ -756,8 +759,11 @@ def dct(bot: 'TwitchChat', args, msg, username, channel, send):
 
                 bot.send_message(message)
         else:
-            message = Message("@" + username + ", " + word + " is not an english word.",
-                              MessageType.COMMAND, channel)
+            if word == "weirdchamp" and not bot.twitch_status.is_subscribed_to(channel):
+                message = Message("@" + username + ", Can't fool me PepeLaugh", MessageType.COMMAND, channel)
+            else:
+                message = Message("@" + username + ", " + word + " is not an english word.",
+                                  MessageType.COMMAND, channel)
 
             bot.send_message(message)
         return True
@@ -791,9 +797,14 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
             if len(counters) < 2:
                 if val_or_user not in counters:
                     counters[val_or_user] = counters.get(val_or_user, "0")
-                    message = Message(
-                        "@" + username + ", I will now count how many times you say " + val_or_user + " PrideLion",
-                        MessageType.COMMAND, channel)
+                    if val_or_user == "WeirdChamp" and not bot.twitch_status.is_subscribed_to(channel):
+                        message = Message("@" + username + ", I'm currently not subscribed so I can't say the word. "
+                                                           "But it will be tracked for you PrideLion !",
+                                          MessageType.COMMAND, channel)
+                    else:
+                        message = Message(
+                            "@" + username + ", I will now count how many times you say " + val_or_user + " PrideLion",
+                            MessageType.COMMAND, channel)
                     bot.send_message(message)
                 else:
                     message = Message("@" + username + ", already tracking " + val_or_user + " 4Head",
@@ -823,10 +834,16 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                 if len(counters) < 2:
                     if val not in counters:
                         counters[val] = counters.get(val, "0")
-                        message = Message(
-                            "@" + username + ", I will now count how many times "
-                            + val_or_user + " says " + val + " PrideLion",
-                            MessageType.COMMAND, channel)
+                        if val == "WeirdChamp" and not bot.twitch_status.is_subscribed_to(channel):
+                            message = Message(
+                                "@" + username + ", I'm currently not subscribed so I can't say the word. "
+                                                 "But it will be tracked for you PrideLion !",
+                                MessageType.COMMAND, channel)
+                        else:
+                            message = Message(
+                                "@" + username + ", I will now count how many times "
+                                + val_or_user + " says " + val + " PrideLion",
+                                MessageType.COMMAND, channel)
                         bot.send_message(message)
                     else:
                         message = Message("@" + username + ", already tracking " + val_or_user + " 4Head",
@@ -869,6 +886,12 @@ def get_count(bot: 'TwitchChat', args, msg, username, channel, send):
             if len(bot.state.get(user).get("counters", dict())) != 0:
                 counters = bot.state.get(user).get("counters")
                 if val in counters:
+                    if val == "WeirdChamp" and not bot.twitch_status.is_subscribed_to(channel):
+                        message = Message(
+                            "@" + username + ", I'm currently not subscribed so I can't say that word sorry!",
+                            MessageType.COMMAND, channel)
+                        bot.send_message(message)
+                        return True
                     if bot.limiter.can_send(channel, user, 5):
                         message = Message(
                             "@" + username + ", " + user + " has said " + val + " " + counters.get(val) + " times",
@@ -936,7 +959,7 @@ def correct(bot: 'TwitchChat', args, msg, username, channel, send):
         emote = match.group(1)
         correct_emotes = emote_dict.access(get_val, key=emote.lower())
         if correct_emotes is not None:
-            if "WeirdChamp" in correct_emotes:
+            if "WeirdChamp" in correct_emotes and not bot.twitch_status.is_subscribed_to(channel):
                 message = Message("@" + username + " can't fool me PepeLaugh", MessageType.COMMAND, channel)
                 bot.send_message(message)
                 return True
@@ -1278,8 +1301,8 @@ def pyramid(bot: 'TwitchChat', args, msg, username, channel, send):
             correct_emotes = emote_dict.access(get_val, key="all_emotes")
             for emote in pyramid_emotes:
                 if emote not in correct_emotes:
-                    return False
-                if emote == "WeirdChamp":
+                    return True
+                if emote == "WeirdChamp" and not bot.twitch_status.is_subscribed_to(channel):
                     message = Message("@" + username + " can't fool me PepeLaugh", MessageType.COMMAND, channel)
                     bot.send_message(message)
                     return True
@@ -1370,7 +1393,13 @@ def unique(bot: 'TwitchChat', args, msg, username, channel, send):
 def jouch(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg.lower() == "!jouch" and bot.limiter.can_send(channel, "jouch", 20):
         emote = random.choice(emote_dict.access(get_val, key="all_emotes"))
-        message = Message(emote + " on da Jouch ", MessageType.COMMAND, channel)
+        if emote == "WeirdChamp":
+            if bot.twitch_status.is_subscribed_to(channel):
+                message = Message(emote + " on da Jouch ", MessageType.COMMAND, channel)
+            else:
+                message = Message("Tried to say wc when I wasn't subscribed", MessageType.COMMAND, channel)
+        else:
+            message = Message(emote + " on da Jouch ", MessageType.COMMAND, channel)
         bot.send_message(message)
 
 
@@ -1510,12 +1539,11 @@ def check_for_title_change(state: dict, bot: 'TwitchChat'):
     channels = bot.channels
     for channel in channels:
         old_title = state.get(channel, "")
-        if channel not in state["ids"]:
+        if channel not in state["cache"]:
             user_id = get_id(http, channel)
-            state["ids"][channel] = user_id
-            f.save(state["ids"], "texts/streamer_ids.txt", True)
+            state["cache"].add_id(channel, user_id)
         else:
-            user_id = state["ids"][channel]
+            user_id = state["cache"].get_id(channel)
         current_title = get_title(http, channel, user_id)
         if old_title != current_title:
             state[channel] = current_title
@@ -1530,7 +1558,8 @@ def check_for_title_change(state: dict, bot: 'TwitchChat'):
 
 @repeat_setup(check_for_title_change.__name__)
 def check_for_title_change_setup(state: dict, bot: 'TwitchChat'):
-    state["ids"] = f.load("texts/streamer_ids.txt", {})
+    global ID_cache
+    state["cache"] = ID_cache
 
 
 def get_id(pool_manager, name):

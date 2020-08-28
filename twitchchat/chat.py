@@ -30,7 +30,7 @@ class TwitchChat(object):
         self.saves = commands.SAVE
         self.state = self.load_state()
         self.limiter = MessageLimiter()
-        self.twitch_status = TwitchStatus(channels)
+        self.twitch_status = TwitchStatus(user, channels, commands.ID_cache)
         self.active = True
         self.repeating_tasks = {func_name: TimedTask(func, loop_time, self) for func_name, (func, loop_time) in
                                 commands.REPEAT.items()}
