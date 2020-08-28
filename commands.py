@@ -399,10 +399,18 @@ def delete_counter(bot: 'TwitchChat', args, msg, username, channel, send):
         word = match.group(2)
         if user in bot.state and "counters" in bot.state.get(user) and word in bot.state.get(user).get("counters"):
             bot.state.get(user).get("counters").pop(word)
-            message = Message("I will no longer track " + word + " for " + user, MessageType.COMMAND, channel)
+            if word == "WeirdChamp" and not bot.twitch_status.is_subscribed_to(channel):
+                message = Message("Can't say the word but it will no longer be tracked for " + user,
+                                  MessageType.COMMAND, channel)
+            else:
+                message = Message("I will no longer track " + word + " for " + user, MessageType.COMMAND, channel)
             bot.send_message(message)
         else:
-            message = Message("I wasn't tracking " + user + " for " + word + "4Head", MessageType.COMMAND, channel)
+            if word == "WeirdChamp" and not bot.twitch_status.is_subscribed_to(channel):
+                message = Message("Can't say the word but I wasn't tracking it for " + user + " 4Head",
+                                  MessageType.COMMAND, channel)
+            else:
+                message = Message("I wasn't tracking " + user + " for " + word + "4Head", MessageType.COMMAND, channel)
             bot.send_message(message)
 
 
