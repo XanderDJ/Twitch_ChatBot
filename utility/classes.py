@@ -2,6 +2,7 @@ import random
 from enum import Enum, auto
 import time
 import urllib3
+from urllib.parse import urlencode
 from threading import Thread, Lock
 import json
 from credentials.api_credentials import client_id, secret
@@ -161,14 +162,15 @@ class TwitchStatus:
         return js.get("access_token")
 
     def _refresh_access_token(self):
-        base = "https://id.twitch.tv/oauth2/token"
+        base = "https://id.twitch.tv/oauth2/token?"
         parameters = {
             "client_id": self._client,
             "client_secret": self._secret,
             "grant_type": "refresh_token",
             "refresh_token": self._refresh_token
         }
-        response = self._manager.request("POST", base, fields=parameters)
+        base = base + urlencode(parameters)
+        response = self._manager.request("POST", base)
         print(response.data)
         if response.status != 200:
             raise Exception("TwitchStatus couldn't get a bearer token from twitch API")
