@@ -169,6 +169,7 @@ class TwitchStatus:
             "refresh_token": self._refresh_token
         }
         response = self._manager.request("POST", base, fields=parameters)
+        print(response.data)
         if response.status != 200:
             raise Exception("TwitchStatus couldn't get a bearer token from twitch API")
         js = json.loads(response.data.decode("UTF-8"))
@@ -245,6 +246,7 @@ class TwitchStatus:
         response = self._manager.request("GET", request_url, headers=headers)
         if response.status == 401:
             # user token has expired and needs to be refreshed
+            print(response.data)
             self._user_token = self._refresh_access_token()
             return self._is_user_subscribed(channel)
         elif response.status == 404:
@@ -277,7 +279,7 @@ class TwitchStatus:
                     self.state[channel]["subscribed"] = self._is_user_subscribed(channel)
                 self._update_channel(channel)
             self._count += 1
-            if self._count == 200:
+            if self._count == 10:
                 self._count = 0
             time.sleep(15)
 
