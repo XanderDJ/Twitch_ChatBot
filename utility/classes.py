@@ -7,7 +7,7 @@ from threading import Thread, Lock
 import json
 from credentials.api_credentials import client_id, secret
 from utility import file_loader as f
-from utility import convert
+from utility import functions
 
 TOGGLEABLE = 3
 
@@ -204,7 +204,7 @@ class TwitchStatus:
         return self.state.get(channel, {"live": False, "activity": "Prechat"})
 
     def is_subscribed_to(self, channel):
-        return convert(self.state[channel]["subscribed"])
+        return functions.convert(self.state[channel]["subscribed"])
 
     def add_subscription(self, channel):
         self.state[channel]["subscribed"] = "True"
