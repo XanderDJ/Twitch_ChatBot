@@ -7,6 +7,7 @@ from threading import Thread, Lock
 import json
 from credentials.api_credentials import client_id, secret
 from utility import file_loader as f
+from utility import convert
 
 TOGGLEABLE = 3
 
@@ -128,16 +129,13 @@ class TwitchStatus:
         self.state = {}
         self._user = user
         self._channels = []
+        subscribed = f.load("texts/subscribed.txt", {})
         for chan in channels:
             self.add_channel(chan)
+            self.state[chan]["subscribed"] = subscribed.get(chan, "False")
         self._manager = urllib3.PoolManager()
         self._bearer = self._get_bearer()
-        user_token = f.load("credentials/user_token.txt")
-        self._user_token = user_token.get("access_token")
-        self._refresh_token = user_token.get("refresh_token")
         self._cache = id_cache
-        self._id = self.get_id(self._user)
-        self._count = 0
 
         self.alive = True
         self.update_thread = Thread(target=self._update_channels)
@@ -160,41 +158,6 @@ class TwitchStatus:
             raise Exception("TwitchStatus couldn't get a bearer token from twitch API")
         js = json.loads(response.data.decode("UTF-8"))
         return js.get("access_token")
-
-    def _refresh_access_token(self):
-        base = "https://id.twitch.tv/oauth2/token?"
-        parameters = {
-            "client_id": self._client,
-            "client_secret": self._secret,
-            "grant_type": "refresh_token",
-            "refresh_token": self._refresh_token
-        }
-        base = base + urlencode(parameters)
-        response = self._manager.request("POST", base)
-        if response.status != 200:
-            raise Exception("TwitchStatus couldn't get a bearer token from twitch API")
-        js = json.loads(response.data.decode("UTF-8"))
-        self._user_token = js.get("access_token")
-        self._refresh_token = js.get("refresh_token")
-        f.save({"access_token": self._user_token, "refresh_token": self._refresh_token}, "credentials/user_token.txt")
-
-    def get_id(self, channel):
-        if channel in self._cache:
-            return self._cache.get_id(channel)
-        else:
-            headers = {
-                "Client-id": self._client,
-                "Accept": "application/vnd.twitchtv.v5+json"
-            }
-            fields = {
-                "login": channel
-            }
-            base = "https://api.twitch.tv/kraken/users"
-            response = self._manager.request("GET", base, headers=headers, fields=fields).data.decode("UTF-8")
-            data = json.loads(response)
-            channel_id = data.get("users")[0].get("_id")
-            self._cache.add_id(channel, channel_id)
-            return channel_id
 
     def _update_channel(self, channel):
         base = "https://api.twitch.tv/helix/streams"
@@ -237,30 +200,25 @@ class TwitchStatus:
                 return
             self.state[channel]["activity"] = data[0].get("name")
 
-    def _is_user_subscribed(self, channel):
-        request_url = "https://api.twitch.tv/kraken/users/" + self._id + "/subscriptions/" + self.get_id(channel)
-        headers = {
-            "Accept": "application/vnd.twitchtv.v5+json",
-            "Client-ID": self._client,
-            "Authorization": f"OAuth {self._user_token}"
-        }
-        response = self._manager.request("GET", request_url, headers=headers)
-        if response.status == 401:
-            # user token has expired and needs to be refreshed
-            self._user_token = self._refresh_access_token()
-            return self._is_user_subscribed(channel)
-        elif response.status == 404:
-            return False
-        elif response.status == 200:
-            return True
-        else:
-            raise Exception("Unknown status code received when trying to check if user is subscribed to channel")
-
     def get_status(self, channel):
         return self.state.get(channel, {"live": False, "activity": "Prechat"})
 
     def is_subscribed_to(self, channel):
-        return self.state[channel]["subscribed"]
+        return convert(self.state[channel]["subscribed"])
+
+    def add_subscription(self, channel):
+        self.state[channel]["subscribed"] = "True"
+        self.save_subscriptions()
+
+    def remove_subscription(self, channel):
+        self.state[channel]["subscribed"] = "False"
+        self.save_subscriptions()
+
+    def save_subscriptions(self):
+        dct = {}
+        for channel in self._channels:
+            dct[channel] = self.state[channel]["subscribed"]
+        f.save(dct, "texts/subscribed.txt")
 
     def add_channel(self, channel):
         self._channels.append(channel)
@@ -272,16 +230,9 @@ class TwitchStatus:
 
     def _update_channels(self):
         while self.alive:
-            check = self._count == 0
             for channel in self._channels:
                 time.sleep(1)
-                if check:
-                    self.state[channel]["subscribed"] = self._is_user_subscribed(channel)
-                    time.sleep(1)
                 self._update_channel(channel)
-            self._count += 1
-            if self._count == 10:
-                self._count = 0
             time.sleep(15)
 
 

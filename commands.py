@@ -414,6 +414,20 @@ def delete_counter(bot: 'TwitchChat', args, msg, username, channel, send):
             bot.send_message(message)
 
 
+@admin
+@unwrap_command_args
+def add_subscription(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg == "!sub":
+        bot.twitch_status.add_subscription(channel)
+
+
+@admin
+@unwrap_command_args
+def remove_subscription(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg == "!unsub":
+        bot.twitch_status.remove_subscription(channel)
+
+
 # COMMANDS
 
 @command
