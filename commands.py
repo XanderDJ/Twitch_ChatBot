@@ -23,7 +23,9 @@ import datetime
 import pymongo
 import json
 from credentials import mongo_credentials
-
+from google.oauth2 import service_account
+import googleapiclient.discovery
+import googleapiclient.errors
 # THIS IS TO AVOID CYCLICAL IMPORTS BUT STILL ALLOWS TYPE CHECKING
 from typing import TYPE_CHECKING
 
@@ -62,6 +64,21 @@ bad_words = f.load("texts/bad_words.txt", [])
 streaks = LockedData(f.load("texts/streaks.txt", {}))
 
 
+def get_youtube_api():
+    scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
+
+    api_service_name = "youtube"
+    api_version = "v3"
+    client_secrets_file = "credentials/youtube_credentials.json"
+
+    # Get credentials and create an API client
+    credentials = service_account.Credentials.from_service_account_file(client_secrets_file, scopes=scopes)
+    youtube = googleapiclient.discovery.build(
+        api_service_name, api_version, credentials=credentials)
+    return youtube
+
+
 def load_emotes():
     emote_dict = {}
     all_emotes = f.load("texts/emotes.txt", [])
@@ -73,6 +90,7 @@ def load_emotes():
     return emote_dict
 
 
+youtube = get_youtube_api()
 db = LockedData({"emotes": dict(), "mentions": []})
 emote_dict = LockedData(load_emotes())
 blacklisted = f.load("texts/blacklisted.txt", [])
@@ -464,6 +482,8 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
                     wrong_emotes.append(wrong_emote)
         if word in emotes and word not in unique_emotes and word != "WeirdChamp":
             unique_emotes.add(word)
+        if match := re.match(r".*watch\?v=([a-zA-Z0-9\-_]+).*", word):
+            check_for_troll(bot, channel, username, match.group(1))
     update_streaks(unique_emotes, channel)
     # Use data gathered
     if len(wrong_emotes) != 0:
@@ -473,6 +493,25 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
             txt = " ".join(wrong_emotes)
             message = Message("@" + username + ", " + txt + " PepeLaugh", MessageType.SPAM, channel)
             bot.send_message(message)
+
+
+def check_for_troll(bot: 'TwitchChat', channel: str, username: str, video_id: str):
+    global youtube
+    request = youtube.videos().list(part="snippet", id=video_id)
+    response = request.execute()
+    try:
+        title = response.get("items")[0].get("snippet").get("title")
+        if contains_all(title.lower(), ["rick", "roll"]):
+            message = Message("Don't search that youtube video, " + username + " is trying to rick roll you!",
+                              MessageType.HELPFUL, channel)
+        elif contains_all(title.lower(), ["stick", "bug"]):
+            message = Message("Don't search that youtube video, " + username + " is trying to stick bug you!",
+                              MessageType.HELPFUL, channel)
+        else:
+            return
+        bot.send_message(message)
+    except IndexError as e:
+        return
 
 
 def update_streaks(unique_emotes, channel):
@@ -1519,6 +1558,24 @@ def edubble(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg == "!edubble" and bot.limiter.can_send(channel, "edubble", 20):
         message = Message("The two tone rebel RIP", MessageType.COMMAND, channel)
         bot.send_message(message)
+
+
+@returns
+@unwrap_command_args
+def check_youtube(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r'!info\s/*watch\?v=([a-zA-Z0-9_\-]+)', msg)
+    if match:
+        video_id = match.group(1)
+        request = youtube.videos().list(part="snippet", id=video_id)
+        response = request.execute()
+        try:
+            title = response.get("items")[0].get("snippet").get("title")
+            message = Message("@" + username + ", the title is " + title, MessageType.COMMAND, channel)
+        except IndexError as e:
+            message = Message("@" + username + ", that youtube video doesn't exist", MessageType.COMMAND, channel)
+        bot.send_message(message)
+        return True
+    return False
 
 
 # REPEATS and REPEATS_SETUP
