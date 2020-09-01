@@ -482,7 +482,8 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
                     wrong_emotes.append(wrong_emote)
         if word in emotes and word not in unique_emotes and word != "WeirdChamp":
             unique_emotes.add(word)
-        if match := re.match(r".*watch\?v=([a-zA-Z0-9\-_]+).*", word):
+        match = re.match(r".*watch\?v=([a-zA-Z0-9\-_]+).*", word)
+        if match:
             check_for_troll(bot, channel, username, match.group(1))
     update_streaks(unique_emotes, channel)
     # Use data gathered
