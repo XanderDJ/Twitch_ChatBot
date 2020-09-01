@@ -503,7 +503,7 @@ def check_for_troll(bot: 'TwitchChat', channel: str, username: str, video_id: st
     try:
         title = response.get("items")[0].get("snippet").get("title")
         if contains_all(title.lower(), ["rick", "roll"]) or contains_all(title.lower(),
-                                                                         ["never", "gonna", "give", "you", "up", "rick",
+                                                                         ["gonna", "give", "you", "up", "rick",
                                                                           "astley"]):
             message = Message("Don't search that youtube video, " + username + " is trying to rick roll you!",
                               MessageType.HELPFUL, channel)
