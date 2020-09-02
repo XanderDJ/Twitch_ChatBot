@@ -1572,8 +1572,9 @@ def check_youtube(bot: 'TwitchChat', args, msg, username, channel, send):
         request = youtube.videos().list(part="snippet", id=video_id)
         response = request.execute()
         try:
-            title = response.get("items")[0].get("snippet").get("title")
-            message = Message("@" + username + ", the title is " + title, MessageType.COMMAND, channel)
+            title, channel_name = response.get("items")[0].get("snippet").get("title"), response.get("items")[0].get(
+                "snippet").get("channelTitle")
+            message = Message("@" + username + " " + title + " - " + channel_name, MessageType.COMMAND, channel)
         except IndexError as e:
             message = Message("@" + username + ", that youtube video doesn't exist", MessageType.COMMAND, channel)
         bot.send_message(message)
