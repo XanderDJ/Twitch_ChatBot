@@ -1577,7 +1577,7 @@ def check_youtube(bot: 'TwitchChat', args, msg, username, channel, send):
         try:
             title, channel_name = response.get("items")[0].get("snippet").get("title"), response.get("items")[0].get(
                 "snippet").get("channelTitle")
-            if contains_word(title, bad_words):
+            if contains_word(title.lower(), bad_words):
                 message = Message("@" + username + ", fuck off for trying that 4Weird", MessageType.COMMAND, channel)
             else:
                 message = Message("@" + username + " " + title + " - " + channel_name, MessageType.COMMAND, channel)
