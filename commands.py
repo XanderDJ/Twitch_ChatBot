@@ -1577,7 +1577,10 @@ def check_youtube(bot: 'TwitchChat', args, msg, username, channel, send):
         try:
             title, channel_name = response.get("items")[0].get("snippet").get("title"), response.get("items")[0].get(
                 "snippet").get("channelTitle")
-            message = Message("@" + username + " " + title + " - " + channel_name, MessageType.COMMAND, channel)
+            if contains_word(title, bad_words):
+                message = Message("@" + username + ", fuck off for trying that 4Weird", MessageType.COMMAND, channel)
+            else:
+                message = Message("@" + username + " " + title + " - " + channel_name, MessageType.COMMAND, channel)
         except IndexError as e:
             message = Message("@" + username + ", that youtube video doesn't exist", MessageType.COMMAND, channel)
         bot.send_message(message)
