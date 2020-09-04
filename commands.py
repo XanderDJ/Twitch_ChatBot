@@ -814,25 +814,19 @@ def dct(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r"!dict\s(\w+)", msg)
     if match:
         word = match.group(1)
-        if dictionary.check(word):
-            try:
-                definition = define(word)
-                message = Message("@" + username + ", " + definition, MessageType.COMMAND, channel)
-
-                bot.send_message(message)
-            except Exception:
-                message = Message("@" + username + " couldn't look up the definition of " + word,
-                                  MessageType.COMMAND, channel)
-
-                bot.send_message(message)
-        else:
-            if word == "weirdchamp" and not bot.twitch_status.is_subscribed_to(channel):
+        try:
+            definition = define(word)
+            if word == "WeirdChamp" and not bot.twitch_status.is_subscribed_to(channel):
                 message = Message("@" + username + ", Can't fool me PepeLaugh", MessageType.COMMAND, channel)
             else:
-                message = Message("@" + username + ", " + word + " is not an english word.",
+                message = Message("@" + username + ", " + definition, MessageType.COMMAND, channel)
+        except Exception:
+            if word == "WeirdChamp" and not bot.twitch_status.is_subscribed_to(channel):
+                message = Message("@" + username + ", Can't fool me PepeLaugh", MessageType.COMMAND, channel)
+            else:
+                message = Message("@" + username + " couldn't look up the definition of " + word,
                                   MessageType.COMMAND, channel)
-
-            bot.send_message(message)
+        bot.send_message(message)
         return True
     return False
 
