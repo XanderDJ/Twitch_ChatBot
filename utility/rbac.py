@@ -1,5 +1,7 @@
 from utility import file_loader as f
 from utility.classes import LockedData
+from credentials import mongo_credentials
+import pymongo
 
 ROLES = {}
 users = LockedData(f.load("texts/user_roles.txt", {}))
@@ -83,3 +85,12 @@ def remove_role(user, role, channel):
                         data[user][channel].remove(role)
 
     users.access(remove_role_inner, user=user, channel=channel, role=role)
+
+
+client = pymongo.MongoClient("mongodb://{}:{}@127.0.0.1:27017/".format(mongo_credentials.user, mongo_credentials.pwd))
+
+
+def log_access(args, channel):
+    twitch = client["twitch"]
+    col = twitch[channel]
+    col.insert_one(args)

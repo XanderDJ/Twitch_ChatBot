@@ -164,7 +164,8 @@ class TwitchChat(object):
                 if rbac.has_roles(args['username'], args['channel']):
                     funcs = rbac.get_allowed_functions(args['username'], args['channel'])
                     for func in funcs:
-                        func(self, args)
+                        if func(self, args):
+                            rbac.log_access(args, args['channel'])
                 for func_name, func in self.returns.items():
                     if func(self, args):
                         return True
@@ -396,4 +397,3 @@ class IrcClient(asynchat.async_chat, object):
             asyncore.loop(map=self.map)
         finally:
             self.running = False
-

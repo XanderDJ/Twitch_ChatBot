@@ -56,7 +56,7 @@ def to_txt(obj):
         txt += "}"
         return txt
     else:
-        return str(obj)
+        return str(obj).replace(" ", "-_-").replace(",", "\\44")
 
 
 def to_pretty_txt(obj):
@@ -88,7 +88,7 @@ def to_pretty_txt(obj):
         txt += "\n}"
         return txt
     else:
-        return str(obj)
+        return str(obj).replace(" ", "-_-").replace(",", "\\44")
 
 
 def iterable_to_strings(iterable, pretty=False):
@@ -141,7 +141,7 @@ def from_text(txt):
             return dct
     else:
         # not an iterable
-        return txt
+        return txt.replace("-_-", " ").replace("\\44", ",")
 
 
 def all_items(txt):

@@ -1,20 +1,22 @@
-As I see it, yes.
-Ask again later.
-Better not tell you now.
-Cannot predict now.
-Concentrate and ask again.
-Don't count on it.
-It is certain.
-It is decidedly so.
-Most likely.
-My reply is no.
-My sources say no.
-Outlook not so good.
-Outlook good.
-Reply hazy, try again.
-Signs point to yes.
-Very doubtful.
-Without a doubt.
-Yes.
-Yes - definitely.
-You may rely on it.
+[
+    As-_-I-_-see-_-it,-_-yes.,
+    Ask-_-again-_-later.,
+    Better-_-not-_-tell-_-you-_-now.,
+    Cannot-_-predict-_-now.,
+    Concentrate-_-and-_-ask-_-again.,
+    Don't-_-count-_-on-_-it.,
+    It-_-is-_-certain.,
+    It-_-is-_-decidedly-_-so.,
+    Most-_-likely.,
+    My-_-reply-_-is-_-no.,
+    My-_-sources-_-say-_-no.,
+    Outlook-_-not-_-so-_-good.,
+    Outlook-_-good.,
+    Reply-_-hazy,-_-try-_-again.,
+    Signs-_-point-_-to-_-yes.,
+    Very-_-doubtful.,
+    Without-_-a-_-doubt.,
+    Yes.,
+    Yes-_---_-definitely.,
+    You-_-may-_-rely-_-on-_-it.
+]

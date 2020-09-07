@@ -288,7 +288,9 @@ def toggle(bot: 'TwitchChat', args, msg, username, channel, send):
         elif ans == "sub":
             bot.toggle_channel(channel, ToggleType.SUBSCRIBER)
         else:
-            return
+            pass
+        return True
+    return False
 
 
 @admin
@@ -323,6 +325,8 @@ def ping(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg == "!ping":
         message = Message("Pong, I'm alive!", MessageType.FUNCTIONAL, channel)
         bot.send_message(message)
+        return True
+    return False
 
 
 @rbac.addRole("snitch")
@@ -341,6 +345,8 @@ def add_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             channel
         )
         bot.send_message(message)
+        return True
+    return False
 
 
 @admin
@@ -358,6 +364,38 @@ def delete_alt(bot: 'TwitchChat', args, msg, username, channel, send: bool):
                 channel
             )
             bot.send_message(message)
+
+
+@admin
+@unwrap_command_args
+def add_line(bot: 'TwitchChat', args, msg, username, channel, send):
+    global line_pickers
+    match = re.match(r'!addline\s([^\s]+)\s(.+)', msg)
+    if match:
+        file = match.group(1)
+        line = match.group(2)
+        if file in line_pickers:
+            line_pickers.get(file).add_line(line)
+            message = Message(line + " has been added to " + file + ".", MessageType.CHAT, channel)
+        else:
+            message = Message("I don't recognize " + file + " you may have typed it wrong.", MessageType.CHAT, channel)
+        bot.send_message(message)
+
+
+@admin
+@unwrap_command_args
+def remove_line(bot: 'TwitchChat', args, msg, username, channel, send):
+    global line_pickers
+    match = re.match(r'!removeline\s([^\s]+)\s(.+)', msg)
+    if match:
+        file = match.group(1)
+        line = match.group(2)
+        if file in line_pickers:
+            line_pickers.get(file).remove_line(line)
+            message = Message(line + " has been removed from " + file + " if it was in it.", MessageType.CHAT, channel)
+        else:
+            message = Message("I don't recognize " + file + " you may have typed it wrong.", MessageType.CHAT, channel)
+        bot.send_message(message)
 
 
 @admin

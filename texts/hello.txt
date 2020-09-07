@@ -1,18 +1,20 @@
-Hello!
-Good morning.
-Good afternoon.
-Good evening.
-It's nice to meet you.
-It's a pleasure to meet you.
-Hi!
-Morning!
-How are things (with you)?
-What's new?
-It's good to see you.
-G'day!
-Howdy!
-Hey there.
-What's up?
-How's it going?
-What's happening
-Yo!
+[
+    Hello!,
+    Good-_-morning.,
+    Good-_-afternoon.,
+    Good-_-evening.,
+    It's-_-nice-_-to-_-meet-_-you.,
+    It's-_-a-_-pleasure-_-to-_-meet-_-you.,
+    Hi!,
+    Morning!,
+    How-_-are-_-things?,
+    What's-_-new?,
+    It's-_-good-_-to-_-see-_-you.,
+    G'day!,
+    Howdy!,
+    Hey-_-there.,
+    What'-_-sup?,
+    How's-_-it-_-going?,
+    What's-_-happening,
+    Yo!
+]

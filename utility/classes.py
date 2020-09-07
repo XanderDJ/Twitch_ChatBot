@@ -61,11 +61,9 @@ class Validation:
 
 class RandomLinePicker:
     def __init__(self, fp):
+        self.file_pointer = fp
         self.lines_said = []
-        self.lines = []
-        lines = open(fp)
-        for line in lines:
-            self.lines.append(line.rstrip())
+        self.lines = f.load(fp)
 
     def get_line(self):
         if len(self.lines) == 0:
@@ -75,6 +73,16 @@ class RandomLinePicker:
         self.lines.remove(line)
         self.lines_said.append(line)
         return line
+
+    def add_line(self, line: str):
+        if line not in self.lines:
+            self.lines.append(line)
+            f.save(self.lines.extend(self.lines_said), self.file_pointer)
+
+    def remove_line(self, line: str):
+        if line in self.lines:
+            self.lines.remove(line)
+            f.save(self.lines.extend(self.lines_said), self.file_pointer)
 
 
 class IDCache:
