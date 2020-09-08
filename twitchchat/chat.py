@@ -251,6 +251,8 @@ class TwitchChat(object):
             return
         elif self.check_part(irc_message):
             return
+        elif self.check_clearchat(irc_message):
+            return
         elif self.check_usernotice(irc_message):
             return
         elif self.check_ping(irc_message, client):
