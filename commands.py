@@ -496,7 +496,7 @@ def ignore_user(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r'!ignore\s(\w+)', msg)
     if match:
         user = match.group(1)
-        ignore_list.access(add_to_container(), elem=user)
+        ignore_list.access(add_to_container, elem=user)
 
 
 # COMMANDS
