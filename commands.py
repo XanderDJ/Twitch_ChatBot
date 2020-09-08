@@ -494,6 +494,14 @@ def remove_subscription(bot: 'TwitchChat', args, msg, username, channel, send):
 
 @command
 @unwrap_command_args
+def auto_yuck(bot: 'TwitchChat', args, msg, username, channel, send):
+    if username.lower() == "autowalkmc":
+        message = Message("PepeMods " * random.randint(1, 10), MessageType.SPAM, channel)
+        bot.send_message(message)
+
+
+@command
+@unwrap_command_args
 def ping_me(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if contains_all(msg, [" ping ", " me "]):
