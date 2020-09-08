@@ -490,6 +490,15 @@ def remove_subscription(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.twitch_status.remove_subscription(channel)
 
 
+@admin
+@unwrap_command_args
+def ignore_user(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r'!ignore\s(\w+)', msg)
+    if match:
+        user = match.group(1)
+        ignore_list.access(add_to_container(), elem=user)
+
+
 # COMMANDS
 
 
