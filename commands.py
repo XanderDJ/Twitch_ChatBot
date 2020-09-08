@@ -1131,7 +1131,7 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel, send):
     global lurkers
     global previous_lurker_ts
     msg = msg.lower()
-    if "!lurker" in msg:
+    if msg == "!lurker":
         if len(lurkers.get(channel, [])) == 0 or time.time() - previous_lurker_ts > 600:
             js = http.request("GET", "https://tmi.twitch.tv/group/user/" + channel + "/chatters").data.decode("UTF-8")
             chatters = json.loads(js)
@@ -1151,7 +1151,7 @@ def lurk(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def aaron(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
-    if contains_word(msg, ["!ap"]):
+    if msg == "!ap":
         if bot.limiter.can_send(channel, "aaron", 60, False):
             message = Message("Wizard Toad wishes you a good day =)", MessageType.COMMAND, channel)
             bot.send_message(message)
@@ -1162,7 +1162,7 @@ def aaron(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def replay(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
-    if contains_word(msg, ["!replay"]):
+    if msg == "!replay":
         if bot.limiter.can_send(channel, "replay", 60, True):
             message = Message("Green OkayChamp", MessageType.COMMAND, channel)
             bot.send_message(message)
@@ -1318,7 +1318,7 @@ def schleem(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def give_fact(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
-    if contains_word(msg, ["!fact", "!facts", "give me a fact"]):
+    if msg == "!fact":
         message = Message("@" + username + ", did you know that " + line_pickers.get("facts").get_line(),
                           MessageType.COMMAND, channel)
 
@@ -1342,7 +1342,7 @@ def eight_ball(bot: 'TwitchChat', args, msg, username, channel, send):
 def quote(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg
     username = username
-    if is_word(msg, ["!inspire"]):
+    if msg.lower() == "!inspire":
         message = Message("@" + username + ", " + line_pickers.get("quotes").get_line(), MessageType.COMMAND, channel)
 
         bot.send_message(message)
