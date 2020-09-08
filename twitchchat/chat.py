@@ -116,6 +116,7 @@ class TwitchChat(object):
             return True
 
     def check_usernotice(self, irc_message):
+        self.logger.debug(irc_message)
         """Parse out new twitch subscriber messages and then call... python subscribers"""
         if irc_message[0] == '@':
             arg_regx = r"([^=;]*)=([^ ;]*)"
