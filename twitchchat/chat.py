@@ -25,6 +25,7 @@ class TwitchChat(object):
         self.irc_handlers = []
         self.admins = commands.ADMIN
         self.commands = commands.COMMAND
+        self.clearchat = commands.CLEARCHAT
         self.notice = commands.NOTICE
         self.returns = commands.RETURNS
         self.saves = commands.SAVE
@@ -66,6 +67,7 @@ class TwitchChat(object):
         importlib.reload(commands)
         self.admins = commands.ADMIN
         self.commands = commands.COMMAND
+        self.clearchat = commands.CLEARCHAT
         self.notice = commands.NOTICE
         self.returns = commands.RETURNS
         self.saves = commands.SAVE
@@ -116,7 +118,6 @@ class TwitchChat(object):
             return True
 
     def check_usernotice(self, irc_message):
-        self.logger.debug(irc_message)
         """Parse out new twitch subscriber messages and then call... python subscribers"""
         if irc_message[0] == '@':
             arg_regx = r"([^=;]*)=([^ ;]*)"
@@ -132,6 +133,24 @@ class TwitchChat(object):
                 args['channel'] = match.group(1)
                 args['message'] = match.group(2)
                 for func_name, func in self.notice.items():
+                    func(self, args)
+                return True
+
+    def check_clearchat(self, irc_message):
+        if irc_message[0] == '@':
+            arg_regx = r"([^=;]*)=([^ ;]*)"
+            arg_regx = re.compile(arg_regx, re.UNICODE)
+            args = dict(re.findall(arg_regx, irc_message[1:]))
+            regex = (
+                r'^@[^ ]* :tmi.twitch.tv'
+                r' CLEARCHAT #(?P<channel>[^ ]*)'  # channel
+                r'((?: :)?(?P<message>.*))?')  # message
+            regex = re.compile(regex, re.UNICODE)
+            match = re.search(regex, irc_message)
+            if match:
+                args['channel'] = match.group(1)
+                args['message'] = match.group(2)
+                for func_name, func in self.clearchat.items():
                     func(self, args)
                 return True
 

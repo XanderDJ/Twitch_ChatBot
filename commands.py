@@ -39,6 +39,7 @@ from utility.pings import pings
 
 ADMIN = {}
 COMMAND = {}
+CLEARCHAT = {}
 NOTICE = {}
 RETURNS = {}
 SAVE = {}
@@ -112,6 +113,11 @@ def admin(func):
 
 def command(func):
     COMMAND[func.__name__] = func
+    return func
+
+
+def clearchat(func):
+    CLEARCHAT[func.__name__] = func
     return func
 
 
@@ -694,7 +700,17 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         bot.send_message(message)
 
 
+# CLEARCHAT
+
+@clearchat
+def send_kapow(bot: 'TwitchChat', args):
+    channel = args["channel"]
+    message = Message("KAPOW", MessageType.SPAM, channel)
+    bot.send_message(message)
+
+
 # NOTICE
+
 
 @notice
 def send_pog(bot: 'TwitchChat', args):
