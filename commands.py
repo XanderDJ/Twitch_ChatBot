@@ -493,7 +493,6 @@ def remove_subscription(bot: 'TwitchChat', args, msg, username, channel, send):
 # COMMANDS
 
 
-
 @command
 @unwrap_command_args
 def ping_me(bot: 'TwitchChat', args, msg, username, channel, send):

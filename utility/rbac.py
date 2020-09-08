@@ -1,6 +1,7 @@
 from utility import file_loader as f
 from utility.classes import LockedData
 from credentials import mongo_credentials
+from datetime import datetime
 import pymongo
 
 ROLES = {}
@@ -91,6 +92,7 @@ client = pymongo.MongoClient("mongodb://{}:{}@127.0.0.1:27017/".format(mongo_cre
 
 
 def log_access(args, channel):
+    args["timestamp"] = datetime.utcnow()
     twitch = client["twitch"]
     col = twitch[channel]
     col.insert_one(args)
