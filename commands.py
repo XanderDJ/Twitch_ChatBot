@@ -496,7 +496,9 @@ def remove_subscription(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def auto_yuck(bot: 'TwitchChat', args, msg, username, channel, send):
     if username.lower() == "autowalkmc":
-        message = Message("PepeMods " * random.randint(1, 10), MessageType.SPAM, channel)
+        message = Message(
+            "@autowalkmc, " + "PepeMods " * random.randint(1, 5) + " gross " + "PepeMods " * random.randint(1, 5),
+            MessageType.SPAM, channel)
         bot.send_message(message)
 
 
