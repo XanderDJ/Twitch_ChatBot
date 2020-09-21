@@ -1822,4 +1822,5 @@ def filter_message(message: Message):
     if message.user in blacklisted:
         message = Message("@" + message.user + ", " + "PogOff " * random.randint(1, 7),
                           message.type, message.channel, message.user)
+    # TODO afk system
     return message
