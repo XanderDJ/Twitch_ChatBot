@@ -21,47 +21,46 @@ class TwitchChat(object):
         self.admin = admin
         self.user = user
         self.oauth = oauth
-        self.channel_servers = {'irc.chat.twitch.tv:6667': {'channel_set': channels}}
-        self.irc_handlers = []
+        self.server = 'irc.chat.twitch.tv:6667'
+        self.irc_client = IrcClient(self.server, self.handle_message)
+
+        self.state = f.load("texts/global_state.txt", default=dict())
+        self.limiter = MessageLimiter()
+        self.twitch_status = TwitchStatus(user, channels, commands.ID_cache)
+
         self.admins = commands.ADMIN
         self.commands = commands.COMMAND
         self.clearchat = commands.CLEARCHAT
         self.notice = commands.NOTICE
         self.returns = commands.RETURNS
         self.saves = commands.SAVE
-        self.state = self.load_state()
-        self.limiter = MessageLimiter()
-        self.twitch_status = TwitchStatus(user, channels, commands.ID_cache)
-        self.active = True
         self.repeating_tasks = {func_name: TimedTask(func, loop_time, self) for func_name, (func, loop_time) in
                                 commands.REPEAT.items()}
         for func_name, setup_func in commands.REPEAT_SETUP.items():
             self.repeating_tasks.get(func_name).setup(setup_func)
+
+        self.active = True
         self.command_thread = Thread(target=self.handle_commandline_input)
         self.command_thread.daemon = True
         self.command_thread.start()
-        self.backup_thread = Thread(target=self.backup_thread)
-        self.backup_thread.daemon = True
-        self.backup_thread.start()
-        for server in self.channel_servers:
-            handler = IrcClient(server, self.handle_message, self.handle_connect, self.can_send_type)
-            self.channel_servers[server]['client'] = handler
-            self.irc_handlers.append(handler)
+        self.backup_t = Thread(target=self.backup_thread)
+        self.backup_t.daemon = True
+        self.backup_t.start()
 
-    def can_send_type(self, channel, msg_type: MessageType):
-        if channel is None:
-            return True
-        return convert(self.state.get(channel).get(msg_type.name, "True"))
+    def init_caps(self):
+        self.logger.info('Connected..authenticating as {0}'.format(self.user))
+        client = self.irc_client
+        client.send_message('Pass ' + self.oauth + '\r\n')
+        client.send_message('NICK ' + self.user.lower() + '\r\n')
+        client.send_message('CAP REQ :twitch.tv/tags\r\n')
+        client.send_message('CAP REQ :twitch.tv/membership\r\n')
+        client.send_message('CAP REQ :twitch.tv/commands\r\n')
 
     def save(self):
         f.save(self.state, "texts/global_state.txt")
         for name, func in self.saves.items():
             logger.info(f"Calling {name}")
             func()
-
-    @staticmethod
-    def load_state():
-        return f.load("texts/global_state.txt", default=dict())
 
     def reload(self):
         importlib.reload(commands)
@@ -81,18 +80,90 @@ class TwitchChat(object):
             repeating_task.start()
 
     def start(self):
-        for handler in self.irc_handlers:
-            handler.start()
+        self.irc_client.start()
         for repeating_task in self.repeating_tasks.values():
             repeating_task.start()
 
+        # wait till irc is connected
+        while not self.irc_client.connected:
+            pass
+
+        # init twitch
+        self.init_caps()
+
+        # Joining channels
+        self.logger.info("Joining channels: {0}".format(self.channels))
+        for chan in self.channels:
+            self.join_twitch_channel(chan)
+
     def join(self):
-        for handler in self.irc_handlers:
-            handler.asynloop_thread.join()
+        self.irc_client.asynloop_thread.join()
 
     def stop_all(self):
-        for handler in self.irc_handlers:
-            handler.stop()
+        self.active = False
+        self.irc_client.stop()
+        for task in self.repeating_tasks.values():
+            task.stop()
+
+    def join_twitch_channel(self, channel: str):
+        self.state[channel] = self.state.get(channel, dict())
+        # Turn bot off when joining a channel (except for functional and chat messages)
+        # if it doesn't have a state yet for that channel.
+        if len(self.state[channel]) == 0:
+            self.toggle_channel(channel, ToggleType.OFF)
+        self.logger.info('Joining channel {0}'.format(channel))
+        channels = self.channels
+        if channel not in channels:
+            channels.append(channel)
+        self.channels = channels
+        client = self.irc_client
+        client.send_message("JOIN #" + channel.lower() + "\r\n")
+
+    def leave_twitch_channel(self, channel: str):
+        self.logger.info('Leaving channel {0}'.format(channel))
+        client = self.irc_client
+        client.send_message("PART #" + channel.lower() + "\r\n")
+        channels = self.channels
+        updated_channels = [chan for chan in channels if chan != channel]
+        self.channels = updated_channels
+
+    def toggle_channel(self, channel, toggle_type: ToggleType):
+        if toggle_type == ToggleType.ON:
+            for tipe in ToggleType:
+                if tipe.value >= TOGGLEABLE:
+                    self.state[channel][tipe.name] = "True"
+        elif toggle_type == ToggleType.OFF:
+            for tipe in ToggleType:
+                if tipe.value >= TOGGLEABLE:
+                    self.state[channel][tipe.name] = "False"
+        else:
+            self.state[channel][toggle_type.name] = str(not convert(self.state.get(channel).get(toggle_type.name)))
+
+    def send_message(self, message: Message):
+        if self.can_send_type(message.channel, message.type) and count_capitals(message.content) < 50:
+            client = self.irc_client
+            client.send_message(u'PRIVMSG #{0} :{1}\n'.format(message.channel, message.content))
+
+    def can_send_type(self, channel, msg_type: MessageType):
+        return convert(self.state.get(channel).get(msg_type.name, "True"))
+
+    def handle_message(self, irc_message, client):
+        """Handle incoming IRC messages"""
+        self.logger.debug(irc_message)
+        if self.check_message(irc_message):
+            return
+        elif self.check_join(irc_message):
+            return
+        elif self.check_part(irc_message):
+            return
+        elif self.check_clearchat(irc_message):
+            return
+        elif self.check_usernotice(irc_message):
+            return
+        elif self.check_ping(irc_message, client):
+            return
+        elif self.check_error(irc_message):
+            return
 
     def check_error(self, irc_message):
         """Check for a login error notification and terminate if found"""
@@ -158,7 +229,7 @@ class TwitchChat(object):
     def check_ping(irc_message, client):
         """Respond to ping messages or twitch boots us off"""
         if re.search(r"PING :tmi\.twitch\.tv", irc_message):
-            message = Message("PING :pong\r\n", MessageType.FUNCTIONAL)
+            message = "PING :pong\r\n"
             client.send_message(message)
             return True
 
@@ -192,82 +263,6 @@ class TwitchChat(object):
                 for func_name, func in self.commands.items():
                     func(self, args)
                 return True
-
-    def handle_connect(self, client):
-        self.logger.info('Connected..authenticating as {0}'.format(self.user))
-        client.send_message(Message('Pass ' + self.oauth + '\r\n', MessageType.FUNCTIONAL))
-        client.send_message(Message('NICK ' + self.user + '\r\n'.lower(), MessageType.FUNCTIONAL))
-        client.send_message(Message('CAP REQ :twitch.tv/tags\r\n', MessageType.FUNCTIONAL))
-        client.send_message(Message('CAP REQ :twitch.tv/membership\r\n', MessageType.FUNCTIONAL))
-        client.send_message(Message('CAP REQ :twitch.tv/commands\r\n', MessageType.FUNCTIONAL))
-
-        for server in self.channel_servers:
-            if server == client.serverstring:
-                self.logger.info('Joining channels {0}'.format(self.channel_servers[server]))
-                for chan in self.channel_servers[server]["channel_set"]:
-                    self.join_twitch_channel(chan)
-
-    def join_twitch_channel(self, channel: str):
-        self.state[channel] = self.state.get(channel, dict())
-        # Turn bot off when joining a channel (except for functional and chat messages.
-        if len(self.state[channel]) == 0:
-            self.toggle_channel(channel, ToggleType.ON)
-        self.logger.info('Joining channel {0}'.format(channel))
-        channels = self.channel_servers.get('irc.chat.twitch.tv:6667').get("channel_set")
-        if channel not in channels:
-            channels.append(channel)
-        self.channel_servers['irc.chat.twitch.tv:6667']['channel_set'] = channels
-        self.channels = channels
-        client = self.channel_servers["irc.chat.twitch.tv:6667"]["client"]
-        client.send_message(Message("JOIN #" + channel.lower() + "\r\n", MessageType.FUNCTIONAL))
-
-    def leave_twitch_channel(self, channel: str):
-        self.logger.info('Leaving channel {0}'.format(channel))
-        client = self.channel_servers["irc.chat.twitch.tv:6667"]["client"]
-        client.send_message(Message("PART #" + channel.lower() + "\r\n", MessageType.FUNCTIONAL))
-        channels = self.channel_servers.get('irc.chat.twitch.tv:6667').get("channel_set")
-        updated_channels = [chan for chan in channels if chan != channel]
-        self.channel_servers['irc.chat.twitch.tv:6667']['channel_set'] = updated_channels
-        self.channels = updated_channels
-
-    def toggle_channel(self, channel, toggle_type: ToggleType):
-        if toggle_type == ToggleType.ON:
-            for tipe in ToggleType:
-                if tipe.value > 2:
-                    self.state[channel][tipe.name] = "True"
-        elif toggle_type == ToggleType.OFF:
-            for tipe in ToggleType:
-                if tipe.value > 2:
-                    self.state[channel][tipe.name] = "False"
-        else:
-            self.state[channel][toggle_type.name] = str(not convert(self.state.get(channel).get(toggle_type.name)))
-
-    def handle_message(self, irc_message, client):
-        """Handle incoming IRC messages"""
-        self.logger.debug(irc_message)
-        if self.check_message(irc_message):
-            return
-        elif self.check_join(irc_message):
-            return
-        elif self.check_part(irc_message):
-            return
-        elif self.check_clearchat(irc_message):
-            return
-        elif self.check_usernotice(irc_message):
-            return
-        elif self.check_ping(irc_message, client):
-            return
-        elif self.check_error(irc_message):
-            return
-
-    def send_message(self, message: Message):
-        for server in self.channel_servers:
-            if message.channel in self.channel_servers[server]['channel_set']:
-                client = self.channel_servers[server]['client']
-                client.send_message(
-                    Message(u'PRIVMSG #{0} :{1}\n'.format(message.channel, message.content), message.type,
-                            message.channel))
-                break
 
     def backup_thread(self):
         while self.active:
@@ -318,33 +313,33 @@ SEND_RATE_WITHIN_SECONDS = 30
 
 class IrcClient(asynchat.async_chat, object):
 
-    def __init__(self, server, message_callback, connect_callback, allowed_callback):
+    def __init__(self, server, message_callback):
         self.logger = logging.getLogger(name="tmi_client[{0}]".format(server))
         self.logger.info('TMI initializing')
         self.map = {}
         asynchat.async_chat.__init__(self, map=self.map)
         self.received_data = bytearray()
         servernport = server.split(":")
-        self.serverstring = server
         self.server = servernport[0]
         self.port = int(servernport[1])
         self.set_terminator(b'\n')
         self.asynloop_thread = Thread(target=self.run)
+        self.send_thread = Thread(target=self.send_loop)
+        self.send_thread.daemon = True
         self.running = False
         self.message_callback = message_callback
-        self.connect_callback = connect_callback
-        self.allowed_callback = allowed_callback
+        self.connected = False
         self.message_queue = Queue()
         self.messages_sent = []
         self.logger.info('TMI initialized')
         return
 
-    def send_message(self, msg: Message):
+    def send_message(self, msg: str):
         self.message_queue.put(msg)
 
     def handle_connect(self):
         """Socket connected successfully"""
-        self.connect_callback(self)
+        self.connected = True
 
     def handle_error(self):
         if self.socket:
@@ -371,8 +366,6 @@ class IrcClient(asynchat.async_chat, object):
             self.connect((self.server, self.port))
             self.asynloop_thread.start()
 
-            self.send_thread = Thread(target=self.send_loop)
-            self.send_thread.daemon = True
             self.send_thread.start()
 
         else:
@@ -399,16 +392,10 @@ class IrcClient(asynchat.async_chat, object):
             if len(self.messages_sent) < MAX_SEND_RATE:
                 if not self.message_queue.empty():
                     to_send = self.message_queue.get()
-                    if self.allowed_callback(to_send.channel, to_send.type) and count_capitals(to_send.content) < 50:
-                        try:
-                            self.push(to_send.content.encode("UTF-8"))
-                            self.logger.info(to_send)
-                        except Exception as e:
-                            self.logger.info(f"Exception occurred for {to_send}")
-                            self.message_queue.put(to_send)
-                        else:
-                            time.sleep(random.randint(50, 150) / 100)
+                    self.push(to_send.encode("UTF-8"))
+                    self.logger.info(to_send)
                     self.messages_sent.append(datetime.now())
+                    time.sleep(random.randint(50, 150) / 100)
             else:
                 time_cutoff = datetime.now() - timedelta(seconds=SEND_RATE_WITHIN_SECONDS)
                 self.messages_sent = [dt for dt in self.messages_sent if dt < time_cutoff]

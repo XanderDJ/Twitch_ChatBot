@@ -42,14 +42,12 @@ class ToggleType(Enum):
 
 
 class Message:
-    def __init__(self, msg: str, msg_type: MessageType, channel=None):
+    def __init__(self, msg: str, msg_type: MessageType, channel):
         self.content = msg
         self.type = msg_type
         self.channel = channel
 
     def __str__(self):
-        if self.channel is None:
-            return "(" + self.content.rstrip() + ", " + str(self.type) + ")"
         return "(" + self.content.rstrip() + ", " + str(self.type) + "," + self.channel + ")"
 
 

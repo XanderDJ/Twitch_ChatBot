@@ -1,8 +1,10 @@
 """
-    Commands in this file will be automatically used by chatbot for commands. Any time a message appears it will run through all the commands available
+    Commands in this file will be automatically used by chatbot for commands.
+    Any time a message appears it will run through all the commands available
 
     @command = this will add the method to the commands that are called when a PRIVMSG appears
-    @admin = This will call the command only when the admin of the bot (bot defined in ChatBot.py or credentials.py) types the command in chat
+    @admin = This will call the command only when the admin of the bot (bot defined in ChatBot.py or credentials.py)
+             types the command in chat
     @returns = This is for commands where other commands shouldn't run
     @save = called in save method every 10 minutes.
     @notice = This will call the command when an USERNOTICE is send in chat.
