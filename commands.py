@@ -1727,6 +1727,8 @@ def going_afk(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message("@" + username + ", " + line_pickers.get("byes").get_line() + " PrideLion",
                           MessageType.HELPFUL, channel, username)
         bot.send_message(message)
+        return True
+    return False
 
 
 # REPEATS and REPEATS_SETUP
