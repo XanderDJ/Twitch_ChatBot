@@ -140,6 +140,7 @@ class TwitchChat(object):
             self.state[channel][toggle_type.name] = str(not convert(self.state.get(channel).get(toggle_type.name)))
 
     def send_message(self, message: Message):
+        message = commands.filter_message(message)
         if self.can_send_type(message.channel, message.type) and count_capitals(message.content) < 50:
             client = self.irc_client
             client.send_message(u'PRIVMSG #{0} :{1}\n'.format(message.channel, message.content))
@@ -301,7 +302,7 @@ class TwitchChat(object):
                 print("channel?")
                 ans = input()
                 if ans in self.channels:
-                    msg = Message(match.group(1), MessageType.CHAT, ans)
+                    msg = Message(match.group(1), MessageType.CHAT, ans, self.user)
                     self.send_message(msg)
             else:
                 print("save\nstop\njoin\nleave\nreload\nstate\ndb\nsend (msg)")
