@@ -763,6 +763,16 @@ def check_if_afk(bot: 'TwitchChat', args, msg, username, channel, send: bool):
         bot.send_message(message)
 
 
+@command
+@unwrap_command_args
+def notify_afk(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    for user in afk:
+        if user in msg.lower():
+            message = Message("that user is afk", MessageType.SPAM, channel, credentials.username)
+            bot.send_message(message)
+            break
+
+
 # CLEARCHAT
 
 @clearchat
