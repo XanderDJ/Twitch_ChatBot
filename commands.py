@@ -99,7 +99,7 @@ youtube = get_youtube_api()
 db = LockedData({"emotes": dict(), "mentions": []})
 emote_dict = LockedData(load_emotes())
 blacklisted = f.load("texts/blacklisted.txt", [])
-
+afk = set()
 ID_cache = IDCache()
 
 
@@ -750,6 +750,16 @@ def card_pogoff(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             ):
         message = Message("@" + username + ", PogOff you're not funny " + "PogOff " * random.randint(1, 6),
                           MessageType.SPAM, channel, username)
+        bot.send_message(message)
+
+
+@command
+@unwrap_command_args
+def check_if_afk(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if username in afk:
+        afk.remove(username)
+        message = Message("@" + username + ", " + line_pickers.get("greetings").get_line() + " PrideLion ",
+                          MessageType.HELPFUL, channel, username)
         bot.send_message(message)
 
 
@@ -1707,6 +1717,16 @@ def check_youtube(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
         return True
     return False
+
+
+@returns
+@unwrap_command_args
+def going_afk(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg.lower() == "!afk":
+        afk.add(username)
+        message = Message("@" + username + ", " + line_pickers.get("byes").get_line() + " PrideLion",
+                          MessageType.HELPFUL, channel, username)
+        bot.send_message(message)
 
 
 # REPEATS and REPEATS_SETUP
