@@ -142,6 +142,7 @@ class TwitchChat(object):
     def send_message(self, message: Message):
         message = commands.filter_message(message)
         if self.can_send_type(message.channel, message.type) and count_capitals(message.content) < 50:
+            self.state[message.channel]["messages"] = str(int(self.state[message.channel].get("messages", "0")) + 1)
             client = self.irc_client
             client.send_message(u'PRIVMSG #{0} :{1}\n'.format(message.channel, message.content))
 

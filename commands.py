@@ -1745,6 +1745,38 @@ def going_afk(bot: 'TwitchChat', args, msg, username, channel, send):
     return False
 
 
+@returns
+@unwrap_command_args
+def doomsday(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg.lower() == "!doomsday":
+        try:
+            min_msgs = get_min_chat_count(channel)
+            current_message_count = int(bot.state.get(channel).get("messages", "0"))
+            if current_message_count < min_msgs:
+                messages_away = min_msgs - current_message_count
+                message = Message("@" + username + f", I'm currently {messages_away - 1} from doomsday",
+                                  MessageType.COMMAND, channel, username)
+            else:
+                message = Message(
+                    "@" + username + ", either " + bot.admin + " didn't really care "
+                                                               "or they're lazy because doomsday has passed",
+                    MessageType.COMMAND, channel, username
+                )
+            bot.send_message(message)
+        except Exception:
+            pass
+        return True
+    return False
+
+
+def get_min_chat_count(channel: str):
+    base = "https://api.streamelements.com/kappa/v2/chatstats/" + channel + "/stats"
+    headers = {"accept": "application/json"}
+    response = http.request("GET", base, headers=headers).data
+    stats = json.loads(response)
+    return stats.get("chatters")[-1].get("amount")
+
+
 # REPEATS and REPEATS_SETUP
 
 @repeat(5)
