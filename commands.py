@@ -1754,7 +1754,7 @@ def doomsday(bot: 'TwitchChat', args, msg, username, channel, send):
             current_message_count = int(bot.state.get(channel).get("messages", "0"))
             if current_message_count < min_msgs:
                 messages_away = min_msgs - current_message_count
-                message = Message("@" + username + f", I'm currently {messages_away - 1} from doomsday",
+                message = Message("@" + username + f", I'm currently {messages_away - 1} messages away from doomsday",
                                   MessageType.COMMAND, channel, username)
             else:
                 message = Message(
