@@ -1125,6 +1125,16 @@ def tj(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 
 @returns
 @unwrap_command_args
+def alien(bot: 'TwitchChat', args, msg, username, channel, send: bool):
+    if username.lower() == "the_classy_aiien":
+        message = Message("@" + username + ", " + "TriDance " * random.randint(1,9), MessageType.SPAM, channel, username)
+        bot.send_message(message)
+        return True
+    return False
+
+
+@returns
+@unwrap_command_args
 def whois(bot: 'TwitchChat', args, msg, username, channel, send: bool):
     global alts
     match = re.match(r'!whois\s(\w+)', msg.lower())
