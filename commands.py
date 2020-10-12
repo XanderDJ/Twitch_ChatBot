@@ -610,7 +610,7 @@ def check_for_troll(bot: 'TwitchChat', channel: str, username: str, video_id: st
         elif contains_all(title.lower(), ["jebaited"]):
             message = Message("Don't search that youtube video, " + username + " is trying to Jebaited you!",
                               MessageType.HELPFUL, channel, username)
-        elif contains_word(title.lower(), ["corrolad", "corolla'd","corollad"]):
+        elif contains_word(title.lower(), ["corrolad", "corolla'd", "corollad"]):
             message = Message("Don't search that youtube video, " + username + " is trying to toyota corolla you!",
                               MessageType.HELPFUL, channel, username)
         else:
@@ -1779,11 +1779,23 @@ def get_min_chat_count(channel: str):
     stats = json.loads(response)
     return stats.get("chatters")[-1].get("amount")
 
+
 @returns
 @unwrap_command_args
 def card(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg == "!card":
         message = Message("no pepeSmoke PogO", MessageType.COMMAND, channel, username)
+        bot.send_message(message)
+        return True
+    return False
+
+
+@returns
+@unwrap_command_args
+def x6(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg == "!x6":
+        message = Message("x6 is no more, their time has come, it was a good run PrideLion", MessageType.COMMAND,
+                          channel, username)
         bot.send_message(message)
         return True
     return False
