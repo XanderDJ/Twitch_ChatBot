@@ -986,7 +986,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
             bot.state[username] = bot.state.get(username, dict())
             bot.state[username]["counters"] = bot.state.get(username).get("counters", {})
             counters = bot.state.get(username).get("counters")
-            if len(counters) < 2:
+            if len(counters) < 5:
                 if val_or_user not in counters:
                     counters[val_or_user] = counters.get(val_or_user, "0")
                     if val_or_user == "WeirdChamp" and not bot.twitch_status.is_subscribed_to(channel):
@@ -1007,7 +1007,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                     bot.send_message(message)
             else:
                 message = Message(
-                    "@" + username + ", you already have 2 counters, you can't have more. "
+                    "@" + username + ", you already have 5 counters, you can't have more. "
                                      "Ask " + bot.admin + " nicely to implement a delete counter command",
                     MessageType.COMMAND,
                     channel,
@@ -1025,7 +1025,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                 bot.state[val_or_user] = bot.state.get(val_or_user, dict())
                 bot.state[val_or_user]["counters"] = bot.state.get(val_or_user).get("counters", {})
                 counters = bot.state.get(val_or_user).get("counters")
-                if len(counters) < 2:
+                if len(counters) < 5:
                     if val not in counters:
                         counters[val] = counters.get(val, "0")
                         if val == "WeirdChamp" and not bot.twitch_status.is_subscribed_to(channel):
@@ -1048,7 +1048,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                         bot.send_message(message)
                 else:
                     message = Message(
-                        "@" + username + ", you already have 2 counters, you can't have more. "
+                        "@" + username + ", you already have 5 counters, you can't have more. "
                                          "Ask " + bot.admin + " nicely to implement a delete counter command",
                         MessageType.COMMAND,
                         channel,
