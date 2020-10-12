@@ -611,7 +611,7 @@ def check_for_troll(bot: 'TwitchChat', channel: str, username: str, video_id: st
             message = Message("Don't search that youtube video, " + username + " is trying to Jebaited you!",
                               MessageType.HELPFUL, channel, username)
         elif contains_word(title.lower(), ["corrolad", "corolla'd","corollad"]):
-            message = Message("Don't search that youtube video, " + username + " is trying to toyota corrola you!",
+            message = Message("Don't search that youtube video, " + username + " is trying to toyota corolla you!",
                               MessageType.HELPFUL, channel, username)
         else:
             return
