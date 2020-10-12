@@ -1776,6 +1776,15 @@ def get_min_chat_count(channel: str):
     stats = json.loads(response)
     return stats.get("chatters")[-1].get("amount")
 
+@returns
+@unwrap_command_args
+def card(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg == "!card":
+        message = Message("pepeSmoke PogO", MessageType.COMMAND, channel, username)
+        bot.send_message(message)
+        return True
+    return False
+
 
 # REPEATS and REPEATS_SETUP
 
