@@ -1801,6 +1801,24 @@ def x6(bot: 'TwitchChat', args, msg, username, channel, send):
     return False
 
 
+@returns
+@unwrap_command_args
+def counts(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg == "!counts":
+        if username in bot.state and "counters" in bot.state.get(username):
+            counts = bot.state.get(username).get("counters").keys()
+            counts = " ".join(counts)
+            message = Message("@" + username + ", your counters are : " + counts, MessageType.COMMAND, channel,
+                              username)
+            bot.send_message(message)
+        else:
+            message = Message("@" + username + ", You don't have any counters 4Head .", MessageType.COMMAND, channel,
+                              username)
+            bot.send_message(message)
+        return True
+    return False
+
+
 # REPEATS and REPEATS_SETUP
 
 @repeat(5)
