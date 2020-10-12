@@ -1783,7 +1783,7 @@ def get_min_chat_count(channel: str):
 @unwrap_command_args
 def card(bot: 'TwitchChat', args, msg, username, channel, send):
     if msg == "!card":
-        message = Message("pepeSmoke PogO", MessageType.COMMAND, channel, username)
+        message = Message("no pepeSmoke PogO", MessageType.COMMAND, channel, username)
         bot.send_message(message)
         return True
     return False
