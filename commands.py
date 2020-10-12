@@ -1243,7 +1243,7 @@ def replay(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     if msg == "!replay":
         if bot.limiter.can_send(channel, "replay", 60, True):
-            message = Message("Green OkayChamp", MessageType.COMMAND, channel, username)
+            message = Message("No longer green FeelsBadMan", MessageType.COMMAND, channel, username)
             bot.send_message(message)
         return True
 
