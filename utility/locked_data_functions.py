@@ -9,19 +9,21 @@ def get_val(dct, kwargs):
 
 
 def delete_from_dict(dct, kwargs):
-    if "key" in kwargs:
+    if "key" in kwargs and kwargs.get("key") in dct:
         return dct.pop(kwargs.get("key"))
 
 
 def delete_from_set(st, kwargs):
     if "elem" in kwargs:
         elem = kwargs.get("elem")
-        st.remove(elem)
+        if elem in st:
+            st.remove(elem)
 
 
 def delete_from_list(lst, kwargs):
     if "elem" in kwargs:
-        lst.remove(kwargs.get("elem"))
+        if kwargs.get("elem") in lst:
+            lst.remove(kwargs.get("elem"))
 
 
 def add_to_container(container, kwargs):
