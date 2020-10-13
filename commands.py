@@ -887,9 +887,13 @@ def remove_from_ignore(bot: 'TwitchChat', args, msg, username, channel, send):
     global ignore_list
     msg = msg.lower()
     if msg == "!unignore me":
-        ignore_list.buffered_write(delete_from_set, elem=username)
-        message = Message("@" + username + ", welcome back PrideLion !", MessageType.COMMAND, channel, username)
-        bot.send_message(message)
+        if ignore_list.access(contains, elem=username):
+            ignore_list.buffered_write(delete_from_set, elem=username)
+            message = Message("@" + username + ", welcome back PrideLion !", MessageType.COMMAND, channel, username)
+            bot.send_message(message)
+        else:
+            message = Message("@" + username + ", you're not ignored 4Head", MessageType.COMMAND, channel, username)
+            bot.send_message(message)
         return True
     return False
 
