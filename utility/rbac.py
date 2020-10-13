@@ -95,4 +95,7 @@ def log_access(args, channel):
     args["timestamp"] = datetime.utcnow()
     twitch = client["twitch"]
     col = twitch[channel]
-    col.insert_one(args)
+    try:
+        col.insert_one(args)
+    except Exception:
+        pass
