@@ -1808,7 +1808,7 @@ def x6(bot: 'TwitchChat', args, msg, username, channel, send):
 @returns
 @unwrap_command_args
 def counts(bot: 'TwitchChat', args, msg, username, channel, send):
-    match = re.match(r"!counts\*(\w*)", msg.lower())
+    match = re.match(r"!counts\s*(\w*)", msg.lower())
     if match:
         username = username if len(match.group(1)) == 0 else match.group(1)
         if username in bot.state and "counters" in bot.state.get(username):
