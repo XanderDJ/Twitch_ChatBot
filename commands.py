@@ -1771,7 +1771,8 @@ def doomsday(bot: 'TwitchChat', args, msg, username, channel, send):
                 )
             bot.send_message(message)
         except Exception:
-            pass
+            message = Message("Couldn't verify doomsday monkaW", MessageType.COMMAND, channel, username)
+            bot.send_message(message)
         return True
     return False
 
