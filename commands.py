@@ -67,6 +67,7 @@ ignore_list = LockedData(f.load("texts/ignore.txt", set()))
 alts = LockedData(f.load("texts/alts.txt", dict()))
 bad_words = f.load("texts/bad_words.txt", [])
 streaks = LockedData(f.load("texts/streaks.txt", {}))
+origins = f.load("texts/emote_origins.txt")
 
 
 def get_youtube_api():
@@ -1822,6 +1823,24 @@ def counts(bot: 'TwitchChat', args, msg, username, channel, send):
             message = Message("@" + username + ", You don't have any counters 4Head .", MessageType.COMMAND, channel,
                               username)
             bot.send_message(message)
+        return True
+    return False
+
+
+@returns
+@unwrap_command_args
+def origin(bot: 'TwitchChat', args, msg, username, channel, send):
+    global origins
+    match = re.match(r"!origin\s([^\s]+)", msg)
+    if match:
+        word = match.group(1)
+        if word in origins:
+            message = Message(f"@{username}, the origin of that emote is : {origins.get(word)}", MessageType.COMMAND,
+                              channel, username)
+        else:
+            message = Message(f"@{username}, don't know the origin of that emote FeelsBadMan", MessageType.COMMAND,
+                              channel, username)
+        bot.send_message(message)
         return True
     return False
 
