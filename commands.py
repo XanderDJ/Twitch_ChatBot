@@ -1834,6 +1834,8 @@ def origin(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r"!origin\s([^\s]+)", msg)
     if match:
         word = match.group(1)
+        print(word)
+        print(origins.get(word))
         if word in origins:
             message = Message(f"@{username}, the origin of that emote is : {origins.get(word)}", MessageType.COMMAND,
                               channel, username)
