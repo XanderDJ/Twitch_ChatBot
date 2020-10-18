@@ -66,6 +66,7 @@ def update_streak_inner(dct, kwargs):
 
 
 def reset_streak_inner(dct, kwargs):
+    print(kwargs)
     if "emote" in kwargs and "channel" in kwargs:
         emote = kwargs.get("emote")
         channel = kwargs.get("channel")

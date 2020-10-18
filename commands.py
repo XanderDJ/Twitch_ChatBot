@@ -549,9 +549,7 @@ def reset_streak(bot: 'TwitchChat', args, msg, username, channel, send):
     global streaks
     match = re.match(r'!reset\s([^\s]+)', msg)
     if match:
-        bot.logger.info("got here")
         emote = match.group(1)
-        bot.logger.info(emote)
         streaks.access(update_streak_inner, emote=emote, channel=channel)
         return True
     return False
