@@ -63,3 +63,11 @@ def update_streak_inner(dct, kwargs):
                 streak["current"] = "0"
             else:
                 streak["current"] = "0"
+
+
+def reset_streak_inner(dct, kwargs):
+    if "emote" in kwargs and "channel" in kwargs:
+        emote = kwargs.get("emote")
+        channel = kwargs.get("channel")
+        if emote in dct[channel]:
+            dct[channel][emote]["max"] = "0"
