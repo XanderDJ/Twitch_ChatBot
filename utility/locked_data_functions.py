@@ -73,4 +73,3 @@ def reset_streak_inner(dct, kwargs):
         if emote in dct[channel]:
             print("trying to reset")
             dct[channel][emote]["max"] = "0"
-            print(dct[channel][emote][max])
