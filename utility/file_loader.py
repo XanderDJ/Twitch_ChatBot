@@ -50,7 +50,7 @@ def to_txt(obj):
     elif isinstance(obj, dict):
         items = []
         for key, val in obj.items():
-            items.append(str(key) + ":" + to_txt(val))
+            items.append(str(key).replace(":", "\\72") + ":" + to_txt(val))
         txt += "{"
         txt += ",".join(items)
         txt += "}"
@@ -82,7 +82,7 @@ def to_pretty_txt(obj):
     elif isinstance(obj, dict):
         items = []
         for key, val in obj.items():
-            items.append(" " * 4 + str(key) + ":" + to_txt(val))
+            items.append(" " * 4 + str(key).replace(":", "\\72") + ":" + to_txt(val))
         txt += "{\n"
         txt += ",\n".join(items)
         txt += "\n}"
@@ -137,7 +137,7 @@ def from_text(txt):
             for item in all_items(content):
                 # Items should be in shape of (key):(possible iterable or txt)
                 key, value = item.split(":", maxsplit=1)
-                dct[key] = from_text(value)
+                dct[key.replace("\\72", ":")] = from_text(value)
             return dct
     else:
         # not an iterable
