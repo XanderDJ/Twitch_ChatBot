@@ -58,7 +58,8 @@ line_pickers = {
     "jokes": RandomLinePicker("texts/jokes.txt"),
     "pickups": RandomLinePicker("texts/pickuplines.txt"),
     "quotes": RandomLinePicker("texts/quotes.txt"),
-    "lilb": RandomLinePicker("texts/lilb.txt")
+    "lilb": RandomLinePicker("texts/lilb.txt"),
+    "halloween": RandomLinePicker("texts/halloween.txt")
 }
 
 lurkers = dict()
@@ -1855,6 +1856,15 @@ def origin(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
         return True
     return False
+
+
+@returns
+@unwrap_command_args
+def costume_idea(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg.lower() == "!costume_idea":
+        message = Message("@" + username + ", You could try this: " + line_pickers.get("halloween").get_line(),
+                          MessageType.COMMAND, channel, username)
+        bot.send_message(message)
 
 
 # REPEATS and REPEATS_SETUP
