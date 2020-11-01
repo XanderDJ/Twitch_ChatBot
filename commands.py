@@ -950,6 +950,7 @@ def english_dictionary():
     english_dict.add("mayhap")
     english_dict.add("luv")
     english_dict.add("mtn")
+    english_dict.add("lil")
     return english_dict
 
 
