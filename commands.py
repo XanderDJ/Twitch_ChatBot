@@ -1866,7 +1866,18 @@ def costume_idea(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message("@" + username + ", You could try this: " + line_pickers.get("halloween").get_line(),
                           MessageType.COMMAND, channel, username)
         bot.send_message(message)
+        return True
+    return False
 
+@returns
+@unwrap_command_args
+def blight(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg.lower() == "!blight":
+        message = Message("Has a hard time beating wulf at pokemon PepeLaugh , got swept twice in a row once!",
+                          MessageType.COMMAND, channel, username)
+        bot.send_message(message)
+        return True
+    return False
 
 # REPEATS and REPEATS_SETUP
 
