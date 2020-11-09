@@ -1870,6 +1870,19 @@ def costume_idea(bot: 'TwitchChat', args, msg, username, channel, send):
     return False
 
 
+@returns
+@unwrap_command_args
+def countdown(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg.lower() == "!countdown":
+        for i in range(3, 0, -1):
+            message = Message(str(i), MessageType.COMMAND, channel, username)
+            bot.send_message(message)
+            time.sleep(0.5)
+        message = Message("GO", MessageType.COMMAND, channel, username)
+        bot.send_message(message)
+        return True
+    return False
+
 # REPEATS and REPEATS_SETUP
 
 @repeat(5)
