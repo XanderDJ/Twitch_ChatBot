@@ -1877,7 +1877,7 @@ def countdown(bot: 'TwitchChat', args, msg, username, channel, send):
         for i in range(3, 0, -1):
             message = Message(str(i), MessageType.COMMAND, channel, username)
             bot.send_message(message)
-            time.sleep(0.5)
+            time.sleep(1)
         message = Message("GO", MessageType.COMMAND, channel, username)
         bot.send_message(message)
         return True
