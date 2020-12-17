@@ -951,6 +951,7 @@ def english_dictionary():
     english_dict.add("luv")
     english_dict.add("mtn")
     english_dict.add("lil")
+    english_dict.add("naw")
     return english_dict
 
 
