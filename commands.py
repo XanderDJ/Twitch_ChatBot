@@ -1887,7 +1887,7 @@ def countdown(bot: 'TwitchChat', args, msg, username, channel, send):
 @returns
 @unwrap_command_args
 def jeff(bot: 'TwitchChat', args, msg, username, channel, send):
-    if msg.lower == "!wakemeupbeforeyougogo":
+    if msg.lower() == "!wakemeupbeforeyougogo":
         message = Message("RIP Jeff a real one", MessageType.COMMAND, channel, username)
         bot.send_message(message)
         return True
