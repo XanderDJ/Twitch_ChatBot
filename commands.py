@@ -1093,8 +1093,8 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
 def get_count(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r'!count\s(\w+)\s*([^\s]*)', msg)
     if match:
-        user = match.group(1).lower() if len(match.group(2)) != 0 else username
-        val = match.group(2) if match.group(2) != 0 else match.group(1)
+        user = match.group(1).lower() if len(match.group(2)) != 0 else username.lower()
+        val = match.group(2) if len(match.group(2)) != 0 else match.group(1)
         if val.lower() in bad_words:
             message = Message("@" + username + ", not fucking cool man.", MessageType.COMMAND, channel, username)
             bot.send_message(message)
