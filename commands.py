@@ -1898,7 +1898,7 @@ def jeff(bot: 'TwitchChat', args, msg, username, channel, send):
 @returns
 @unwrap_command_args
 def roles(bot: 'TwitchChat', args, msg, username, channel, send):
-    if msg.lower() != "!roles":
+    if msg.lower() == "!roles":
         roles = rbac.get_roles(username, channel)
         if len(roles) == 0:
             message = Message("@" + username + ", you don't have any roles 4Weird", MessageType.COMMAND, channel,
