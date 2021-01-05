@@ -25,7 +25,10 @@ def get_roles(user, channel):
 
     def get_roles_inner(db, kwargs):
         if "user" in kwargs and "channel" in kwargs:
-            return db.get(kwargs.get("user")).get(kwargs.get("channel"))
+            if user in db:
+                return db.get(kwargs.get("user")).get(kwargs.get("channel"), [])
+            else:
+                return []
 
     return users.access(get_roles_inner, user=user, channel=channel)
 
