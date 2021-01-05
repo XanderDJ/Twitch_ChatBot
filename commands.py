@@ -1884,6 +1884,7 @@ def countdown(bot: 'TwitchChat', args, msg, username, channel, send):
         return True
     return False
 
+
 @returns
 @unwrap_command_args
 def jeff(bot: 'TwitchChat', args, msg, username, channel, send):
@@ -1892,6 +1893,25 @@ def jeff(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
         return True
     return False
+
+
+@returns
+@unwrap_command_args
+def roles(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg.lower() != "!roles":
+        roles = rbac.get_roles(username, channel)
+        if len(roles) == 0:
+            message = Message("@" + username + ", you don't have any roles 4Weird", MessageType.COMMAND, channel,
+                              username)
+            bot.send_message(message)
+            return True
+        else:
+            string = "@" + username + ", your roles are : " + ", ".join(roles)
+            message = Message(string, MessageType.COMMAND, channel, username)
+            bot.send_message(message)
+            return True
+    return False
+
 
 # REPEATS and REPEATS_SETUP
 
