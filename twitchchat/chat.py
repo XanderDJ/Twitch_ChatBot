@@ -140,7 +140,7 @@ class TwitchChat(object):
             self.state[channel][toggle_type.name] = str(not convert(self.state.get(channel).get(toggle_type.name)))
 
     def send_message(self, message: Message):
-        message = commands.filter_message(message)
+        message = commands.filter_message(message, self)
         if self.can_send_type(message.channel, message.type) and count_capitals(message.content) < 50:
             self.state[message.channel]["messages"] = str(int(self.state[message.channel].get("messages", "0")) + 1)
             client = self.irc_client

@@ -2026,9 +2026,10 @@ def toggle_if_live(state, bot: 'TwitchChat'):
 
 # FILTERING
 
-def filter_message(message: Message):
+def filter_message(message: Message, bot: 'TwitchChat'):
     if message.user in blacklisted:
         message = Message("@" + message.user + ", " + "PogOff " * random.randint(1, 7),
                           message.type, message.channel, message.user)
-    # TODO afk system
+    if contains_word(message.content, ["WeirdChamp"]) and not bot.twitch_status.is_subscribed_to(message.channel):
+        message = Message("Can't fool me PepeLaugh", message.type, message.channel, message.user)
     return message
