@@ -1759,7 +1759,7 @@ def going_afk(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r'!afk\s*(.*)', msg)
     if match:
         reason = match.group(1) if len(match.group(1)) != 0 else "No reason given"
-        if contains_all(reason, ["gift", "me"]):
+        if contains_all(reason, ["gift", "me"]) or contains_word(reason, bad_words):
             message = Message("Can't fool me PepeLaugh", MessageType.COMMAND, channel, username)
             bot.send_message(message)
             return True
