@@ -603,7 +603,7 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.state[channel]["lacking"] = str(int(amount) + len(wrong_emotes))
         if send:
             txt = " ".join(wrong_emotes)
-            message = Message("@" + username + ", " + txt + " PepeLaugh", MessageType.SPAM, channel, username)
+            message = Message("@" + username + ", pepePoint " + txt, MessageType.SPAM, channel, username)
             bot.send_message(message)
 
 
