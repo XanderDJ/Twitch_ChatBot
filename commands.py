@@ -1825,6 +1825,16 @@ def x6(bot: 'TwitchChat', args, msg, username, channel, send):
         return True
     return False
 
+@returns
+@unwrap_command_args
+def x12(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg == "!x12":
+        message = Message("x12 another one that bit the dust, cya x12 PrideLion", MessageType.COMMAND,
+                          channel, username)
+        bot.send_message(message)
+        return True
+    return False
+
 
 @returns
 @unwrap_command_args
