@@ -1932,7 +1932,7 @@ def roles(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def title(bot: 'TwitchChat', args, msg, username, channel, send):
     global ID_cache
-    if msg.lower() == "!title":
+    if msg.lower() == "!title" and bot.limiter.can_send(channel, "title", 30):
         if channel in ID_cache:
             title = get_title(http, channel, ID_cache.get_id(channel))
             message = Message("@" + username + ", Current title: " + title + " PrideLion ", MessageType.COMMAND,
