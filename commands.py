@@ -1825,6 +1825,7 @@ def x6(bot: 'TwitchChat', args, msg, username, channel, send):
         return True
     return False
 
+
 @returns
 @unwrap_command_args
 def x12(bot: 'TwitchChat', args, msg, username, channel, send):
@@ -1924,6 +1925,24 @@ def roles(bot: 'TwitchChat', args, msg, username, channel, send):
             message = Message(string, MessageType.COMMAND, channel, username)
             bot.send_message(message)
             return True
+    return False
+
+
+@returns
+@unwrap_command_args
+def title(bot: 'TwitchChat', args, msg, username, channel, send):
+    global ID_cache
+    if msg.lower() == "!title":
+        if channel in ID_cache:
+            title = get_title(http, channel, ID_cache.get_id(channel))
+            message = Message("@" + username + ", Current title: " + title + " PrideLion ", MessageType.COMMAND,
+                              channel, username)
+            bot.send_message(message)
+        else:
+            message = Message("@" + username + ", Don't have the id for this channel yet somehow PrideLion ",
+                              MessageType.COMMAND, channel, username)
+            bot.send_message(message)
+        return True
     return False
 
 
