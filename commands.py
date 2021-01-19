@@ -1946,6 +1946,20 @@ def title(bot: 'TwitchChat', args, msg, username, channel, send):
     return False
 
 
+@returns
+@unwrap_command_args
+def whoami(bot: 'TwitchChat', args, msg, username, channel, send):
+    global alts
+    if msg.lower() == "!whoami":
+        alt = username
+        while alts.access(contains, elem=alt):
+            alt = alts.access(get_val, key=alt)
+        message = Message("@" + username + ", you're " + alt + " PrideLion", MessageType.COMMAND, channel, username)
+        bot.send_message(message)
+        return True
+    return False
+
+
 # REPEATS and REPEATS_SETUP
 
 @repeat(5)
