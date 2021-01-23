@@ -583,6 +583,9 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
     counters_check = username in bot.state and len(counters) != 0
     not_bot = not username == bot.user
     for word in words:
+        if word.lower() == "poooound" and bot.limiter.can_send(channel, "pound", 30, True):
+            message = Message("Poooound", MessageType.SPAM, channel, username)
+            bot.send_message(message)
         if counters_check and word in counters:
             counters[word] = str(int(counters.get(word)) + 1)
         if not_bot:
