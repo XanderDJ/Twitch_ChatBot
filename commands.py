@@ -69,6 +69,7 @@ alts = LockedData(f.load("texts/alts.txt", dict()))
 bad_words = f.load("texts/bad_words.txt", [])
 streaks = LockedData(f.load("texts/streaks.txt", {}))
 origins = f.load("texts/emote_origins.txt")
+dictionary_words = LockedData(f.load("texts/dictionary.txt", []))
 
 
 def get_youtube_api():
@@ -273,6 +274,14 @@ def save_user_roles():
 @save
 def save_blacklist():
     f.save(blacklisted, "texts/blacklisted.txt")
+
+
+@save
+def save_dictionary_words():
+    def save_dictionary_inner(data, kwargs):
+        f.save(data, "texts/dictionary.txt")
+
+    dictionary_words.access(save_dictionary_inner)
 
 
 # ADMIN
@@ -552,6 +561,19 @@ def reset_streak(bot: 'TwitchChat', args, msg, username, channel, send):
     if match:
         emote = match.group(1)
         streaks.access(reset_streak_inner, emote=emote, channel=channel)
+        return True
+    return False
+
+
+@admin
+@unwrap_command_args
+def add_word(bot: 'TwitchChat', args, msg, username, channel, send):
+    global dictionary, dictionary_words
+    match = re.match(r'!addword\s([^\s]+)', msg.lower())
+    if match:
+        new_word = match.group(1)
+        dictionary.add(new_word)
+        dictionary_words.access(add_to_container, elem=new_word)
         return True
     return False
 
@@ -929,32 +951,11 @@ http = urllib3.PoolManager()
 
 
 def english_dictionary():
+    global dictionary_words
     english_dict = enchant.Dict("en_US")
-    english_dict.add("pov")
-    english_dict.add("POV")
-    english_dict.add("pogo")
-    english_dict.add("poro")
-    english_dict.add("png")
-    english_dict.add("PNG")
-    english_dict.add("ppl")
-    english_dict.add("nvm")
-    english_dict.add("pos")
-    english_dict.add("POS")
-    english_dict.add("ludwigs")
-    english_dict.add("mon")
-    english_dict.add("yee")
-    english_dict.add("yeh")
-    english_dict.add("lul")
-    english_dict.add("lol")
-    english_dict.add("LOL")
-    english_dict.add("lud")
-    english_dict.add("bo3")
-    english_dict.add("boi")
-    english_dict.add("mayhap")
-    english_dict.add("luv")
-    english_dict.add("mtn")
-    english_dict.add("lil")
-    english_dict.add("naw")
+    current_words = dictionary_words.access(get_data)
+    for word in current_words:
+        english_dict.add(word)
     return english_dict
 
 
