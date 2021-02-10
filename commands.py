@@ -569,7 +569,7 @@ def reset_streak(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def add_word(bot: 'TwitchChat', args, msg, username, channel, send):
     global dictionary, dictionary_words
-    match = re.match(r'!addword\s([^\s]+)', msg.lower())
+    match = re.match(r'!addword\s([^\s]+)', msg)
     if match:
         new_word = match.group(1)
         dictionary.add(new_word)
