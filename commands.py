@@ -722,7 +722,7 @@ def time_out(bot: 'TwitchChat', args, msg, username, channel, send):
     msg = msg.lower()
     username = username
     if "time out" in msg and username == bot.admin:
-        message = Message("This is a very long text so that eventually I will get tim ed out with a relatively small time. This is done so that my messages will get "cleared" and is appropriate when you said some shit that you regret or find repulsive. Hopefully this text is long enough cause I don't know the character limit. I'm dog like that. How many more sentences should I write to get that sweet sweet timeout , is this long enough? God I hope it is? Imagine if it wasn't I would look foolish and goolish. pepePray ", MessageType.SPECIAL, channel, username)
+        message = Message("This is a very long text so that eventually I will get timed out with a relatively small time. This is done so that my messages will get \"cleared\" and is appropriate when you said some shit that you regret or find repulsive. Hopefully this text is long enough cause I don't know the character limit. I'm dog like that. How many more sentences should I write to get that sweet sweet timeout , is this long enough? God I hope it is? Imagine if it wasn't I would look foolish and goolish. pepePray ", MessageType.SPECIAL, channel, username)
         bot.send_message(message)
     elif "time out" in msg:
         message = Message("@" + username + " What's the password", MessageType.SPAM, channel, username)
