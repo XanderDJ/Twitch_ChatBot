@@ -890,6 +890,16 @@ def subscriber_type(months):
 
 @returns
 @unwrap_command_args
+def raptor(bot: 'TwitchChat', args, msg, username, channel, send):
+    if msg.lower() == "!raptor":
+        message = Message("A homie (not banned HYPERS ) FeelsOkayMan ", MessageType.COMMAND, channel, username)
+        bot.send_message(message)
+        return True
+    return False
+
+
+@returns
+@unwrap_command_args
 def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
     color = args['color']
     color = color if len(color) != 0 else "#808080"
