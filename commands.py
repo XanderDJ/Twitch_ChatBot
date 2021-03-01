@@ -628,11 +628,6 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
         match = re.match(r".*watch\?v=([a-zA-Z0-9\-_]+).*", word)
         if match:
             check_for_troll(bot, channel, username, match.group(1))
-        if yooo(word.lower()):
-            message = Message(
-                "@psygs, this will stay until psyShamrock is gone PrideLion " + line_pickers.get("greetings").get_line()
-                , MessageType.CHAT, channel, username)
-            bot.send_message(message)
     update_streaks(unique_emotes, channel, username)
     # Use data gathered
     if len(wrong_emotes) != 0:
