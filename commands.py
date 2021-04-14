@@ -1256,16 +1256,14 @@ def lacking(bot: 'TwitchChat', args, msg, username, channel, send):
 def pickup(bot: 'TwitchChat', args, msg, username, channel, send):
     message = Message("@" + username + ", " + line_pickers.get("pickups").get_line(), MessageType.COMMAND, channel,
                       username)
-
     bot.send_message(message)
 
 
-@alias("joke, jokes")
+@alias("joke", "jokes")
 @unwrap_command_args
 def joke(bot: 'TwitchChat', args, msg, username, channel, send):
     message = Message("@" + username + ", " + line_pickers.get("jokes").get_line(), MessageType.COMMAND, channel,
                       username)
-
     bot.send_message(message)
 
 
