@@ -12,7 +12,6 @@ import importlib
 
 logger = logging.getLogger(name="tmi")
 
-
 class TwitchChat(object):
 
     def __init__(self, user, admin, oauth, channels):
@@ -29,10 +28,10 @@ class TwitchChat(object):
         self.twitch_status = TwitchStatus(user, channels, commands.ID_cache)
 
         self.admins = commands.ADMIN
-        self.commands = commands.COMMAND
+        self.command = commands.COMMAND
         self.clearchat = commands.CLEARCHAT
         self.notice = commands.NOTICE
-        self.returns = commands.RETURNS
+        self.commands = commands.COMMANDS
         self.saves = commands.SAVE
         self.repeating_tasks = {func_name: TimedTask(func, loop_time, self) for func_name, (func, loop_time) in
                                 commands.REPEAT.items()}
@@ -65,10 +64,10 @@ class TwitchChat(object):
     def reload(self):
         importlib.reload(commands)
         self.admins = commands.ADMIN
-        self.commands = commands.COMMAND
+        self.command = commands.COMMAND
         self.clearchat = commands.CLEARCHAT
         self.notice = commands.NOTICE
-        self.returns = commands.RETURNS
+        self.commands = commands.COMMANDS
         self.saves = commands.SAVE
         for repeating_task in self.repeating_tasks.values():
             repeating_task.stop()
@@ -251,18 +250,28 @@ class TwitchChat(object):
                 args['channel'] = match.group(2)
                 args['message'] = match.group(3)
                 self.logger.debug(args["message"])
+                # ADMIN
                 if args["username"] == self.admin:
                     for func_name, func in self.admins.items():
                         func(self, args)
+                # ROLES
                 if rbac.has_roles(args['username'], args['channel']):
                     funcs = rbac.get_allowed_functions(args['username'], args['channel'])
                     for func in funcs:
                         if func(self, args):
-                            rbac.log_access(args, args['channel'])
-                for func_name, func in self.returns.items():
-                    if func(self, args):
-                        return True
-                for func_name, func in self.commands.items():
+                            return True
+
+                # COMMANDS
+                if len(match.group(3)) > 0 and match.group(3)[0] == "!":
+                    command = re.match(r"!([^\s]*).*", match.group(3).lower())
+                    if command:
+                        command_name = command.group(1)
+                        if command_name in self.commands:
+                            self.commands.get(command_name)(self, args)
+                    return True
+
+                # ALWAYS
+                for func_name, func in self.command.items():
                     func(self, args)
                 return True
 

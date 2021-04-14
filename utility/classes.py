@@ -82,6 +82,9 @@ class RandomLinePicker:
         if line in self.lines:
             self.lines.remove(line)
             f.save(self.lines.extend(self.lines_said), self.file_pointer)
+        elif line in self.lines_said:
+            self.lines_said.remove(line)
+            f.save(self.lines.extend(self.lines_said), self.file_pointer)
 
 
 class IDCache:

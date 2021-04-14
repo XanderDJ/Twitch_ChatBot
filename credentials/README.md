@@ -1,4 +1,3 @@
-# This folder needs to contain two python files
 
 ## credentials.py
 This file needs to hold three variables.
