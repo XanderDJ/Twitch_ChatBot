@@ -66,7 +66,7 @@ bad_words = f.load("texts/bad_words.txt", [])
 streaks = LockedData(f.load("texts/streaks.txt", {}))
 origins = f.load("texts/emote_origins.txt")
 dictionary_words = LockedData(f.load("texts/dictionary.txt", []))
-
+commands = LockedData(f.load("texts/commands.txt", {}))
 
 def get_youtube_api():
     scopes = ["https://www.googleapis.com/auth/youtube.readonly"]

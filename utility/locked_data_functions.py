@@ -40,6 +40,7 @@ def add_to_container(container, kwargs):
 def contains(container, kwargs):
     if "elem" in kwargs:
         return kwargs.get("elem") in container
+    return False
 
 
 def append_to_list_in_dict(dct, kwargs):

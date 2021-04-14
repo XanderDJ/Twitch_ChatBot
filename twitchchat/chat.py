@@ -268,6 +268,10 @@ class TwitchChat(object):
                         command_name = command.group(1)
                         if command_name in self.commands:
                             self.commands.get(command_name)(self, args)
+                        elif commands.commands.access(contains, elem=command_name):
+                            response = commands.commands.access(get_val, key=command_name)
+                            self.send_message(Message(response, MessageType.COMMAND, args["channel"], args["username"]))
+
                     return True
 
                 # ALWAYS
