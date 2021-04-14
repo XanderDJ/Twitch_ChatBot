@@ -68,6 +68,7 @@ origins = f.load("texts/emote_origins.txt")
 dictionary_words = LockedData(f.load("texts/dictionary.txt", []))
 commands = LockedData(f.load("texts/commands.txt", {}))
 
+
 def get_youtube_api():
     scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "0"
@@ -282,6 +283,14 @@ def save_dictionary_words():
         f.save(data, "texts/dictionary.txt")
 
     dictionary_words.access(save_dictionary_inner)
+
+
+@save
+def save_commands():
+    def save_commands_inner(data, kwargs):
+        f.save(data, "texts/commands.txt")
+
+    commands.access(save_commands_inner)
 
 
 # ADMIN
@@ -576,6 +585,31 @@ def add_word(bot: 'TwitchChat', args, msg, username, channel, send):
         dictionary_words.access(add_to_container, elem=new_word)
         return True
     return False
+
+
+@admin
+@unwrap_command_args
+def add_command(bot: 'TwitchChat', args, msg, username, channel, send):
+    global commands
+    match = re.match(r'!addcommand\s([a-zA-Z0-9_]*)\s([^\s]*)')
+    if match:
+        command_name = match.group(1)
+        if commands.access(contains,elem=command_name):
+            bot.send_message(Message("This command is already in use, if you want to overwrite this command use !addcommandf PrideLion", MessageType.FUNCTIONAL, channel, username))
+        else:
+            commands.access(write_to_dict,key=command_name,val=match.group(2))
+            bot.send_message(Message(f"Command {command_name} added PrideLion", MessageType.FUNCTIONAL, channel, username))
+
+
+@admin
+@unwrap_command_args
+def add_commandf(bot: 'TwitchChat', args, msg, username, channel, send):
+    global commands
+    match = re.match(r'!addcommandf\s([a-zA-Z0-9_]*)\s([^\s]*)')
+    if match:
+        command_name = match.group(1)
+        commands.access(write_to_dict,key=command_name,val=match.group(2))
+        bot.send_message(Message(f"Command {command_name} added PrideLion", MessageType.FUNCTIONAL, channel, username))
 
 
 # COMMANDS
