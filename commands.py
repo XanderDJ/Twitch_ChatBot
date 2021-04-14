@@ -591,7 +591,7 @@ def add_word(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def add_command(bot: 'TwitchChat', args, msg, username, channel, send):
     global commands
-    match = re.match(r'!addcommand\s([a-zA-Z0-9_]*)\s([^\s]*)')
+    match = re.match(r'!addcommand\s([a-zA-Z0-9_]*)\s([^\s]*)', msg)
     if match:
         command_name = match.group(1)
         if commands.access(contains,elem=command_name):
@@ -605,7 +605,7 @@ def add_command(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def add_commandf(bot: 'TwitchChat', args, msg, username, channel, send):
     global commands
-    match = re.match(r'!addcommandf\s([a-zA-Z0-9_]*)\s([^\s]*)')
+    match = re.match(r'!addcommandf\s([a-zA-Z0-9_]*)\s([^\s]*)', msg)
     if match:
         command_name = match.group(1)
         commands.access(write_to_dict,key=command_name,val=match.group(2))
