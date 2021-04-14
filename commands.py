@@ -1560,7 +1560,6 @@ def pyramid(bot: 'TwitchChat', args, msg, username, channel, send):
                 for pyramid_msg in pyramid:
                     message = Message(pyramid_msg, MessageType.SPAM, channel, username)
                     bot.send_message(message)
-                    time.sleep(1.5)
                 return True
             return True
     return False
