@@ -1549,7 +1549,7 @@ def get_min_chat_count(channel: str):
 def counts(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r"!(counts|counters)\s*(\w*)", msg.lower())
     if match:
-        username = username if len(match.group(1)) == 0 else match.group(2)
+        username = username if len(match.group(2)) == 0 else match.group(2)
         if username in bot.state and "counters" in bot.state.get(username):
             counts = bot.state.get(username).get("counters").keys()
             counts = " ".join(counts)
