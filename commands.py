@@ -1764,7 +1764,7 @@ def check_youtube(bot: 'TwitchChat', args, msg, username, channel, send):
                 message = Message("@" + username + ", fuck off for trying that 4Weird", MessageType.COMMAND, channel,
                                   username)
             else:
-                message = Message("@" + username + " " + title + " - " + channel_name, MessageType.COMMAND, channel,
+                message = Message("@" + username + " " + title + " - " + channel_name + " LINK: https://www.youtube.com/watch?v=" + video_id, MessageType.COMMAND, channel,
                                   username)
         except IndexError as e:
             message = Message("@" + username + ", that youtube video doesn't exist", MessageType.COMMAND, channel,
