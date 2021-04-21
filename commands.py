@@ -594,11 +594,14 @@ def add_command(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r'!addcommand\s([a-zA-Z0-9_]*)\s(.*)', msg)
     if match:
         command_name = match.group(1)
-        if commands.access(contains,elem=command_name):
-            bot.send_message(Message("This command is already in use, if you want to overwrite this command use !addcommandf PrideLion", MessageType.FUNCTIONAL, channel, username))
+        if commands.access(contains, elem=command_name):
+            bot.send_message(Message(
+                "This command is already in use, if you want to overwrite this command use !addcommandf PrideLion",
+                MessageType.FUNCTIONAL, channel, username))
         else:
-            commands.access(write_to_dict,key=command_name,val=match.group(2))
-            bot.send_message(Message(f"Command {command_name} added PrideLion", MessageType.FUNCTIONAL, channel, username))
+            commands.access(write_to_dict, key=command_name, val=match.group(2))
+            bot.send_message(
+                Message(f"Command {command_name} added PrideLion", MessageType.FUNCTIONAL, channel, username))
 
 
 @admin
@@ -608,7 +611,7 @@ def add_commandf(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r'!addcommandf\s([a-zA-Z0-9_]*)\s(.*)', msg)
     if match:
         command_name = match.group(1)
-        commands.access(write_to_dict,key=command_name,val=match.group(2))
+        commands.access(write_to_dict, key=command_name, val=match.group(2))
         bot.send_message(Message(f"Command {command_name} added PrideLion", MessageType.FUNCTIONAL, channel, username))
 
 
@@ -1668,6 +1671,38 @@ def whoami(bot: 'TwitchChat', args, msg, username, channel, send):
         alt = alts.access(get_val, key=alt)
     message = Message("@" + username + ", you're " + alt + " PrideLion", MessageType.COMMAND, channel, username)
     bot.send_message(message)
+
+
+# GAMES WOOOOO
+
+@alias("rps")
+def rps(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r"!rps\s*(rock|r|paper|p|scissors|s)*?", msg.lower())
+    if match and bot.limiter.can_send(channel, "rps", 5):
+        matched = match.group(1)
+        if len(matched) == 0:
+            message = Message(
+                f"@{username}, to play rock paper scissors, use !rps (rock or paper or scissors) PrideLion",
+                MessageType.SPAM, channel, username)
+            bot.send_message(message)
+        else:
+            rps_object = get_RPS_object(matched)
+            if rps_object is None:
+                message = Message(f"@{username} couldn't parse given symbol {matched}", MessageType.SPAM, channel,
+                                  username)
+                bot.send_message(message)
+            else:
+                (outcome, bot_symbol) = play_rps(rps_object)
+                if outcome == Outcome.WON:
+                    message = Message(f"@{username}, You won PrideLion ! I chose {str(bot_symbol)}",
+                                      MessageType.SPAM, channel, username)
+                elif outcome == Outcome.LOST:
+                    message = Message(f"@{username}, You lost PrideLion ! I chose {str(bot_symbol)}",
+                                      MessageType.SPAM, channel, username)
+                else:
+                    message = Message(f"@{username}, We tied PrideLion ! I chose {str(bot_symbol)}",
+                                      MessageType.SPAM, channel, username)
+                bot.send_message(message)
 
 
 # REPEATS and REPEATS_SETUP
