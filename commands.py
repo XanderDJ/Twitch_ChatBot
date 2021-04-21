@@ -1788,7 +1788,8 @@ def accept(bot: 'TwitchChat', args, msg, username, channel, send):
             message = Message(row, MessageType.SPAM, channel, username)
             bot.send_message(message)
         message = Message(
-            f"Pick the row and column to place your symbol by using !pick row col. row and col need to be between 1 and 3 PrideLion")
+            f"Pick the row and column to place your symbol by using !pick row col. row and col need to be between 1 and 3 PrideLion",
+            MessageType.SPAM, channel, username)
         bot.send_message(message)
     else:
         message = Message(f"Waiting for {ttt.waiting_for} not for you {username} 4WeirdW", MessageType.SPAM, channel,
