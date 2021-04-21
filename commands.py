@@ -1801,13 +1801,13 @@ def accept(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def pick(bot: 'TwitchChat', args, msg, username, channel, send):
     user = username.lower()
-    bot.logger.info(ttt.active)
-    bot.logger.info(ttt.active and (user == ttt.p1 or user == ttt.p2))
     if ttt.active and (user == ttt.p1 or user == ttt.p2):
         match = re.match(r"!pick\s(\d)\s(\d)", msg.lower())
         if match:
             row = int(match.group(1))
             col = int(match.group(2))
+            bot.logger.info(row)
+            bot.logger.info(col)
             if ttt.pick(user, row, col):
                 board = ttt.get_board()
                 for row in board:
