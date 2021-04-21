@@ -1768,6 +1768,7 @@ def swap(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message(
             f"@{username} either you're not the one who sent the challenge or the game is already running 4Head",
             MessageType.SPAM, channel, username)
+        bot.send_message(message)
 
 
 @alias("accept")
@@ -1793,7 +1794,8 @@ def accept(bot: 'TwitchChat', args, msg, username, channel, send):
             MessageType.SPAM, channel, username)
         bot.send_message(message)
     else:
-        message = Message(f"Waiting for {ttt.waiting_for} not for you {username} 4WeirdW", MessageType.SPAM, channel,
+        msg_str = "No challenge has been sent yet 4WeirdW" if len(ttt.waiting_for) == 0 else f"Waiting for {ttt.waiting_for} not for you {username} 4WeirdW"
+        message = Message(msg_str, MessageType.SPAM, channel,
                           username)
         bot.send_message(message)
 
@@ -1831,6 +1833,7 @@ def pick(bot: 'TwitchChat', args, msg, username, channel, send):
                 bot.send_message(message)
     else:
         message = Message(f"@{username}, you're not participating 4WeirdW", MessageType.SPAM, channel, username)
+        bot.send_message(message)
 
 
 # REPEATS and REPEATS_SETUP
