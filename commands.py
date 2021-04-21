@@ -1829,6 +1829,7 @@ def pick(bot: 'TwitchChat', args, msg, username, channel, send):
             else:
                 message = Message(f"@{username}, either it's not your turn or you tried to do an invalid turn",
                                   MessageType.SPAM, channel, username)
+                bot.send_message(message)
     else:
         message = Message(f"@{username}, you're not participating 4WeirdW", MessageType.SPAM, channel, username)
 
