@@ -96,7 +96,7 @@ class TicTacToe:
                 return True, self.p2
         # check column
         for i in range(len(self.board)):
-            col = [self.board[i][col] for col in range(3)]
+            col = [self.board[row][i] for row in range(3)]
             if "x" in col and "o" not in col and "#" not in col:
                 return True, self.p1
             elif "o" in col and "x" not in col and "#" not in col:
