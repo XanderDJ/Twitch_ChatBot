@@ -1742,7 +1742,7 @@ ttt = TicTacToe()
 @alias("tictactoe", "ttt")
 @unwrap_command_args
 def tictactoe(bot: 'TwitchChat', args, msg, username, channel, send):
-    match = re.match(r"!(tictactoe|ttt)\s([^\s]+)")
+    match = re.match(r"!(tictactoe|ttt)\s([^\s]+)", msg.lower())
     if match and bot.limiter.can_send(channel, "ttt", 600):
         if not ttt.active:
             ttt.p1 = username.lower()
