@@ -57,7 +57,7 @@ class TicTacToe:
         self.active = False
         self.x = "x"
         self.o = "o"
-        self.board = [["_" for i in range(3)] for i in range(3)]
+        self.board = [["-" for i in range(3)] for i in range(3)]
         self.current = 0
         self.waiting_for = ""
 

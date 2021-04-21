@@ -1804,8 +1804,8 @@ def pick(bot: 'TwitchChat', args, msg, username, channel, send):
     if ttt.active and (user == ttt.p1 or user == ttt.p2):
         match = re.match(r"!pick\s(\d)\s(\d)", msg.lower())
         if match:
-            row = match.group(1)
-            col = match.group(2)
+            row = int(match.group(1))
+            col = int(match.group(2))
             if ttt.pick(user, row, col):
                 board = ttt.get_board()
                 for row in board:
