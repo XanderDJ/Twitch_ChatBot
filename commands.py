@@ -1681,7 +1681,7 @@ def rps(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r"!rps\s*(rock|r|paper|p|scissors|s)*", msg.lower())
     if match and bot.limiter.can_send(channel, "rps", 5):
         matched = match.group(1)
-        if len(matched) == 0:
+        if matched is None:
             message = Message(
                 f"@{username}, to play rock paper scissors, use !rps (rock or paper or scissors) PrideLion",
                 MessageType.SPAM, channel, username)
