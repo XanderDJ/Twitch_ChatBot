@@ -67,7 +67,7 @@ streaks = LockedData(f.load("texts/streaks.txt", {}))
 origins = f.load("texts/emote_origins.txt")
 dictionary_words = LockedData(f.load("texts/dictionary.txt", []))
 commands = LockedData(f.load("texts/commands.txt", {}))
-rps_scores = LockedData(f.load("texts/rps.txt"), {})
+rps_scores = LockedData(f.load("texts/rps.txt", {}))
 
 
 def get_youtube_api():
