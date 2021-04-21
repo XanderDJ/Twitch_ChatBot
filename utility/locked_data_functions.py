@@ -78,3 +78,24 @@ def reset_streak_inner(dct, kwargs):
 
 def get_data(data, kwargs):
     return data
+
+
+def add_loss(data, kwargs):
+    if "user" in kwargs:
+        user = kwargs.get("user")
+        (wins, losses, ties) = data.get(user, ("0", "0", "0"))
+        data[user] = (wins, str(int(losses) + 1), ties)
+
+
+def add_win(data, kwargs):
+    if "user" in kwargs:
+        user = kwargs.get("user")
+        (wins, losses, ties) = data.get(user, ("0", "0", "0"))
+        data[user] = (str(int(wins) + 1), losses, ties)
+
+
+def add_tie(data, kwargs):
+    if "user" in kwargs:
+        user = kwargs.get("user")
+        (wins, losses, ties) = data.get(user, ("0", "0", "0"))
+        data[user] = (wins, losses, str(int(ties) + 1))

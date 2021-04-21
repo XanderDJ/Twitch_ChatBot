@@ -67,6 +67,7 @@ streaks = LockedData(f.load("texts/streaks.txt", {}))
 origins = f.load("texts/emote_origins.txt")
 dictionary_words = LockedData(f.load("texts/dictionary.txt", []))
 commands = LockedData(f.load("texts/commands.txt", {}))
+rps_scores = LockedData(f.load("texts/rps.txt"), {})
 
 
 def get_youtube_api():
@@ -291,6 +292,14 @@ def save_commands():
         f.save(data, "texts/commands.txt")
 
     commands.access(save_commands_inner)
+
+
+@save
+def save_rps_scores():
+    def save_rps_inner(data, kwargs):
+        f.save(data, "texts/rps.txt")
+
+    rps_scores.access(save_rps_inner)
 
 
 # ADMIN
@@ -829,6 +838,7 @@ def notify_afk(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             message = Message("that user is afk for: " + afk.get(word), MessageType.SPAM, channel, credentials.username)
             bot.send_message(message)
 
+
 """
 @command
 @unwrap_command_args
@@ -842,6 +852,7 @@ def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
     except IndexError:
         client.colors.users.insert_one({"username": username.lower(), "hex": color})
 """
+
 
 # CLEARCHAT
 
@@ -1673,6 +1684,21 @@ def whoami(bot: 'TwitchChat', args, msg, username, channel, send):
     bot.send_message(message)
 
 
+@alias("rps_score")
+@unwrap_command_args
+def rps_score(bot: 'TwitchChat', args, msg, username, channel, send):
+    global rps_scores
+    if rps_scores.access(contains, elem=username):
+        (wins, losses, ties) = rps_scores.access(get_val, key=username)
+        message = Message(
+            f"@{username}, your rock paper scissors scores is {wins - losses} with {wins} wins, {losses} losses, and {ties} ties PrideLion",
+            MessageType.SPAM, channel, username)
+        bot.send_message(message)
+    else:
+        message = Message(f"@{username}, you haven't played any rps games yet 4Head", MessageType.SPAM, channel, username)
+        bot.send_message(message)
+
+
 # GAMES WOOOOO
 
 @alias("rps")
@@ -1697,12 +1723,15 @@ def rps(bot: 'TwitchChat', args, msg, username, channel, send):
                 if outcome == Outcome.WON:
                     message = Message(f"@{username}, You won PrideLion ! I chose {str(bot_symbol)}",
                                       MessageType.SPAM, channel, username)
+                    rps_scores.access(add_win, user=username)
                 elif outcome == Outcome.LOST:
                     message = Message(f"@{username}, You lost PrideLion ! I chose {str(bot_symbol)}",
                                       MessageType.SPAM, channel, username)
+                    rps_scores.access(add_loss, user=username)
                 else:
                     message = Message(f"@{username}, We tied PrideLion ! I chose {str(bot_symbol)}",
                                       MessageType.SPAM, channel, username)
+                    rps_scores.access(add_tie, user=username)
                 bot.send_message(message)
 
 
