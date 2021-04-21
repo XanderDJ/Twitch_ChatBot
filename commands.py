@@ -1695,7 +1695,8 @@ def rps_score(bot: 'TwitchChat', args, msg, username, channel, send):
             MessageType.SPAM, channel, username)
         bot.send_message(message)
     else:
-        message = Message(f"@{username}, you haven't played any rps games yet 4Head", MessageType.SPAM, channel, username)
+        message = Message(f"@{username}, you haven't played any rps games yet 4Head", MessageType.SPAM, channel,
+                          username)
         bot.send_message(message)
 
 
@@ -1733,6 +1734,98 @@ def rps(bot: 'TwitchChat', args, msg, username, channel, send):
                                       MessageType.SPAM, channel, username)
                     rps_scores.access(add_tie, user=username)
                 bot.send_message(message)
+
+
+ttt = TicTacToe()
+
+
+@alias("tictactoe", "ttt")
+@unwrap_command_args
+def tictactoe(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r"!(tictactoe|ttt)\s([^\s]+)")
+    if match and bot.limiter.can_send(channel, "ttt", 600):
+        if not ttt.active:
+            ttt.p1 = username.lower()
+            ttt.waiting_for = match.group(2).lower()
+            message = Message(f"Waiting for @{match.group(2)} to accept the challenge with !accept PrideLion",
+                              MessageType.SPAM, channel, username)
+
+
+@alias("swap")
+@unwrap_command_args
+def swap(bot: 'TwitchChat', args, msg, username, channel, send):
+    if username.lower() == ttt.p1 and not ttt.active:
+        match = re.match(r"!swap\s([^\s]*)", msg.lower())
+        if match:
+            previous_wait = ttt.waiting_for
+            ttt.waiting_for = match.group(1)
+            message = Message(f"@{username}, swapped challenge from {previous_wait} to {match.group(1)} PrideLion",
+                              MessageType.SPAM, channel, username)
+            bot.send_message(message)
+    else:
+        message = Message(
+            f"@{username} either you're not the one who sent the challenge or the game is already running 4Head",
+            MessageType.SPAM, channel, username)
+
+
+@alias("accept")
+@unwrap_command_args
+def accept(bot: 'TwitchChat', args, msg, username, channel, send):
+    if username.lower() == ttt.waiting_for:
+        ttt.active = True
+        if randint(0, 1) == 0:
+            ttt.p2 = ttt.waiting_for
+        else:
+            ttt.p1, ttt.p2 = ttt.waiting_for, ttt.p1
+        ttt.waiting_for = ""
+        message = Message(f"TIC TAC TOE GAME STARTED. Player 1 = {ttt.p1}, Player 2 = {ttt.p2} PrideLion",
+                          MessageType.SPAM, channel, username)
+        bot.send_message(message)
+        board = ttt.get_board()
+        for row in board:
+            message = Message(row, MessageType.SPAM, channel, username)
+            bot.send_message(message)
+        message = Message(
+            f"Pick the row and column to place your symbol by using !pick row col. row and col need to be between 1 and 3 PrideLion")
+        bot.send_message(message)
+    else:
+        message = Message(f"Waiting for {ttt.waiting_for} not for you {username} 4WeirdW", MessageType.SPAM, channel,
+                          username)
+        bot.send_message(message)
+
+
+@alias("pick")
+@unwrap_command_args
+def pick(bot: 'TwitchChat', args, msg, username, channel, send):
+    user = username.lower()
+    if ttt.active and (user == ttt.p1 or user == ttt.p2):
+        match = re.match(r"!pick\s(\d)\s(\d)", msg.lower())
+        if match:
+            row = match.group(1)
+            col = match.group(2)
+            if ttt.pick(user, row, col):
+                board = ttt.get_board()
+                for row in board:
+                    message = Message(row, MessageType.SPAM, channel, username)
+                    bot.send_message(message)
+                (won, player) = ttt.won()
+                if won:
+                    message = Message(f"@{player} won PrideLion !!", MessageType.SPAM, channel, username)
+                    bot.send_message(message)
+                    ttt.reset()
+                    return
+                tie = ttt.tie()
+                if tie:
+                    message = Message(f"No one won the tic tac toe game PrideLion !", MessageType.SPAM, channel,
+                                      username)
+                    bot.send_message(message)
+                    ttt.reset()
+                    return
+            else:
+                message = Message(f"@{username}, either it's not your turn or you tried to do an invalid turn",
+                                  MessageType.SPAM, channel, username)
+    else:
+        message = Message(f"@{username}, you're not participating 4WeirdW", MessageType.SPAM, channel, username)
 
 
 # REPEATS and REPEATS_SETUP
