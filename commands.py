@@ -1691,7 +1691,7 @@ def rps_score(bot: 'TwitchChat', args, msg, username, channel, send):
     if rps_scores.access(contains, elem=username):
         (wins, losses, ties) = rps_scores.access(get_val, key=username)
         message = Message(
-            f"@{username}, your rock paper scissors scores is {wins - losses} with {wins} wins, {losses} losses, and {ties} ties PrideLion",
+            f"@{username}, your rock paper scissors scores is {int(wins) - int(losses)} with {wins} wins, {losses} losses, and {ties} ties PrideLion",
             MessageType.SPAM, channel, username)
         bot.send_message(message)
     else:
