@@ -83,36 +83,36 @@ class TicTacToe:
             return False
 
     def is_valid_pick(self, row, col):
-        if 0 <= row < 3 and 0 <= col < 3 and self.board[row][col] == "_":
+        if 0 <= row < 3 and 0 <= col < 3 and self.board[row][col] == "#":
             return True
         return False
 
     def won(self):
         # Check row
         for row in self.board:
-            if "x" in row and "o" not in row and "_" not in row:
+            if "x" in row and "o" not in row and "#" not in row:
                 return True, self.p1
-            elif "o" in row and "x" not in row and "_" not in row:
+            elif "o" in row and "x" not in row and "#" not in row:
                 return True, self.p2
         # check column
         for i in range(len(self.board)):
             col = [self.board[i][col] for col in range(3)]
-            if "x" in col and "o" not in col and "_" not in col:
+            if "x" in col and "o" not in col and "#" not in col:
                 return True, self.p1
-            elif "o" in col and "x" not in col and "_" not in col:
+            elif "o" in col and "x" not in col and "#" not in col:
                 return True, self.p2
 
         # check diagonal
         diagonal1 = [self.board[i][i] for i in range(3)]
         diagonal2 = [self.board[i][2 - i] for i in range(3)]
-        if "x" in diagonal1 and "o" not in diagonal1 and "_" not in diagonal1:
+        if "x" in diagonal1 and "o" not in diagonal1 and "#" not in diagonal1:
             return True, self.p1
-        elif "o" in diagonal1 and "x" not in diagonal1 and "_" not in diagonal1:
+        elif "o" in diagonal1 and "x" not in diagonal1 and "#" not in diagonal1:
             return True, self.p2
 
-        if "x" in diagonal2 and "o" not in diagonal2 and "_" not in diagonal2:
+        if "x" in diagonal2 and "o" not in diagonal2 and "#" not in diagonal2:
             return True, self.p1
-        elif "o" in diagonal2 and "x" not in diagonal2 and "_" not in diagonal2:
+        elif "o" in diagonal2 and "x" not in diagonal2 and "#" not in diagonal2:
             return True, self.p2
 
         return False, ""
@@ -129,4 +129,4 @@ class TicTacToe:
         self.active = False
         self.current = 0
         self.waiting_for = ""
-        self.board = [["_" for i in range(3)] for i in range(3)]
+        self.board = [["#" for i in range(3)] for i in range(3)]

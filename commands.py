@@ -1778,7 +1778,8 @@ def accept(bot: 'TwitchChat', args, msg, username, channel, send):
         if randint(0, 1) == 0:
             ttt.p2 = ttt.waiting_for
         else:
-            ttt.p1, ttt.p2 = ttt.waiting_for, ttt.p1
+            ttt.p2 = ttt.p1
+            ttt.p1 = ttt.waiting_for
         ttt.waiting_for = ""
         message = Message(f"TIC TAC TOE GAME STARTED. Player 1 = {ttt.p1}, Player 2 = {ttt.p2} PrideLion",
                           MessageType.SPAM, channel, username)
@@ -1806,8 +1807,6 @@ def pick(bot: 'TwitchChat', args, msg, username, channel, send):
         if match:
             row = int(match.group(1))
             col = int(match.group(2))
-            bot.logger.info(row)
-            bot.logger.info(col)
             if ttt.pick(user, row, col):
                 board = ttt.get_board()
                 for row in board:
