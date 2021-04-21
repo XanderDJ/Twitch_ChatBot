@@ -1676,6 +1676,7 @@ def whoami(bot: 'TwitchChat', args, msg, username, channel, send):
 # GAMES WOOOOO
 
 @alias("rps")
+@unwrap_command_args
 def rps(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r"!rps\s*(rock|r|paper|p|scissors|s)*?", msg.lower())
     if match and bot.limiter.can_send(channel, "rps", 5):
