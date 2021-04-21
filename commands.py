@@ -826,7 +826,7 @@ def notify_afk(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             message = Message("that user is afk for: " + afk.get(word), MessageType.SPAM, channel, credentials.username)
             bot.send_message(message)
 
-
+"""
 @command
 @unwrap_command_args
 def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
@@ -838,7 +838,7 @@ def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
             client.colors.users.replace_one(doc, {"username": username.lower(), "hex": color})
     except IndexError:
         client.colors.users.insert_one({"username": username.lower(), "hex": color})
-
+"""
 
 # CLEARCHAT
 
@@ -1720,7 +1720,7 @@ def check_for_title_change(state: dict, bot: 'TwitchChat'):
             state[channel] = current_title
             message = Message(
                 "PrideLion TITLE CHANGE PrideLion",
-                MessageType.CHAT,
+                MessageType.FUNCTIONAL,
                 channel,
                 credentials.username
             )
