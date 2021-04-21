@@ -1750,6 +1750,7 @@ def tictactoe(bot: 'TwitchChat', args, msg, username, channel, send):
             ttt.waiting_for = match.group(2).lower()
             message = Message(f"Waiting for @{match.group(2)} to accept the challenge with !accept PrideLion",
                               MessageType.SPAM, channel, username)
+            bot.send_message(message)
 
 
 @alias("swap")
