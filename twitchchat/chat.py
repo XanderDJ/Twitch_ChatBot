@@ -266,7 +266,7 @@ class TwitchChat(object):
                     command = re.match(r"!([^\s]*).*", match.group(3).lower())
                     if command:
                         command_name = command.group(1)
-                        if command_name in self.commands:
+                        if command_name in self.commands and self.limiter.can_send(args["channel"],"command", 3):
                             self.commands.get(command_name)(self, args)
                         elif commands.commands.access(contains, elem=command_name):
                             response = commands.commands.access(get_val, key=command_name)
