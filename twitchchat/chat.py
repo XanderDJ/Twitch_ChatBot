@@ -251,7 +251,7 @@ class TwitchChat(object):
                 args['message'] = match.group(3)
                 self.logger.debug(args["message"])
                 # ADMIN
-                if args["username"] == self.admin:
+                if args["username"] in self.admin:
                     for func_name, func in self.admins.items():
                         func(self, args)
                 # ROLES
