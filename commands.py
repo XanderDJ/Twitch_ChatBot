@@ -68,7 +68,7 @@ origins = f.load("texts/emote_origins.txt")
 dictionary_words = LockedData(f.load("texts/dictionary.txt", []))
 commands = LockedData(f.load("texts/commands.txt", {}))
 rps_scores = LockedData(f.load("texts/rps.txt", {}))
-
+time_started = datetime.datetime.today()
 
 def get_youtube_api():
     scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
@@ -1693,6 +1693,15 @@ def rps_score(bot: 'TwitchChat', args, msg, username, channel, send):
     else:
         message = Message(f"@{username}, you haven't played any rps games yet 4Head", MessageType.SPAM, channel,
                           username)
+        bot.send_message(message)
+
+
+@alias("uptime","alive")
+@unwrap_command_args
+def uptime(bot: 'TwitchChat', args, msg, username, channel, send):
+    if bot.limiter.can_send(channel, "uptime", 60):
+        time = str(datetime.datetime.now() - time_started)
+        message = Message(f"@{username}, I have been alive for {time} PrideLion ", MessageType.COMMAND, channel, username)
         bot.send_message(message)
 
 
