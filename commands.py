@@ -1033,7 +1033,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
             else:
                 message = Message(
                     "@" + username + ", you already have 5 counters, you can't have more. "
-                                     "Ask " + bot.admin + " nicely to implement a delete counter command",
+                                     "Ask " + ", ".join(bot.admin) + " nicely to implement a delete counter command",
                     MessageType.COMMAND,
                     channel,
                     username
@@ -1074,7 +1074,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                 else:
                     message = Message(
                         "@" + username + ", you already have 5 counters, you can't have more. "
-                                         "Ask " + bot.admin + " nicely to implement a delete counter command",
+                                         "Ask " + ", ".join(bot.admin) + " nicely to implement a delete counter command",
                         MessageType.COMMAND,
                         channel,
                         username
@@ -1083,7 +1083,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
             else:
                 # Let user know who can do this command
                 message = Message(
-                    "@" + username + ", only " + val_or_user + " and " + bot.admin + " can use this command",
+                    "@" + username + ", only " + val_or_user + " and " +", ".join(bot.admin) + " can use this command",
                     MessageType.COMMAND,
                     channel,
                     username
