@@ -1700,8 +1700,8 @@ def rps_score(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def uptime(bot: 'TwitchChat', args, msg, username, channel, send):
     if bot.limiter.can_send(channel, "uptime", 60):
-        time = str(datetime.datetime.now() - time_started).split(".")[0]
-        message = Message(f"@{username}, I have been alive for {time} PrideLion ", MessageType.COMMAND, channel, username)
+        time = str(datetime.datetime.now() - time_started).split(".")[0].split(":")
+        message = Message(f"@{username}, I have been alive for {time[0]} hours, {time[1]} minutes, and {time[2]} seconds PrideLion ", MessageType.COMMAND, channel, username)
         bot.send_message(message)
 
 
