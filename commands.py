@@ -852,11 +852,19 @@ def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
 
 # CLEARCHAT
 
+previous_user_timed_out = ""
+
 @clearchat
 def send_kapow(bot: 'TwitchChat', args):
+    global previous_user_timed_out
     channel = args["channel"]
-    message = Message("KAPOW", MessageType.SPAM, channel, credentials.username)
-    bot.send_message(message)
+    user = args["message"]
+    ban_time = args["ban-duration"]
+    if not previous_user_timed_out == user:
+        print(f"KAPOW: {user} for {ban_time}")
+        previous_user_timed_out = user
+        message = Message("KAPOW", MessageType.SPAM, channel, credentials.username)
+        bot.send_message(message)
 
 
 # NOTICE
