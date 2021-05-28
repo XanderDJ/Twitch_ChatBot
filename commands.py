@@ -860,8 +860,8 @@ def send_kapow(bot: 'TwitchChat', args):
     channel = args["channel"]
     user = args["message"]
     ban_time = args["ban-duration"]
-    if not previous_user_timed_out == user:
-        print(f"KAPOW: {user} for {ban_time}")
+    if not previous_user_timed_out == user and int(ban_time) > 5:
+        bot.logger.debug(f"KAPOW: {user} for {ban_time}")
         previous_user_timed_out = user
         message = Message("KAPOW", MessageType.SPAM, channel, credentials.username)
         bot.send_message(message)
