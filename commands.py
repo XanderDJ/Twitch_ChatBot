@@ -69,6 +69,8 @@ dictionary_words = LockedData(f.load("texts/dictionary.txt", []))
 commands = LockedData(f.load("texts/commands.txt", {}))
 rps_scores = LockedData(f.load("texts/rps.txt", {}))
 time_started = datetime.datetime.today()
+scrape_colour = False
+
 
 def get_youtube_api():
     scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
@@ -835,19 +837,21 @@ def notify_afk(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             bot.send_message(message)
 
 
-"""
+
 @command
 @unwrap_command_args
 def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
-    color = args['color']
-    color = color if len(color) != 0 else "#808080"
-    try:
-        doc = client.colors.users.find({"username": username.lower()})[0]
-        if doc["hex"] != color:
-            client.colors.users.replace_one(doc, {"username": username.lower(), "hex": color})
-    except IndexError:
-        client.colors.users.insert_one({"username": username.lower(), "hex": color})
-"""
+    global scrape_colour
+    if scrape_colour:
+        color = args['color']
+        color = color if len(color) != 0 else "#808080"
+        try:
+            doc = client.colors.users.find({"username": username.lower()})[0]
+            if doc["hex"] != color:
+                client.colors.users.replace_one(doc, {"username": username.lower(), "hex": color})
+        except IndexError:
+            client.colors.users.insert_one({"username": username.lower(), "hex": color})
+
 
 
 # CLEARCHAT
@@ -932,6 +936,22 @@ def subscriber_type(months):
 
 # RETURNS
 
+
+@alias("scrape")
+@unwrap_command_args
+def toggle_scrape(bot: 'TwitchChat', args, msg, username, channel, send):
+    global scrape_colour
+    match = re.match(r"!scrape\s([^\s]+)", msg.lower())
+    if match:
+        code = match.group(1)
+        if code == "off":
+            scrape_colour = False
+            message = Message("No longer scraping colours PrideLion", MessageType.FUNCTIONAL, channel, username)
+            bot.send_message(message)
+        elif code == "on":
+            scrape_colour = True
+            message = Message("Scraping colours PrideLion", MessageType.FUNCTIONAL, channel, username)
+            bot.send_message(message)
 
 @alias("ignore")
 @unwrap_command_args
@@ -1944,11 +1964,13 @@ def get_title(pool_manager, channel, user_id):
 
 @repeat(5)
 def toggle_if_live(state, bot: 'TwitchChat'):
+    global scrape_colour
     for channel in bot.channels:
         live = bot.twitch_status.get_status(channel)["live"]
         if live and live != state[channel]:
             state[channel] = live
-            bot.logger.info(channel + " went live toggling bot off")
+            bot.logger.info(channel + " went live toggling bot off and turning off scraping colours")
+            scrape_colour = False
             bot.toggle_channel(channel, ToggleType.OFF)
 
 
