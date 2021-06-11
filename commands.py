@@ -1735,6 +1735,18 @@ def uptime(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
 
 
+@alias("clip", "clips")
+@unwrap_command_args
+def clip_link(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r"!clips*\s([^\s]*)", msg)
+    if match and "linker" in rbac.get_roles(username, channel) and bot.limiter.can_send(channel, "clips", 10):
+        title = bot.twitch_status.get_clip_title(match.group(1))
+        message = Message(f"@{username}, {title} - LINK: clips.twitch.tv/{match.group(1)} PrideLion", MessageType.COMMAND, channel, username)
+        bot.send_message(message)
+
+
+
+
 # GAMES WOOOOO
 
 @alias("rps")
@@ -1870,14 +1882,6 @@ def pick(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message(f"@{username}, you're not participating 4WeirdW", MessageType.SPAM, channel, username)
         bot.send_message(message)
 
-
-@alias("clip", "clips")
-@unwrap_command_args
-def clip_link(bot: 'TwitchChat', args, msg, username, channel, send):
-    match = re.match(r"!clips*\s([^\s]*)", msg)
-    if match and "linker" in rbac.get_roles(username, channel) and bot.limiter.can_send(channel, "clips", 10):
-        message = Message(f"@{username}, clips.twitch.tv/{match.group(1)} PrideLion", MessageType.COMMAND, channel, username)
-        bot.send_message(message)
 
 # REPEATS and REPEATS_SETUP
 

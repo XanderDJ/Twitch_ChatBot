@@ -210,6 +210,30 @@ class TwitchStatus:
                 return
             self.state[channel]["activity"] = data[0].get("name")
 
+    def get_clip_title(self, id):
+        base = "https://api.twitch.tv/helix/clips"
+        headers = {
+            "Client-ID": self._client,
+            "Authorization": f"Bearer {self._bearer}"
+        }
+        parameters = {
+            "id": id
+        }
+        response = self._manager.request("GET", base, fields=parameters, headers=headers)
+        if response.status == 401:
+            # Bearer has expired
+            self._bearer = self._get_bearer()
+            self.get_clip_title(id)
+        elif response.status != 200:
+            # Something weird happened so we do nothing
+            return
+        else:
+            #200 OK
+            dct = json.loads(response.data.decode("UTF-8"))
+            data = dct.get("data", [])
+            title = "No title found " if not data else data[0].get("title", "")
+            return title
+
     def get_status(self, channel):
         return self.state.get(channel, {"live": False, "activity": "Prechat"})
 
