@@ -1871,6 +1871,14 @@ def pick(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(message)
 
 
+@alias("clip", "clips")
+@unwrap_command_args
+def clip_link(bot: 'TwitchChat', args, msg, username, channel, send):
+    match = re.match(r"!clips*\s([^\s]*)", msg.lower())
+    if match and "linker" in rbac.get_roles(username, channel) and bot.limiter.can_send(channel, "clips", 10):
+        message = Message(f"@{username}, clips.twitch.tv/{match.group(1)} PrideLion", MessageType.COMMAND, channel, username)
+        bot.send_message(message)
+
 # REPEATS and REPEATS_SETUP
 
 @repeat(5)
