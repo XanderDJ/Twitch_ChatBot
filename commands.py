@@ -1248,7 +1248,7 @@ def lacking_for(bot: 'TwitchChat', args, msg, username, channel, send):
                               channel,
                               username)
             bot.send_message(message)
-        elif all_lacks:
+        elif all_lacks and word != direct_match:
             message = Message(f"@{username}, the reason {word} counts as a lack is because of {', '.join(all_lacks)}",
                               MessageType.COMMAND,
                               channel,
