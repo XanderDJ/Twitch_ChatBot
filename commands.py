@@ -737,6 +737,14 @@ def validate_emote(emote, emotes):
     return Validation(True, emote)
 
 
+def get_all_lacks(emote, emotes):
+    lacks = []
+    for correct_emote in emotes:
+        dist = hammington(emote, correct_emote)
+        if dist == 1 or is_anagram(correct_emote,emote):
+            lacks.append(correct_emote)
+    return lacks
+
 def update_emotes(db, kwargs) -> None:
     if "chan" in kwargs and "we" in kwargs and "ce" in kwargs and "ac" in kwargs:
         channel, wrong_emote, correct_emote, activity = kwargs.get("chan"), kwargs.get("we"), \
@@ -1218,11 +1226,35 @@ def correct(bot: 'TwitchChat', args, msg, username, channel, send):
                 bot.send_message(message)
                 return
         else:
+
             message = Message(
                 "@" + username + ", that emote wasn't in my emote database. "
                                  "So I can't tell you the correct way to spell it.", MessageType.COMMAND, channel,
                 username)
             bot.send_message(message)
+
+@alias("reason_lack")
+@unwrap_command_args
+def lacking_for(bot: 'TwitchChat', args, msg, username, channel, send):
+    global emote_dict
+    match = re.match(r"!reason_lack\s+([^\s]*)", msg)
+    if match:
+        word = match.group(1)
+        direct_match = emote_dict.access(get_val,key=word.lower())
+        all_lacks = get_all_lacks(word, emote_dict.access(get_val,key="all_emotes"))
+        if direct_match and word != direct_match:
+            message = Message(f"@{username}, the reason {word} counts as a lack is because of {direct_match}",
+                              MessageType.COMMAND,
+                              channel,
+                              username)
+            bot.send_message(message)
+        elif all_lacks:
+            message = Message(f"@{username}, the reason {word} counts as a lack is because of {', '.join(all_lacks)}",
+                              MessageType.COMMAND,
+                              channel,
+                              username)
+            bot.send_message(message)
+
 
 
 @alias("tyke")
