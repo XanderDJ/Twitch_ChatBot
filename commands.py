@@ -1243,7 +1243,7 @@ def lacking_for(bot: 'TwitchChat', args, msg, username, channel, send):
         direct_match = emote_dict.access(get_val,key=word.lower())
         all_lacks = get_all_lacks(word, emote_dict.access(get_val,key="all_emotes"))
         if direct_match and word != direct_match:
-            message = Message(f"@{username}, the reason {word} counts as a lack is because of {','.join(direct_match)}",
+            message = Message(f"@{username}, the reason {word} counts as a lack is because of {', '.join(direct_match)}",
                               MessageType.COMMAND,
                               channel,
                               username)
