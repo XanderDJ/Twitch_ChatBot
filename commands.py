@@ -1969,7 +1969,7 @@ def check_for_title_change(state: dict, bot: 'TwitchChat'):
                 channel,
                 credentials.username
             )
-            if old_title != "":
+            if old_title != "" and not bot.twitch_status.get_status(channel)["live"]:
                 bot.send_message(message)
 
 
