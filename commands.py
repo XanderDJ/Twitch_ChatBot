@@ -1579,9 +1579,9 @@ def top_streaks(bot: 'TwitchChat', args, msg, username, channel, send):
 @alias("info", "youtube")
 @unwrap_command_args
 def check_youtube(bot: 'TwitchChat', args, msg, username, channel, send):
-    match = re.match(r'!info\s/*watch\?v=([a-zA-Z0-9_\-]+)', msg)
+    match = re.match(r'!info\s(/*watch\?v=)*([a-zA-Z0-9_\-]+)', msg)
     if match:
-        video_id = match.group(1)
+        video_id = match.group(2)
         request = youtube.videos().list(part="snippet", id=video_id)
         response = request.execute()
         try:
