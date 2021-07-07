@@ -1776,7 +1776,7 @@ def clip_link(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message(f"@{username}, {title} - LINK: clips.twitch.tv/{match.group(1)} PrideLion", MessageType.COMMAND, channel, username)
         bot.send_message(message)
 
-
+"""
 @alias("inside")
 @unwrap_command_args
 def inside_again(bot: 'TwitchChat', args, msg, username, channel, send):
@@ -1786,6 +1786,7 @@ def inside_again(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(whale)
         bot.send_message(whale)
         bot.send_message(look)
+"""
 
 # GAMES WOOOOO
 
