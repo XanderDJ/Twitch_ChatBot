@@ -656,7 +656,7 @@ def declare_war(bot: 'TwitchChat', args, msg, username, channel, send):
 @unwrap_command_args
 def declare_truce(bot: 'TwitchChat', args, msg, username, channel, send):
     global war
-    match = re.match(r'!war\s@*([^\s]*)', msg.lower())
+    match = re.match(r'!truce\s@*([^\s]*)', msg.lower())
     if match:
         name = match.group(1)
         if name in war:
