@@ -70,7 +70,7 @@ commands = LockedData(f.load("texts/commands.txt", {}))
 rps_scores = LockedData(f.load("texts/rps.txt", {}))
 time_started = datetime.datetime.today()
 scrape_colour = False
-
+war = []
 
 def get_youtube_api():
     scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
@@ -641,6 +641,29 @@ def delete_command(bot: 'TwitchChat', args, msg, username, channel, send):
             message = Message(f"command \"{command_name}\" isn't a command 4Head", MessageType.FUNCTIONAL, channel, username)
             bot.send_message(message)
 
+@admin
+@unwrap_command_args
+def declare_war(bot: 'TwitchChat', args, msg, username, channel, send):
+    global war
+    match = re.match(r'!war\s@*([^\s]*)', msg.lower())
+    if match:
+        war.append(match.group(1))
+        message = Message(f"Declared war on {match.group(1)} peepoWTF", MessageType.FUNCTIONAL, channel, username)
+        bot.send_message(message)
+
+
+@admin
+@unwrap_command_args
+def declare_truce(bot: 'TwitchChat', args, msg, username, channel, send):
+    global war
+    match = re.match(r'!war\s@*([^\s]*)', msg.lower())
+    if match:
+        name = match.group(1)
+        if name in war:
+            war.remove(name)
+            message = Message("Truce PrideLion !", MessageType.FUNCTIONAL, channel, username)
+            bot.send_message(message)
+
 # COMMANDS
 
 
@@ -863,6 +886,17 @@ def notify_afk(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 
 @command
 @unwrap_command_args
+def send_war_message(bot: 'TwitchChat', args, msg, username, channel, send):
+    global war
+    if username.lower() in war:
+        message = Message("@" + username + ", " + "PogOff " * random.randint(1, 7),
+                          MessageType.SPAM, channel, username)
+        bot.send_message(message)
+
+
+
+@command
+@unwrap_command_args
 def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
     global scrape_colour
     if scrape_colour:
@@ -874,9 +908,6 @@ def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
                 client.colors.users.replace_one(doc, {"username": username.lower(), "hex": color})
         except IndexError:
             client.colors.users.insert_one({"username": username.lower(), "hex": color})
-
-
-
 # CLEARCHAT
 
 previous_user_timed_out = ""
