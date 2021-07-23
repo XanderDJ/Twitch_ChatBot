@@ -626,6 +626,21 @@ def add_commandf(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(Message(f"Command {command_name} added PrideLion", MessageType.FUNCTIONAL, channel, username))
 
 
+@admin
+@unwrap_command_args
+def delete_command(bot: 'TwitchChat', args, msg, username, channel, send):
+    global commands
+    match = re.match(r'!deletecommand\s([^\s]*)', msg)
+    if match:
+        command_name = match.group(1)
+        if commands.access(contains, elem=command_name):
+            commands.access(delete_from_dict,key=command_name)
+            message = Message(f"command \"{command_name}\" was removed PrideLion", MessageType.FUNCTIONAL, channel, username)
+            bot.send_message(message)
+        else:
+            message = Message(f"command \"{command_name}\" isn't a command 4Head", MessageType.FUNCTIONAL, channel, username)
+            bot.send_message(message)
+
 # COMMANDS
 
 
