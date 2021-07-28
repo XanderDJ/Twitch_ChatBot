@@ -473,5 +473,12 @@
     Widewig1,
     Widewig2,
     ludwigJam,
-    PrideLesbian
+    PrideLesbian,
+    FeelsWeakMan,
+    littleD,
+    MewSpin,
+    NonbinaryPride,
+    COPIUM,
+    Peepo,
+    birthD
 ]
