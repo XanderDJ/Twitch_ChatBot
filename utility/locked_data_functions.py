@@ -61,7 +61,7 @@ def list_in_dict_contains(dct, kwargs):
     if "key" in kwargs and "val" in kwargs:
         key = kwargs.get("key")
         val = kwargs.get("val")
-        return val in dct.get(key)
+        return val in dct.get(key, [])
     return False
 
 def update_streak_inner(dct, kwargs):
