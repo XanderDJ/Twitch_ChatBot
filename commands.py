@@ -756,9 +756,10 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.state[channel]["lacking"] = str(int(amount) + len(wrong_emotes))
         if send:
             wrong_emotes = list(filter(lambda lack : not is_granted(username.lower(), lack), wrong_emotes))
-            txt = " ".join(wrong_emotes)
-            message = Message("@" + username + ", pepePoint " + txt, MessageType.SPAM, channel, username)
-            bot.send_message(message)
+            if len(wrong_emotes) != 0:
+                txt = " ".join(wrong_emotes)
+                message = Message("@" + username + ", pepePoint " + txt, MessageType.SPAM, channel, username)
+                bot.send_message(message)
 
 def is_granted(user, word):
     global lacking_granted
