@@ -68,9 +68,11 @@ origins = f.load("texts/emote_origins.txt")
 dictionary_words = LockedData(f.load("texts/dictionary.txt", []))
 commands = LockedData(f.load("texts/commands.txt", {}))
 rps_scores = LockedData(f.load("texts/rps.txt", {}))
+lacking_granted = LockedData(f.load("texts/grants.txt", {}))
 time_started = datetime.datetime.today()
 scrape_colour = False
 war = []
+
 
 def get_youtube_api():
     scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
@@ -302,6 +304,16 @@ def save_rps_scores():
         f.save(data, "texts/rps.txt")
 
     rps_scores.access(save_rps_inner)
+
+
+@save
+def save_grants():
+    global lacking_granted
+
+    def save_grants_inner(data, kwargs):
+        f.save(data, "texts/grants.txt")
+
+    lacking_granted.access(save_grants_inner)
 
 
 # ADMIN
@@ -634,12 +646,15 @@ def delete_command(bot: 'TwitchChat', args, msg, username, channel, send):
     if match:
         command_name = match.group(1)
         if commands.access(contains, elem=command_name):
-            commands.access(delete_from_dict,key=command_name)
-            message = Message(f"command \"{command_name}\" was removed PrideLion", MessageType.FUNCTIONAL, channel, username)
+            commands.access(delete_from_dict, key=command_name)
+            message = Message(f"command \"{command_name}\" was removed PrideLion", MessageType.FUNCTIONAL, channel,
+                              username)
             bot.send_message(message)
         else:
-            message = Message(f"command \"{command_name}\" isn't a command 4Head", MessageType.FUNCTIONAL, channel, username)
+            message = Message(f"command \"{command_name}\" isn't a command 4Head", MessageType.FUNCTIONAL, channel,
+                              username)
             bot.send_message(message)
+
 
 @admin
 @unwrap_command_args
@@ -664,6 +679,32 @@ def declare_truce(bot: 'TwitchChat', args, msg, username, channel, send):
             message = Message("Truce PrideLion !", MessageType.FUNCTIONAL, channel, username)
             bot.send_message(message)
 
+
+@admin
+@unwrap_command_args
+def grant_lack(bot: 'TwitchChat', args, msg, username, channel, send):
+    global lacking_granted
+
+    match = re.match(r'!grant\s([^\s]*)\s([^\s]*)', msg)
+    if match:
+        user = match.group(1).lower()
+        lack = match.group(2)
+        lacking_granted.access(append_to_list_in_dict, key=user, val=lack)
+
+        message = Message(f"{user} is granted access to saying {lack} PrideLion ", MessageType.COMMAND, channel, username)
+        bot.send_message(message)
+
+@admin
+@unwrap_command_args
+def ungrant_lack(bot: 'TwitchChat', args, msg, username, channel, send):
+    global lacking_granted
+    match = re.match(r'!ungrant\s([^\s]*)\s([^\s]*)', msg)
+    if match:
+        user = match.group(1).lower()
+        lack = match.group(2)
+        lacking_granted.access(delete_from_list_in_dict, key=user, val=lack)
+        message = Message(f"{user} is no longer granted access to saying {lack} 4Weird ", MessageType.COMMAND, channel, username)
+
 # COMMANDS
 
 
@@ -679,6 +720,7 @@ def ping_me(bot: 'TwitchChat', args, msg, username, channel, send):
 @command
 @unwrap_command_args
 def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
+    global lacking_granted
     words = msg.split()
     username = username.lower()
     # static data
@@ -713,9 +755,14 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
         amount = bot.state.get(channel).get("lacking", "0")
         bot.state[channel]["lacking"] = str(int(amount) + len(wrong_emotes))
         if send:
+            wrong_emotes = list(filter(lambda lack : not is_granted(username.lower(), lack), wrong_emotes))
             txt = " ".join(wrong_emotes)
             message = Message("@" + username + ", pepePoint " + txt, MessageType.SPAM, channel, username)
             bot.send_message(message)
+
+def is_granted(user, word):
+    global lacking_granted
+    return lacking_granted.access(list_in_dict_contains, key=user, val=word)
 
 
 def check_for_troll(bot: 'TwitchChat', channel: str, username: str, video_id: str):
@@ -779,9 +826,10 @@ def get_all_lacks(emote, emotes):
     lacks = []
     for correct_emote in emotes:
         dist = hammington(emote, correct_emote)
-        if dist == 1 or is_anagram(correct_emote,emote):
+        if dist == 1 or is_anagram(correct_emote, emote):
             lacks.append(correct_emote)
     return lacks
+
 
 def update_emotes(db, kwargs) -> None:
     if "chan" in kwargs and "we" in kwargs and "ce" in kwargs and "ac" in kwargs:
@@ -883,7 +931,6 @@ def notify_afk(bot: 'TwitchChat', args, msg, username, channel, send: bool):
             bot.send_message(message)
 
 
-
 @command
 @unwrap_command_args
 def send_war_message(bot: 'TwitchChat', args, msg, username, channel, send):
@@ -892,7 +939,6 @@ def send_war_message(bot: 'TwitchChat', args, msg, username, channel, send):
         message = Message("@" + username + ", " + "PogOff " * random.randint(1, 7),
                           MessageType.SPAM, channel, username)
         bot.send_message(message)
-
 
 
 @command
@@ -908,9 +954,12 @@ def scrape_color(bot: 'TwitchChat', args, msg, username, channel, send):
                 client.colors.users.replace_one(doc, {"username": username.lower(), "hex": color})
         except IndexError:
             client.colors.users.insert_one({"username": username.lower(), "hex": color})
+
+
 # CLEARCHAT
 
 previous_user_timed_out = ""
+
 
 @clearchat
 def send_kapow(bot: 'TwitchChat', args):
@@ -926,6 +975,7 @@ def send_kapow(bot: 'TwitchChat', args):
     elif ban_time == "ban":
         message = Message("KAPOW", MessageType.SPAM, channel, credentials.username)
         bot.send_message(message)
+
 
 # NOTICE
 
@@ -1006,6 +1056,7 @@ def toggle_scrape(bot: 'TwitchChat', args, msg, username, channel, send):
             scrape_colour = True
             message = Message("Scraping colours PrideLion", MessageType.FUNCTIONAL, channel, username)
             bot.send_message(message)
+
 
 @alias("ignore")
 @unwrap_command_args
@@ -1158,7 +1209,8 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                 else:
                     message = Message(
                         "@" + username + ", you already have 5 counters, you can't have more. "
-                                         "Ask " + ", ".join(bot.admin) + " nicely to implement a delete counter command",
+                                         "Ask " + ", ".join(
+                            bot.admin) + " nicely to implement a delete counter command",
                         MessageType.COMMAND,
                         channel,
                         username
@@ -1167,7 +1219,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
             else:
                 # Let user know who can do this command
                 message = Message(
-                    "@" + username + ", only " + val_or_user + " and " +", ".join(bot.admin) + " can use this command",
+                    "@" + username + ", only " + val_or_user + " and " + ", ".join(bot.admin) + " can use this command",
                     MessageType.COMMAND,
                     channel,
                     username
@@ -1279,6 +1331,7 @@ def correct(bot: 'TwitchChat', args, msg, username, channel, send):
                 username)
             bot.send_message(message)
 
+
 @alias("reason_lack")
 @unwrap_command_args
 def lacking_for(bot: 'TwitchChat', args, msg, username, channel, send):
@@ -1286,13 +1339,14 @@ def lacking_for(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r"!reason_lack\s+([^\s]*)", msg)
     if match:
         word = match.group(1)
-        direct_match = emote_dict.access(get_val,key=word.lower())
-        all_lacks = get_all_lacks(word, emote_dict.access(get_val,key="all_emotes"))
+        direct_match = emote_dict.access(get_val, key=word.lower())
+        all_lacks = get_all_lacks(word, emote_dict.access(get_val, key="all_emotes"))
         if direct_match and word != direct_match:
-            message = Message(f"@{username}, the reason {word} counts as a lack is because of {', '.join(direct_match)}",
-                              MessageType.COMMAND,
-                              channel,
-                              username)
+            message = Message(
+                f"@{username}, the reason {word} counts as a lack is because of {', '.join(direct_match)}",
+                MessageType.COMMAND,
+                channel,
+                username)
             bot.send_message(message)
         elif all_lacks and word != direct_match:
             message = Message(f"@{username}, the reason {word} counts as a lack is because of {', '.join(all_lacks)}",
@@ -1300,7 +1354,6 @@ def lacking_for(bot: 'TwitchChat', args, msg, username, channel, send):
                               channel,
                               username)
             bot.send_message(message)
-
 
 
 @alias("tyke")
@@ -1809,7 +1862,9 @@ def rps_score(bot: 'TwitchChat', args, msg, username, channel, send):
 def uptime(bot: 'TwitchChat', args, msg, username, channel, send):
     if bot.limiter.can_send(channel, "uptime", 60):
         time = str(datetime.datetime.now() - time_started).split(".")[0].split(":")
-        message = Message(f"@{username}, I have been alive for {time[0]} hours, {time[1]} minutes, and {time[2]} seconds PrideLion ", MessageType.COMMAND, channel, username)
+        message = Message(
+            f"@{username}, I have been alive for {time[0]} hours, {time[1]} minutes, and {time[2]} seconds PrideLion ",
+            MessageType.COMMAND, channel, username)
         bot.send_message(message)
 
 
@@ -1819,7 +1874,8 @@ def clip_link(bot: 'TwitchChat', args, msg, username, channel, send):
     match = re.match(r"!clips*\s([^\s]*)", msg)
     if match and "linker" in rbac.get_roles(username, channel) and bot.limiter.can_send(channel, "clips", 10):
         title = bot.twitch_status.get_clip_title(match.group(1))
-        message = Message(f"@{username}, {title} - LINK: clips.twitch.tv/{match.group(1)} PrideLion", MessageType.COMMAND, channel, username)
+        message = Message(f"@{username}, {title} - LINK: clips.twitch.tv/{match.group(1)} PrideLion",
+                          MessageType.COMMAND, channel, username)
         bot.send_message(message)
 
 """
@@ -1833,6 +1889,7 @@ def inside_again(bot: 'TwitchChat', args, msg, username, channel, send):
         bot.send_message(whale)
         bot.send_message(look)
 """
+
 
 # GAMES WOOOOO
 
@@ -1928,7 +1985,8 @@ def accept(bot: 'TwitchChat', args, msg, username, channel, send):
             MessageType.SPAM, channel, username)
         bot.send_message(message)
     else:
-        msg_str = "No challenge has been sent yet 4WeirdW" if len(ttt.waiting_for) == 0 else f"Waiting for {ttt.waiting_for} not for you {username} 4WeirdW"
+        msg_str = "No challenge has been sent yet 4WeirdW" if len(
+            ttt.waiting_for) == 0 else f"Waiting for {ttt.waiting_for} not for you {username} 4WeirdW"
         message = Message(msg_str, MessageType.SPAM, channel,
                           username)
         bot.send_message(message)

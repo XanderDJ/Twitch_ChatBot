@@ -45,8 +45,24 @@ def contains(container, kwargs):
 
 def append_to_list_in_dict(dct, kwargs):
     if "key" in kwargs and "val" in kwargs:
+        dct[kwargs.get("key")] = dct.get(kwargs.get("key"), [])
         dct.get(kwargs.get("key")).append(kwargs.get("val"))
 
+
+def delete_from_list_in_dict(dct, kwargs):
+    if "key" in kwargs and "val" in kwargs:
+        key = kwargs.get("key")
+        val = kwargs.get("val")
+        dct[key] = dct.get(key, [])
+        dct.get(key).remove(val)
+
+
+def list_in_dict_contains(dct, kwargs):
+    if "key" in kwargs and "val" in kwargs:
+        key = kwargs.get("key")
+        val = kwargs.get("val")
+        return val in dct.get(key)
+    return False
 
 def update_streak_inner(dct, kwargs):
     if "emotes" in kwargs and "channel" in kwargs:
