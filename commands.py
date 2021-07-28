@@ -704,6 +704,7 @@ def ungrant_lack(bot: 'TwitchChat', args, msg, username, channel, send):
         lack = match.group(2)
         lacking_granted.access(delete_from_list_in_dict, key=user, val=lack)
         message = Message(f"{user} is no longer granted access to saying {lack} 4Weird ", MessageType.COMMAND, channel, username)
+        bot.send_message(message)
 
 # COMMANDS
 
