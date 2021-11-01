@@ -513,7 +513,7 @@ def remove_role(bot: 'TwitchChat', args, msg, username, channel, send):
 @admin
 @unwrap_command_args
 def delete_counter(bot: 'TwitchChat', args, msg, username, channel, send):
-    match = re.match(r'!deletecounter\s([^\s]+)\s([^\s]+)', msg)
+    match = re.match(r'!deletecounter\s([^\s]+)\s([^\s]+)', msg).lower()
     if match:
         user = match.group(1)
         word = match.group(2)
