@@ -1182,7 +1182,7 @@ def addcounter(bot: 'TwitchChat', args, msg, username, channel, send):
                 bot.send_message(message)
                 return True
             val_or_user = val_or_user.lower()
-            if username.lower() == val_or_user.lower() or username == bot.admin:
+            if username.lower() == val_or_user.lower() or username in bot.admin:
                 # add the counter for the username mentione with
                 bot.state[val_or_user] = bot.state.get(val_or_user, dict())
                 bot.state[val_or_user]["counters"] = bot.state.get(val_or_user).get("counters", {})
