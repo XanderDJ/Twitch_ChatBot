@@ -759,7 +759,7 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
             wrong_emotes = list(filter(lambda lack : not is_granted(username.lower(), lack), wrong_emotes))
             if len(wrong_emotes) != 0:
                 txt = " ".join(wrong_emotes)
-                message = Message("@" + username + ", pepePoint " + txt, MessageType.SPAM, channel, username)
+                message = Message("@" + username + txt + " PepeLaugh", MessageType.SPAM, channel, username)
                 bot.send_message(message)
 
 def is_granted(user, word):
@@ -938,7 +938,7 @@ def notify_afk(bot: 'TwitchChat', args, msg, username, channel, send: bool):
 def send_war_message(bot: 'TwitchChat', args, msg, username, channel, send):
     global war
     if username.lower() in war:
-        message = Message("@" + username + ", " + "PogOff " * random.randint(1, 7),
+        message = Message("@" + username + ", " + "ludwigSpectrum " * random.randint(1, 7),
                           MessageType.SPAM, channel, username)
         bot.send_message(message)
 
