@@ -691,8 +691,10 @@ def grant_lack(bot: 'TwitchChat', args, msg, username, channel, send):
         lack = match.group(2)
         lacking_granted.access(append_to_list_in_dict, key=user, val=lack)
 
-        message = Message(f"{user} is granted access to saying {lack} PrideLion ", MessageType.COMMAND, channel, username)
+        message = Message(f"{user} is granted access to saying {lack} PrideLion ", MessageType.COMMAND, channel,
+                          username)
         bot.send_message(message)
+
 
 @admin
 @unwrap_command_args
@@ -703,8 +705,10 @@ def ungrant_lack(bot: 'TwitchChat', args, msg, username, channel, send):
         user = match.group(1).lower()
         lack = match.group(2)
         lacking_granted.access(delete_from_list_in_dict, key=user, val=lack)
-        message = Message(f"{user} is no longer granted access to saying {lack} 4Weird ", MessageType.COMMAND, channel, username)
+        message = Message(f"{user} is no longer granted access to saying {lack} 4Weird ", MessageType.COMMAND, channel,
+                          username)
         bot.send_message(message)
+
 
 # COMMANDS
 
@@ -756,11 +760,12 @@ def loop_over_words(bot: 'TwitchChat', args, msg, username, channel, send):
         amount = bot.state.get(channel).get("lacking", "0")
         bot.state[channel]["lacking"] = str(int(amount) + len(wrong_emotes))
         if send:
-            wrong_emotes = list(filter(lambda lack : not is_granted(username.lower(), lack), wrong_emotes))
+            wrong_emotes = list(filter(lambda lack: not is_granted(username.lower(), lack), wrong_emotes))
             if len(wrong_emotes) != 0:
                 txt = " ".join(wrong_emotes)
-                message = Message("@" + username + txt + " PepeLaugh", MessageType.SPAM, channel, username)
+                message = Message("@" + username + ", " + txt + "  PepeLaugh", MessageType.SPAM, channel, username)
                 bot.send_message(message)
+
 
 def is_granted(user, word):
     global lacking_granted
@@ -1880,6 +1885,7 @@ def clip_link(bot: 'TwitchChat', args, msg, username, channel, send):
                           MessageType.COMMAND, channel, username)
         bot.send_message(message)
 
+
 """
 @alias("inside")
 @unwrap_command_args
@@ -2143,7 +2149,7 @@ def toggle_if_live(state, bot: 'TwitchChat'):
 
 def filter_message(message: Message, bot: 'TwitchChat'):
     if message.user in blacklisted:
-        message = Message("@" + message.user + ", " + "PogOff " * random.randint(1, 7),
+        message = Message("@" + message.user + ", " + "ludwigSpectrum " * random.randint(1, 7),
                           message.type, message.channel, message.user)
     if contains_word(message.content, ["WeirdChamp"]) and not bot.twitch_status.is_subscribed_to(message.channel):
         message = Message("Can't fool me PepeLaugh", message.type, message.channel, message.user)

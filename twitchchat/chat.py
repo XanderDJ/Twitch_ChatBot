@@ -12,6 +12,7 @@ import importlib
 
 logger = logging.getLogger(name="tmi")
 
+
 class TwitchChat(object):
 
     def __init__(self, user, admin, oauth, channels):
@@ -140,10 +141,11 @@ class TwitchChat(object):
 
     def send_message(self, message: Message):
         message = commands.filter_message(message, self)
-        if self.can_send_type(message.channel, message.type) and count_capitals(message.content) < 50 and not commands.ignore_list.access(contains,elem=message.user):
-            self.state[message.channel]["messages"] = str(int(self.state[message.channel].get("messages", "0")) + 1)
-            client = self.irc_client
-            client.send_message(u'PRIVMSG #{0} :{1}\n'.format(message.channel, message.content))
+        if self.can_send_type(message.channel, message.type) and count_capitals(message.content) < 50:
+            if not commands.ignore_list.access(contains, elem=message.user) or message.user.lower() in commands.war:
+                self.state[message.channel]["messages"] = str(int(self.state[message.channel].get("messages", "0")) + 1)
+                client = self.irc_client
+                client.send_message(u'PRIVMSG #{0} :{1}\n'.format(message.channel, message.content))
 
     def can_send_type(self, channel, msg_type: MessageType):
         return convert(self.state.get(channel).get(msg_type.name, "True"))
@@ -266,7 +268,7 @@ class TwitchChat(object):
                     command = re.match(r"!([^\s]*).*", match.group(3).lower())
                     if command:
                         command_name = command.group(1)
-                        if command_name in self.commands and self.limiter.can_send(args["channel"],"command", 3):
+                        if command_name in self.commands and self.limiter.can_send(args["channel"], "command", 3):
                             self.commands.get(command_name)(self, args)
                         elif commands.commands.access(contains, elem=command_name):
                             response = commands.commands.access(get_val, key=command_name)
