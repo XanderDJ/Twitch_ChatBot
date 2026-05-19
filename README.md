@@ -1,4 +1,5 @@
 # Synopsis
+a
 
 A twitch chat bot with multiple features based on Shughes-uk initial structure.
 When run it joins twitch channels given in the commandline.
